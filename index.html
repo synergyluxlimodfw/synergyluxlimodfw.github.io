@@ -342,12 +342,13 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
       <h2>Request a <strong style="color:var(--gold)">Free Quote</strong></h2>
       <p>Fill out the form and we'll respond within minutes — or call (646) 879-1391 for immediate booking</p>
     </div>
-    <form class="form-grid" onsubmit="submitForm(event)">
-      <div class="fg"><label>Full Name</label><input type="text" placeholder="Your full name" required></div>
-      <div class="fg"><label>Phone Number</label><input type="tel" placeholder="(000) 000-0000" required></div>
-      <div class="fg"><label>Email Address</label><input type="email" placeholder="your@email.com"></div>
+    <form class="form-grid" action="https://formspree.io/f/mojpnzgp" method="POST">
+      <input type="hidden" name="_redirect" value="https://www.synergyluxlimodfw.com/thank-you.html">
+      <div class="fg"><label>Full Name</label><input name="name" placeholder="Your full name" required></div>
+      <div class="fg"><label>Phone Number</label><input type="tel" name="phone" placeholder="(000) 000-0000" required></div>
+      <div class="fg"><label>Email Address</label><input type="email" name="email" placeholder="your@email.com"></div>
       <div class="fg"><label>Service Type</label>
-        <select required>
+        <select name="service" required>
           <option value="">Select a service</option>
           <option>Airport Transfer — DFW ($135)</option>
           <option>Airport Transfer — Love Field ($115)</option>
@@ -360,17 +361,17 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
           <option>Corporate Account — Monthly</option>
         </select>
       </div>
-      <div class="fg"><label>Pickup Location</label><input type="text" placeholder="Address or terminal"></div>
-      <div class="fg"><label>Drop-off Location</label><input type="text" placeholder="Address or location"></div>
-      <div class="fg"><label>Date</label><input type="date"></div>
-      <div class="fg"><label>Time</label><input type="time"></div>
+      <div class="fg"><label>Pickup Location</label><input type="text" name="pickup" placeholder="Address or terminal"></div>
+      <div class="fg"><label>Drop-off Location</label><input type="text" name"dropoff" placeholder="Address or location"></div>
+      <div class="fg"><label>Date</label><input type="date" name="date"></div>
+      <div class="fg"><label>Time</label><input type="time" name="time"></div>
       <div class="fg"><label>Passengers</label>
         <select>
           <option>1 passenger</option><option>2 passengers</option><option>3 passengers</option>
           <option>4 passengers</option><option>5 passengers</option><option>6 passengers</option>
         </select>
       </div>
-      <div class="fg full"><label>Flight Number / Notes</label><textarea rows="3" placeholder="Flight number, special requests, or any other details..."></textarea></div>
+      <div class="fg full"><label>Flight Number / Notes</label><textarea mame="notes" rows="3" placeholder="Flight number, special requests, or any other details..."></textarea></div>
       <div class="form-submit"><button type="submit">Send Quote Request</button></div>
     </form>
   </div>
@@ -587,11 +588,7 @@ function toggleFaq(btn){
   document.querySelectorAll('.faq-q').forEach(x=>x.classList.remove('active'));
   if(!open){a.classList.add('open');btn.classList.add('active');}
 }
-function submitForm(e){
-  e.preventDefault();
-  alert('Thank you! We will contact you within minutes.\nFor immediate assistance call (646) 879-1391.');
-  e.target.reset();
-}
+
 const obs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}});
 },{threshold:0.1});
