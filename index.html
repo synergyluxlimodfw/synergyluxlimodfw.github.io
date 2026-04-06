@@ -1057,24 +1057,18 @@ function handleBooking(e){
   .then(function(r){
     if(!r.ok) throw new Error('Formspree error');
     // Send to Zapier for Google Calendar
-    fetch('https://hooks.zapier.com/hooks/catch/27079056/u73tqjh/',{
-      method:'POST',
-      mode:'no-cors',
-      body:JSON.stringify({
-        client_name: name,
-        client_phone: phone,
-        client_email: email,
-        service_type: service,
-        pickup_location: pickup,
-        dropoff_location: dropoff,
-        trip_date: date,
-        trip_time: time,
-        passengers: passengers,
-        notes: notes,
-        submitted_at: submitted
-      }),
-      headers:{'Content-Type':'application/json'}
-    }).catch(function(){});  // Silent fail - don't block the booking
+    var zapierForm = document.createElement('form');
+zapierForm.method = 'POST';
+zapierForm.action = 'https://hooks.zapier.com/hooks/catch/27079056/u73tqjh/';
+zapierForm.target = 'zapier-frame';
+var fields = {client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,passengers:passengers,notes:notes,submitted_at:submitted};
+Object.keys(fields).forEach(function(k){var i=document.createElement('input');i.type='hidden';i.name=k;i.value=fields[k];zapierForm.appendChild(i);});
+var iframe = document.createElement('iframe');
+iframe.name='zapier-frame';
+iframe.style.display='none';
+document.body.appendChild(iframe);
+document.body.appendChild(zapierForm);
+zapierForm.submit();
 
     // Step 2: Send customer confirmation email
     return emailjs.send('service_tnx9bxv','template_i4rw16m', templateParams);
