@@ -146,6 +146,25 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
 #whatsapp-btn{position:fixed;bottom:28px;right:28px;background:#25D366;color:white;display:flex;align-items:center;gap:10px;padding:14px 20px;border-radius:50px;text-decoration:none;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;box-shadow:0 4px 20px rgba(37,211,102,0.4);z-index:9999;transition:all 0.3s;}
 #whatsapp-btn:hover{background:#20ba57;transform:translateY(-3px);}
 
+/* GRID LINES OVERLAY */
+.hero-grid{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;background:repeating-linear-gradient(45deg,rgba(201,168,76,0.08) 0px,rgba(201,168,76,0.08) 1px,transparent 1px,transparent 40px);}
+
+/* FLAG BANNER */
+.flag-banner{background:#0d0d0d;padding:20px 0;overflow:hidden;border-top:1px solid rgba(201,168,76,0.15);border-bottom:1px solid rgba(201,168,76,0.15);}
+.flag-track{display:flex;gap:0;width:max-content;animation:flagScroll 30s linear infinite;}
+.flag-track:hover{animation-play-state:paused;}
+.flag-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 28px;min-width:100px;}
+.flag-item span:first-child{font-size:48px;line-height:1;}
+.flag-item span:last-child{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);}
+@keyframes flagScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* NATIONS SECTION */
+.nations-sec{padding:80px 80px;text-align:center;}
+.nations-card{display:inline-block;background:var(--card);border:1px solid rgba(201,168,76,0.3);padding:48px 56px;max-width:900px;width:100%;}
+.nations-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--gold);margin-bottom:8px;}
+.nations-sub{font-size:13px;color:var(--muted);letter-spacing:1px;margin-bottom:32px;}
+.nations-flags{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;font-size:36px;line-height:1;}
+
 /* MOBILE */
 @media(max-width:900px){
   nav{padding:0 20px;}
@@ -159,6 +178,9 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
   .form-grid{grid-template-columns:1fr;}
   .fg.full{grid-column:1;}
   .cta-band{padding:40px 24px;flex-direction:column;text-align:center;}
+  .nations-sec{padding:56px 16px;}
+  .nations-card{padding:32px 20px;}
+  .nations-flags{font-size:28px;gap:8px;}
   footer{padding:32px 24px;flex-direction:column;text-align:center;}
   .countdown-grid{gap:20px;}
   .countdown-num{font-size:36px;}
@@ -178,6 +200,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
   <video class="hero-video" autoplay muted loop playsinline poster="escalade.jpeg">
     <source src="city-hero.mp4" type="video/mp4">
   </video>
+  <div class="hero-grid"></div>
   <div class="hero-overlay"></div>
 
   <div class="fifa-badge">⚽ FIFA World Cup 2026 · Dallas · Official Host City</div>
@@ -211,6 +234,45 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
       <div class="countdown-num" id="seconds">--</div>
       <div class="countdown-label">Seconds</div>
     </div>
+  </div>
+</div>
+
+<!-- FLAG BANNER -->
+<div class="flag-banner">
+  <div class="flag-track">
+    <div class="flag-item"><span>🇧🇷</span><span>Brazil</span></div>
+    <div class="flag-item"><span>🇫🇷</span><span>France</span></div>
+    <div class="flag-item"><span>🇦🇷</span><span>Argentina</span></div>
+    <div class="flag-item"><span>🇩🇪</span><span>Germany</span></div>
+    <div class="flag-item"><span>🇪🇸</span><span>Spain</span></div>
+    <div class="flag-item"><span>🇲🇽</span><span>Mexico</span></div>
+    <div class="flag-item"><span>🇺🇸</span><span>USA</span></div>
+    <div class="flag-item"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span>England</span></div>
+    <div class="flag-item"><span>🇵🇹</span><span>Portugal</span></div>
+    <div class="flag-item"><span>🇯🇵</span><span>Japan</span></div>
+    <div class="flag-item"><span>🇲🇦</span><span>Morocco</span></div>
+    <div class="flag-item"><span>🇳🇱</span><span>Netherlands</span></div>
+    <div class="flag-item"><span>🇭🇷</span><span>Croatia</span></div>
+    <div class="flag-item"><span>🇸🇳</span><span>Senegal</span></div>
+    <div class="flag-item"><span>🇰🇷</span><span>South Korea</span></div>
+    <div class="flag-item"><span>🇨🇦</span><span>Canada</span></div>
+    <!-- Duplicate for seamless loop -->
+    <div class="flag-item"><span>🇧🇷</span><span>Brazil</span></div>
+    <div class="flag-item"><span>🇫🇷</span><span>France</span></div>
+    <div class="flag-item"><span>🇦🇷</span><span>Argentina</span></div>
+    <div class="flag-item"><span>🇩🇪</span><span>Germany</span></div>
+    <div class="flag-item"><span>🇪🇸</span><span>Spain</span></div>
+    <div class="flag-item"><span>🇲🇽</span><span>Mexico</span></div>
+    <div class="flag-item"><span>🇺🇸</span><span>USA</span></div>
+    <div class="flag-item"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span>England</span></div>
+    <div class="flag-item"><span>🇵🇹</span><span>Portugal</span></div>
+    <div class="flag-item"><span>🇯🇵</span><span>Japan</span></div>
+    <div class="flag-item"><span>🇲🇦</span><span>Morocco</span></div>
+    <div class="flag-item"><span>🇳🇱</span><span>Netherlands</span></div>
+    <div class="flag-item"><span>🇭🇷</span><span>Croatia</span></div>
+    <div class="flag-item"><span>🇸🇳</span><span>Senegal</span></div>
+    <div class="flag-item"><span>🇰🇷</span><span>South Korea</span></div>
+    <div class="flag-item"><span>🇨🇦</span><span>Canada</span></div>
   </div>
 </div>
 
@@ -304,6 +366,18 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
     </div>
   </div>
   <p style="text-align:center;margin-top:24px;font-size:12px;color:var(--muted);">Full match schedule to be confirmed by FIFA. Book early to guarantee availability on all dates.</p>
+</section>
+
+<!-- 32 NATIONS -->
+<section class="nations-sec">
+  <div class="nations-card">
+    <div class="nations-title">32 Nations. One City.</div>
+    <div class="nations-sub">Dallas welcomes the world — June &amp; July 2026</div>
+    <div class="nations-flags">
+      🇦🇷 🇦🇺 🇧🇪 🇧🇷 🇨🇦 🇨🇲 🇨🇴 🇨🇷 🇭🇷 🇩🇰 🇪🇨 🇪🇬 🇫🇷 🇩🇪 🇬🇭 🇮🇷
+      🇯🇵 🇲🇽 🇲🇦 🇳🇱 🇳🇬 🇵🇱 🇵🇹 🇶🇦 🇸🇦 🇸🇳 🇸🇷 🇰🇷 🇪🇸 🇨🇭 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇺🇸
+    </div>
+  </div>
 </section>
 
 <!-- WHY US -->
