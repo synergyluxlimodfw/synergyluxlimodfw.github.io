@@ -84,7 +84,10 @@ nav{background:rgba(10,10,10,0.98);padding:0 40px;display:flex;justify-content:s
 .hamburger span{width:24px;height:2px;background:var(--white);display:block;}
 
 /* HERO */
-.hero{min-height:100vh;background:linear-gradient(to bottom,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.5) 60%,rgba(0,0,0,0.92) 100%),url('escalade.jpeg') center/cover no-repeat;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 80px;}
+.hero{min-height:100vh;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 80px;}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.72) 0%,rgba(0,0,0,0.48) 60%,rgba(0,0,0,0.90) 100%);z-index:1;}
+.hero>*:not(.hero-video):not(.hero-overlay){position:relative;z-index:2;}
 .hero-tag{font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
 .hero-tag::before{content:'';width:36px;height:1px;background:var(--gold);}
 .hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,7vw,88px);font-weight:300;line-height:1.05;margin-bottom:20px;max-width:780px;}
@@ -409,6 +412,10 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
 
 <!-- HERO -->
 <section class="hero">
+  <video class="hero-video" autoplay muted loop playsinline poster="escalade.jpeg">
+    <source src="escalade-hero.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
   <div class="hero-tag">Dallas · Fort Worth · Executive Black Car Service</div>
   <h1>DFW Executive Black Car Service —<br><strong>Always On Time or It's Free</strong></h1>
   <p>Luxury Cadillac Escalade service for airport transfers, corporate travel and special events across Dallas-Fort Worth. One professional chauffeur. Every ride, every time.</p>
