@@ -83,7 +83,7 @@ nav{background:rgba(10,10,10,0.98);padding:0 40px;display:flex;justify-content:s
 .commission-card:hover{border-color:rgba(201,168,76,0.35);transform:translateY(-4px);}
 .commission-card.featured{border-color:rgba(201,168,76,0.4);background:rgba(201,168,76,0.05);}
 .commission-badge{position:absolute;top:-1px;right:20px;background:var(--gold);color:#000;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;}
-.commission-icon{font-size:36px;margin-bottom:16px;display:block;}
+.commission-icon{font-size:36px;margin-bottom:16px;display:block;color:rgba(201,168,76,0.7);}
 .commission-card h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;margin-bottom:8px;}
 .commission-amount{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:700;color:var(--gold);line-height:1;margin-bottom:6px;}
 .commission-per{font-size:12px;color:var(--muted);margin-bottom:16px;}
@@ -96,7 +96,7 @@ nav{background:rgba(10,10,10,0.98);padding:0 40px;display:flex;justify-content:s
 .benefits-list{display:flex;flex-direction:column;gap:16px;}
 .benefit-item{display:flex;align-items:flex-start;gap:16px;padding:20px;background:var(--card2);border:1px solid rgba(201,168,76,0.08);transition:border-color 0.3s;}
 .benefit-item:hover{border-color:rgba(201,168,76,0.25);}
-.benefit-icon{font-size:24px;flex-shrink:0;}
+.benefit-icon{font-size:24px;flex-shrink:0;color:rgba(201,168,76,0.7);}
 .benefit-text h4{font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px;}
 .benefit-text p{font-size:12px;color:var(--muted);line-height:1.6;font-weight:300;}
 .benefits-image{background:var(--card2);border:1px solid rgba(201,168,76,0.12);padding:40px;text-align:center;}
@@ -237,7 +237,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
   <div class="commission-grid">
     <div class="commission-card featured">
       <div class="commission-badge">Most Popular</div>
-      <span class="commission-icon">🏨</span>
+      <span class="commission-icon"><i class="fa-solid fa-bell-concierge"></i></span>
       <h3>Hotel Concierge</h3>
       <div class="commission-amount">$20</div>
       <div class="commission-per">per completed ride</div>
@@ -245,7 +245,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
       <div class="commission-potential">10 rides/month = <strong>$200/month</strong> extra</div>
     </div>
     <div class="commission-card">
-      <span class="commission-icon">💍</span>
+      <span class="commission-icon"><i class="fa-solid fa-ring"></i></span>
       <h3>Wedding & Events</h3>
       <div class="commission-amount">12%</div>
       <div class="commission-per">of total booking value</div>
@@ -253,7 +253,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
       <div class="commission-potential">2 weddings/month = <strong>$150+/month</strong></div>
     </div>
     <div class="commission-card">
-      <span class="commission-icon">💼</span>
+      <span class="commission-icon"><i class="fa-solid fa-briefcase"></i></span>
       <h3>Corporate Accounts</h3>
       <div class="commission-amount">8%</div>
       <div class="commission-per">of monthly account spend</div>
@@ -261,7 +261,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
       <div class="commission-potential">$3,000/mo account = <strong>$240/month</strong></div>
     </div>
     <div class="commission-card">
-      <span class="commission-icon">🏡</span>
+      <span class="commission-icon"><i class="fa-solid fa-house"></i></span>
       <h3>Real Estate Agents</h3>
       <div class="commission-amount">$25</div>
       <div class="commission-per">per referred client</div>
@@ -269,7 +269,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
       <div class="commission-potential">4 referrals/month = <strong>$100/month</strong></div>
     </div>
     <div class="commission-card">
-      <span class="commission-icon">🌃</span>
+      <span class="commission-icon"><i class="fa-solid fa-moon"></i></span>
       <h3>Event Promoters</h3>
       <div class="commission-amount">$25</div>
       <div class="commission-per">per group booking</div>
@@ -277,7 +277,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
       <div class="commission-potential">6 groups/month = <strong>$150/month</strong></div>
     </div>
     <div class="commission-card">
-      <span class="commission-icon">✈️</span>
+      <span class="commission-icon"><i class="fa-solid fa-plane"></i></span>
       <h3>Travel Agents</h3>
       <div class="commission-amount">10%</div>
       <div class="commission-per">of total booking value</div>
@@ -295,35 +295,35 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
   <div class="benefits-grid">
     <div class="benefits-list">
       <div class="benefit-item">
-        <span class="benefit-icon">⏰</span>
+        <span class="benefit-icon"><i class="fa-regular fa-clock"></i></span>
         <div class="benefit-text">
           <h4>On-Time Guarantee</h4>
           <p>If we're ever late your client's ride is complimentary. We've never missed a pickup. Your clients will thank you for the referral.</p>
         </div>
       </div>
       <div class="benefit-item">
-        <span class="benefit-icon">🚗</span>
+        <span class="benefit-icon"><i class="fa-solid fa-car-side"></i></span>
         <div class="benefit-text">
           <h4>2023 Cadillac Escalade Fleet</h4>
           <p>Immaculate, detailed before every ride. Your clients arrive in the most premium SUV available in DFW — every time.</p>
         </div>
       </div>
       <div class="benefit-item">
-        <span class="benefit-icon">💳</span>
+        <span class="benefit-icon"><i class="fa-solid fa-credit-card"></i></span>
         <div class="benefit-text">
           <h4>Flat Rates — No Surge Pricing</h4>
           <p>Your clients always know what they'll pay. No surprises, no surge pricing. The price they're quoted is the price they pay.</p>
         </div>
       </div>
       <div class="benefit-item">
-        <span class="benefit-icon">📋</span>
+        <span class="benefit-icon"><i class="fa-solid fa-clipboard-list"></i></span>
         <div class="benefit-text">
           <h4>COI & W-9 Available</h4>
           <p>Certificate of Insurance and W-9 available on request. We're set up as a professional vendor for corporate and hotel accounts.</p>
         </div>
       </div>
       <div class="benefit-item">
-        <span class="benefit-icon">💰</span>
+        <span class="benefit-icon"><i class="fa-solid fa-coins"></i></span>
         <div class="benefit-text">
           <h4>Monthly Payments via Zelle</h4>
           <p>Commissions paid on the 1st of every month via Zelle. No invoicing, no waiting, no paperwork. Just a payment.</p>

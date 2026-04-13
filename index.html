@@ -172,7 +172,7 @@ nav{background:rgba(10,10,10,0.98);padding:0 40px;display:flex;justify-content:s
 .svc-card::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--gold);transition:width 0.4s;}
 .svc-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-4px);}
 .svc-card:hover::after{width:100%;}
-.svc-icon{font-size:30px;margin-bottom:18px;display:block;}
+.svc-icon{font-size:28px;margin-bottom:18px;display:block;color:rgba(201,168,76,0.7);}
 .svc-card h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-bottom:10px;}
 .svc-card p{font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:14px;font-weight:300;}
 .svc-price{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px;margin-bottom:16px;display:block;}
@@ -294,7 +294,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
 .pay-card:hover { border-color: rgba(201,168,76,0.35); transform: translateY(-4px); }
 .pay-card.featured { border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.05); }
 .pay-badge { position: absolute; top: -1px; right: 20px; background: var(--gold); color: #000; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; }
-.pay-icon { font-size: 32px; margin-bottom: 14px; display: block; }
+.pay-icon { font-size: 28px; margin-bottom: 14px; display: block; color: rgba(201,168,76,0.7); }
 .pay-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; margin-bottom: 8px; }
 .pay-price { font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 8px; }
 .pay-sub { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 14px; font-weight: 300; }
@@ -639,7 +639,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
   <p class="sec-sub">Every service tailored to your schedule, your standards, and your expectations.</p>
   <div class="services-grid">
     <div class="svc-card">
-      <span class="svc-icon">✈️</span><h3>Airport Transfers</h3>
+      <span class="svc-icon"><i class="fa-solid fa-plane"></i></span><h3>Airport Transfers</h3>
       <p>DFW & Love Field. Flight tracking on every arrival. Flat rates, no surge pricing, meet & greet.</p>
       <span class="svc-price">From $115 one-way</span>
       <div class="svc-btns">
@@ -648,7 +648,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">💼</span><h3>Corporate & Executive</h3>
+      <span class="svc-icon"><i class="fa-solid fa-briefcase"></i></span><h3>Corporate & Executive</h3>
       <p>Point-to-point executive transit. Monthly invoicing, net-30 billing, COI on request.</p>
       <span class="svc-price">From $125</span>
       <div class="svc-btns">
@@ -657,7 +657,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">💍</span><h3>Weddings</h3>
+      <span class="svc-icon"><i class="fa-solid fa-ring"></i></span><h3>Weddings</h3>
       <p>Red carpet arrival for your most important day. Complimentary vehicle décor and coordination.</p>
       <span class="svc-price">From $625 · 4 hrs</span>
       <div class="svc-btns">
@@ -666,7 +666,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">🎓</span><h3>Proms & Events</h3>
+      <span class="svc-icon"><i class="fa-solid fa-graduation-cap"></i></span><h3>Proms & Events</h3>
       <p>Professional, safe, and on time for concerts, proms, and special occasions across DFW.</p>
       <span class="svc-price">From $575</span>
       <div class="svc-btns">
@@ -675,7 +675,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">⏱️</span><h3>Hourly Charter</h3>
+      <span class="svc-icon"><i class="fa-regular fa-clock"></i></span><h3>Hourly Charter</h3>
       <p>Your driver on standby. Roadshows, shopping, dining, city tours — full flexibility.</p>
       <span class="svc-price">$145/hr · 2hr min</span>
       <div class="svc-btns">
@@ -684,7 +684,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">🌃</span><h3>Night Out</h3>
+      <span class="svc-icon"><i class="fa-solid fa-moon"></i></span><h3>Night Out</h3>
       <p>Arrive in style and get home safely. Dinner, shows, sports events, and nights on the town.</p>
       <span class="svc-price">From $450 · 3 hrs</span>
       <div class="svc-btns">
@@ -693,7 +693,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">🏢</span><h3>Corporate Accounts</h3>
+      <span class="svc-icon"><i class="fa-solid fa-building"></i></span><h3>Corporate Accounts</h3>
       <p>Monthly flat rates, net-30 invoicing, COI on request for law firms & Fortune 500 companies.</p>
       <span class="svc-price">Custom pricing</span>
       <div class="svc-btns">
@@ -702,7 +702,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">🏈</span><h3>Sporting Events</h3>
+      <span class="svc-icon"><i class="fa-solid fa-football"></i></span><h3>Sporting Events</h3>
       <p>Cowboys, Mavericks, Stars, Rangers — skip the parking and arrive in absolute luxury.</p>
       <span class="svc-price">From $260 roundtrip</span>
       <div class="svc-btns">
@@ -787,7 +787,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
 
     <div class="pay-card featured">
       <div class="pay-badge">Most Popular</div>
-      <div class="pay-icon">✈️</div>
+      <div class="pay-icon"><i class="fa-solid fa-plane"></i></div>
       <h3>Airport Transfer</h3>
       <div class="pay-price">$135</div>
       <div class="pay-sub">DFW Airport · Flat rate<br>Flight tracking · Meet & greet included</div>
@@ -799,7 +799,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
     </div>
 
     <div class="pay-card">
-      <div class="pay-icon">💍</div>
+      <div class="pay-icon"><i class="fa-solid fa-ring"></i></div>
       <h3>Wedding Package</h3>
       <div class="pay-price">$625</div>
       <div class="pay-sub">4-hour minimum · Complimentary décor<br>Full day from $1,100</div>
@@ -811,7 +811,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
     </div>
 
     <div class="pay-card">
-      <div class="pay-icon">🎓</div>
+      <div class="pay-icon"><i class="fa-solid fa-graduation-cap"></i></div>
       <h3>Prom / Event</h3>
       <div class="pay-price">$575</div>
       <div class="pay-sub">4-hour package · Professional chauffeur<br>Night out from $450</div>
@@ -823,7 +823,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
     </div>
 
     <div class="pay-card">
-      <div class="pay-icon">⏱️</div>
+      <div class="pay-icon"><i class="fa-regular fa-clock"></i></div>
       <h3>Hourly Charter</h3>
       <div class="pay-price">$290</div>
       <div class="pay-sub">2-hour minimum · $145/hr after<br>Perfect for corporate roadshows</div>
@@ -835,7 +835,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
     </div>
 
     <div class="pay-card">
-      <div class="pay-icon">💼</div>
+      <div class="pay-icon"><i class="fa-solid fa-briefcase"></i></div>
       <h3>Corporate Account</h3>
       <div class="pay-price">Custom</div>
       <div class="pay-sub">Monthly invoicing · Net-30 billing<br>COI provided · W-9 on request</div>
@@ -847,7 +847,7 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:72p
     </div>
 
     <div class="pay-card">
-      <div class="pay-icon">🌃</div>
+      <div class="pay-icon"><i class="fa-solid fa-moon"></i></div>
       <h3>Night Out / Sporting</h3>
       <div class="pay-price">$450</div>
       <div class="pay-sub">Night out 3hrs · Sporting events<br>Cowboys · Mavericks · Stars · Rangers</div>
