@@ -560,6 +560,25 @@ align-items:center;justify-content:center;gap:8px;position:relative;overflow:hid
 .tc-note{font-size:10px;font-weight:300;color:rgba(255,255,255,.12);
 letter-spacing:3px;text-transform:uppercase;}
 
+/* ── DRIVER PROFILE CARD (dashboard) ── */
+.driver-card{display:flex;align-items:center;gap:14px;
+background:rgba(255,255,255,.025);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.05);border-radius:16px;
+padding:14px 18px;margin-bottom:11px;}
+.driver-avatar{width:44px;height:44px;border-radius:50%;flex-shrink:0;
+background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(212,175,55,.06));
+border:1px solid rgba(212,175,55,.2);
+display:flex;align-items:center;justify-content:center;}
+.driver-avatar i{font-size:18px;color:rgba(212,175,55,.7);}
+.driver-info{flex:1;min-width:0;}
+.driver-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;
+color:rgba(255,255,255,.75);line-height:1.1;margin-bottom:3px;}
+.driver-meta{font-size:9px;letter-spacing:2.5px;color:rgba(255,255,255,.2);text-transform:uppercase;}
+.driver-rating{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+.driver-stars{display:flex;gap:2px;}
+.driver-stars i{font-size:9px;color:var(--g);}
+.driver-score{font-family:'Cormorant Garamond',serif;font-size:16px;color:rgba(212,175,55,.7);}
+
 /* dashboard appreciation link */
 .dash-appr-link{display:flex;align-items:center;justify-content:center;gap:9px;
 padding:11px 16px;border-radius:10px;
@@ -602,7 +621,7 @@ color:rgba(212,175,55,.7);box-shadow:0 0 16px rgba(212,175,55,.12);}
         <div class="appr-icon"><i class="fa-solid fa-heart"></i></div>
       </div>
       <div class="appr-title">Show Appreciation</div>
-      <div class="appr-subtitle">Your chauffeur ensured<br>a premium experience</div>
+      <div class="appr-subtitle" id="appr-subtitle-text"></div>
       <div class="appr-tips">
         <div class="appr-tip" onclick="selectTip(10, this)">
           $10<span class="appr-tip-sub">Kind</span>
@@ -658,6 +677,14 @@ let socket;
 let userProfile = {
   name: "Guest",
   preferences: { music: "Jazz", temperature: "Cool", drink: "Sparkling Water" }
+};
+
+let driver = {
+  name: "Michael",
+  rating: 5.0,
+  car: "Escalade",
+  since: "2019",
+  tagline: "Your comfort, my commitment"
 };
 
 // ── REAL-TIME SYSTEM ──
@@ -854,6 +881,17 @@ function renderDashboard() {
         <div class="dash-title">Your <em>Experience</em></div>
         <div class="focus-badge"><i class="fa-solid fa-crosshairs"></i>&nbsp;Focus Mode Active</div>
       </div>
+      <div class="driver-card">
+        <div class="driver-avatar"><i class="fa-solid fa-user-tie"></i></div>
+        <div class="driver-info">
+          <div class="driver-name">${driver.name}</div>
+          <div class="driver-meta">${driver.car} &nbsp;·&nbsp; ${driver.tagline}</div>
+        </div>
+        <div class="driver-rating">
+          <div class="driver-stars">${"<i class='fa-solid fa-star'></i>".repeat(Math.round(driver.rating))}</div>
+          <div class="driver-score">${driver.rating.toFixed(1)}</div>
+        </div>
+      </div>
       ${nearBanner}
       ${suggestionsHTML}
       <div class="dash-primary" onclick="navigate('experience')">
@@ -1031,7 +1069,7 @@ function renderContact() {
     <div class="ctc-body">
       <button class="sc-back" onclick="navigate('dashboard')"><i class="fa-solid fa-chevron-left"></i>&nbsp; Back</button>
       <div class="ctc-h">Contact Your <em>Chauffeur</em></div>
-      <div class="ctc-sub">Available 24 / 7 &nbsp;·&nbsp; W. Rodriguez</div>
+      <div class="ctc-sub">Available 24 / 7 &nbsp;·&nbsp; ${driver.name}</div>
       <div class="ctc-ctas">
         <button class="ctc-cta ctc-call" onclick="window.location.href='tel:6468791391'">
           <div class="ctc-ci"><i class="fa-solid fa-phone"></i></div>CALL NOW — (646) 879-1391
@@ -1113,7 +1151,7 @@ function renderTripComplete() {
       <div class="tc-emblem"><i class="fa-solid fa-star"></i></div>
       <div class="tc-eyebrow">Journey Complete</div>
       <div class="tc-title">Thank You<br>for <em>Riding</em> With Us</div>
-      <div class="tc-sub">We hope it was an exceptional experience</div>
+      <div class="tc-sub">Your chauffeur ${driver.name} ensured a smooth experience</div>
       <button class="tc-appr-btn" onclick="openAppreciation()">
         <i class="fa-solid fa-heart"></i> Thank Your Chauffeur
       </button>
@@ -1233,6 +1271,8 @@ let selectedTipAmount = null;
 function openAppreciation() {
   playClick();
   const overlay = document.getElementById("appr-overlay");
+  const sub = document.getElementById("appr-subtitle-text");
+  if (sub) sub.innerHTML = `Your chauffeur ${driver.name} ensured<br>a smooth experience`;
   // Reset to form state
   document.getElementById("appr-form").style.display = "block";
   document.getElementById("appr-confirm").style.display = "none";
