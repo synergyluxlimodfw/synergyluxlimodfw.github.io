@@ -410,6 +410,167 @@ border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;ma
 text-transform:uppercase;margin-bottom:2px;}
 .near-dest-val{font-family:'Cormorant Garamond',serif;font-size:16px;color:rgba(255,255,255,.75);}
 
+/* ── APPRECIATION MODAL ── */
+@keyframes modalIn{from{opacity:0;transform:translateY(24px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes modalOut{from{opacity:1;transform:translateY(0) scale(1);}to{opacity:0;transform:translateY(16px) scale(.97);}}
+@keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
+@keyframes overlayOut{from{opacity:1;}to{opacity:0;}}
+@keyframes checkDraw{from{stroke-dashoffset:60;}to{stroke-dashoffset:0;}}
+@keyframes heartPulse{0%,100%{transform:scale(1);}45%{transform:scale(1.18);}70%{transform:scale(.94);}}
+
+.appr-overlay{position:fixed;inset:0;z-index:2000;
+display:flex;align-items:center;justify-content:center;padding:24px;
+background:rgba(4,4,8,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+animation:overlayIn .35s ease both;}
+.appr-overlay.closing{animation:overlayOut .28s ease forwards;}
+
+.appr-card{width:100%;max-width:440px;position:relative;
+background:rgba(14,14,22,.92);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
+border:1px solid rgba(212,175,55,.2);border-radius:28px;
+padding:36px 32px 28px;
+box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(212,175,55,.06),inset 0 1px 0 rgba(212,175,55,.1);
+animation:modalIn .4s cubic-bezier(.22,1,.36,1) both;}
+
+/* top accent line */
+.appr-card::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+width:80px;height:2px;border-radius:2px;
+background:linear-gradient(90deg,transparent,var(--g),transparent);}
+
+.appr-icon-wrap{display:flex;justify-content:center;margin-bottom:20px;}
+.appr-icon{width:64px;height:64px;border-radius:50%;
+background:radial-gradient(circle,rgba(212,175,55,.14) 0%,rgba(212,175,55,.04) 100%);
+border:1px solid rgba(212,175,55,.22);
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 32px rgba(212,175,55,.15);
+animation:heartPulse 2.8s ease-in-out infinite;}
+.appr-icon i{font-size:26px;color:var(--g);}
+
+.appr-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400;
+text-align:center;letter-spacing:1px;margin-bottom:8px;}
+.appr-subtitle{font-size:11px;font-weight:300;color:rgba(255,255,255,.3);
+letter-spacing:3.5px;text-transform:uppercase;text-align:center;
+line-height:1.65;margin-bottom:28px;}
+
+/* tip amount grid */
+.appr-tips{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.appr-tip{padding:16px 8px;border-radius:16px;
+background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:rgba(255,255,255,.55);
+text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.appr-tip .appr-tip-sub{display:block;font-family:'Outfit',sans-serif;
+font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.2);text-transform:uppercase;margin-top:3px;}
+.appr-tip:hover{border-color:rgba(212,175,55,.3);color:rgba(255,255,255,.8);
+background:rgba(212,175,55,.06);}
+.appr-tip:active{transform:scale(.95);}
+.appr-tip.active{background:rgba(212,175,55,.1);border-color:rgba(212,175,55,.45);
+color:var(--g);box-shadow:0 0 18px rgba(212,175,55,.2);}
+.appr-tip.active .appr-tip-sub{color:rgba(212,175,55,.5);}
+
+/* custom amount */
+.appr-custom-wrap{margin-bottom:24px;overflow:hidden;
+max-height:0;transition:max-height .35s cubic-bezier(.22,1,.36,1),opacity .25s ease;opacity:0;}
+.appr-custom-wrap.visible{max-height:70px;opacity:1;}
+.appr-custom-f{display:flex;align-items:center;gap:0;
+background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.2);border-radius:14px;
+padding:0 16px;transition:border-color .3s;}
+.appr-custom-f:focus-within{border-color:rgba(212,175,55,.45);box-shadow:0 0 16px rgba(212,175,55,.1);}
+.appr-custom-sym{font-family:'Cormorant Garamond',serif;font-size:22px;color:rgba(212,175,55,.6);
+padding:14px 8px 14px 0;}
+.appr-custom-inp{flex:1;background:transparent;border:none;outline:none;
+font-family:'Cormorant Garamond',serif;font-size:22px;color:rgba(255,255,255,.65);
+padding:14px 0;}
+.appr-custom-inp::placeholder{color:rgba(255,255,255,.15);}
+
+/* action buttons */
+.appr-actions{display:flex;flex-direction:column;gap:10px;}
+.appr-send{width:100%;padding:16px 22px;border-radius:14px;
+background:linear-gradient(135deg,var(--g) 0%,var(--g2) 100%);color:#000;
+font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+cursor:pointer;font-family:'Outfit',sans-serif;border:none;
+display:flex;align-items:center;justify-content:center;gap:10px;
+transition:all .3s;box-shadow:0 4px 24px rgba(212,175,55,.2);position:relative;overflow:hidden;}
+.appr-send:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(212,175,55,.6);}
+.appr-send:active{transform:scale(.98);}
+.appr-send:disabled{opacity:.45;cursor:default;transform:none;box-shadow:none;}
+.appr-later{width:100%;padding:13px;border-radius:12px;
+background:transparent;border:none;
+font-size:10px;font-weight:400;letter-spacing:3px;text-transform:uppercase;
+color:rgba(255,255,255,.2);cursor:pointer;font-family:'Outfit',sans-serif;
+transition:color .2s;}
+.appr-later:hover{color:rgba(255,255,255,.4);}
+
+/* confirmation state */
+.appr-confirm{display:none;flex-direction:column;align-items:center;padding:16px 0 8px;}
+.appr-check{margin-bottom:22px;}
+.appr-check svg{width:62px;height:62px;}
+.appr-check circle{fill:rgba(212,175,55,.08);stroke:rgba(212,175,55,.25);stroke-width:1;}
+.appr-check path{fill:none;stroke:var(--g);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;
+stroke-dasharray:60;stroke-dashoffset:60;animation:checkDraw .5s .2s ease forwards;}
+.appr-confirm-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;
+text-align:center;margin-bottom:8px;color:#fff;}
+.appr-confirm-sub{font-size:10px;font-weight:300;letter-spacing:4px;
+color:rgba(255,255,255,.25);text-transform:uppercase;text-align:center;margin-bottom:28px;}
+.appr-close{padding:12px 36px;border-radius:30px;
+background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.18);
+font-size:10px;letter-spacing:3px;color:rgba(212,175,55,.7);text-transform:uppercase;
+cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;}
+.appr-close:hover{background:rgba(212,175,55,.13);box-shadow:0 0 16px rgba(212,175,55,.2);}
+
+/* ── TRIP COMPLETE SCREEN ── */
+.tc-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+filter:brightness(.22) saturate(.35) blur(3px);z-index:1;}
+.tc:before{content:'';position:absolute;inset:0;z-index:2;
+background:linear-gradient(180deg,rgba(6,6,10,.96) 0%,rgba(6,6,10,.75) 40%,rgba(6,6,10,.98) 100%);}
+.tc:after{content:'';position:absolute;inset:0;z-index:2;
+background:radial-gradient(ellipse 60% 50% at 50% 55%,rgba(212,175,55,.05) 0%,transparent 70%);}
+.tc-body{position:absolute;inset:0;z-index:3;
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+padding:56px 32px 52px;text-align:center;}
+.tc-emblem{width:80px;height:80px;border-radius:50%;margin-bottom:24px;
+background:radial-gradient(circle,rgba(212,175,55,.12),rgba(212,175,55,.04));
+border:1px solid rgba(212,175,55,.25);
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 48px rgba(212,175,55,.12);
+animation:heartPulse 3s ease-in-out infinite;}
+.tc-emblem i{font-size:32px;color:var(--g);}
+.tc-eyebrow{font-size:9px;letter-spacing:5px;color:rgba(212,175,55,.5);
+text-transform:uppercase;margin-bottom:12px;}
+.tc-title{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:400;
+line-height:.95;letter-spacing:-.5px;margin-bottom:12px;}
+.tc-title em{font-style:italic;color:var(--g);}
+.tc-sub{font-size:11px;font-weight:300;color:rgba(255,255,255,.25);
+letter-spacing:4px;text-transform:uppercase;margin-bottom:36px;}
+.tc-appr-btn{width:100%;max-width:380px;padding:18px 24px;border-radius:16px;
+background:linear-gradient(135deg,var(--g) 0%,var(--g2) 100%);color:#000;
+font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+cursor:pointer;font-family:'Outfit',sans-serif;border:none;
+display:flex;align-items:center;justify-content:center;gap:12px;
+transition:all .3s;box-shadow:0 8px 40px rgba(212,175,55,.3);
+margin-bottom:12px;position:relative;overflow:hidden;}
+.tc-appr-btn:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(212,175,55,.6);}
+.tc-appr-btn:active{transform:scale(.98);}
+.tc-secondary-actions{display:flex;gap:10px;width:100%;max-width:380px;margin-bottom:28px;}
+.tc-sec-btn{flex:1;padding:14px;border-radius:12px;
+background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.35);text-transform:uppercase;
+cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;display:flex;
+align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;}
+.tc-sec-btn:hover{border-color:rgba(255,255,255,.14);color:rgba(255,255,255,.55);}
+.tc-sec-btn i{font-size:12px;}
+.tc-note{font-size:10px;font-weight:300;color:rgba(255,255,255,.12);
+letter-spacing:3px;text-transform:uppercase;}
+
+/* dashboard appreciation link */
+.dash-appr-link{display:flex;align-items:center;justify-content:center;gap:9px;
+padding:11px 16px;border-radius:10px;
+background:rgba(212,175,55,.04);border:1px solid rgba(212,175,55,.1);
+font-size:9px;letter-spacing:2.5px;color:rgba(212,175,55,.45);text-transform:uppercase;
+cursor:pointer;font-family:'Outfit',sans-serif;transition:all .3s;
+margin-top:8px;position:relative;overflow:hidden;}
+.dash-appr-link:hover{background:rgba(212,175,55,.09);border-color:rgba(212,175,55,.25);
+color:rgba(212,175,55,.7);box-shadow:0 0 16px rgba(212,175,55,.12);}
+.dash-appr-link i{font-size:11px;}
+
 /* ── ANIMATIONS ── */
 @keyframes roll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 </style>
@@ -431,6 +592,60 @@ text-transform:uppercase;margin-bottom:2px;}
 <div class="ticker"><div class="ticker-t" id="tkr"></div></div>
 
 <div id="app"></div>
+
+<!-- Appreciation Modal (lives outside #app to overlay everything) -->
+<div id="appr-overlay" class="appr-overlay" style="display:none;" onclick="handleOverlayClick(event)">
+  <div class="appr-card" id="appr-card">
+    <!-- Main form view -->
+    <div id="appr-form">
+      <div class="appr-icon-wrap">
+        <div class="appr-icon"><i class="fa-solid fa-heart"></i></div>
+      </div>
+      <div class="appr-title">Show Appreciation</div>
+      <div class="appr-subtitle">Your chauffeur ensured<br>a premium experience</div>
+      <div class="appr-tips">
+        <div class="appr-tip" onclick="selectTip(10, this)">
+          $10<span class="appr-tip-sub">Kind</span>
+        </div>
+        <div class="appr-tip" onclick="selectTip(20, this)">
+          $20<span class="appr-tip-sub">Generous</span>
+        </div>
+        <div class="appr-tip" onclick="selectTip(50, this)">
+          $50<span class="appr-tip-sub">Exceptional</span>
+        </div>
+        <div class="appr-tip" id="appr-custom-btn" onclick="selectTip('custom', this)">
+          <i class="fa-solid fa-pen" style="font-size:14px;"></i>
+          <span class="appr-tip-sub">Custom</span>
+        </div>
+      </div>
+      <div class="appr-custom-wrap" id="appr-custom-wrap">
+        <div class="appr-custom-f">
+          <span class="appr-custom-sym">$</span>
+          <input class="appr-custom-inp" id="appr-custom-inp" type="number" min="1" max="999"
+            placeholder="Enter amount" oninput="setCustomTip(this.value)">
+        </div>
+      </div>
+      <div class="appr-actions">
+        <button class="appr-send" id="appr-send-btn" onclick="sendAppreciation()" disabled>
+          <i class="fa-solid fa-heart"></i> Send Appreciation
+        </button>
+        <button class="appr-later" onclick="closeAppreciation()">Maybe later</button>
+      </div>
+    </div>
+    <!-- Confirmation view -->
+    <div class="appr-confirm" id="appr-confirm">
+      <div class="appr-check">
+        <svg viewBox="0 0 62 62">
+          <circle cx="31" cy="31" r="30"/>
+          <path d="M19 31 L27 39 L43 23" class="appr-check-path"/>
+        </svg>
+      </div>
+      <div class="appr-confirm-title">Thank You</div>
+      <div class="appr-confirm-sub">Your generosity means<br>the world to us</div>
+      <button class="appr-close" onclick="closeAppreciation()">Close</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── STATE ──
@@ -471,7 +686,6 @@ function initRealtime() {
 
 // ── SIMULATED STATE PROGRESSION ──
 function startRideSimulation() {
-  // After 45 seconds, simulate approach to destination
   setTimeout(() => {
     if (rideState === "in_transit") {
       rideState = "near_destination";
@@ -479,6 +693,13 @@ function startRideSimulation() {
       if (activeScreen === "dashboard") renderApp();
     }
   }, 45000);
+  // Trip complete after 90s (demo)
+  setTimeout(() => {
+    if (rideState === "near_destination" || rideState === "in_transit") {
+      rideState = "complete";
+      navigate("complete");
+    }
+  }, 90000);
 }
 
 // ── SOUND ──
@@ -670,6 +891,10 @@ function renderDashboard() {
           <i class="fa-solid fa-crosshairs"></i>
           <span>${focusMode ? "Exit Focus" : "Focus Mode"}</span>
         </button>
+      </div>
+      <div class="dash-appr-link" onclick="openAppreciation()">
+        <i class="fa-solid fa-heart"></i>
+        <span>Thank Your Chauffeur</span>
       </div>
     </div>
   </div>`;
@@ -879,6 +1104,32 @@ function renderTripDetails() {
   </div>`;
 }
 
+// ── RENDER TRIP COMPLETE ──
+function renderTripComplete() {
+  return `
+  <div class="sc tc">
+    <img class="tc-bg" src="interior-rear-seats.jpg" alt="" onerror="this.style.opacity='0'">
+    <div class="tc-body">
+      <div class="tc-emblem"><i class="fa-solid fa-star"></i></div>
+      <div class="tc-eyebrow">Journey Complete</div>
+      <div class="tc-title">Thank You<br>for <em>Riding</em> With Us</div>
+      <div class="tc-sub">We hope it was an exceptional experience</div>
+      <button class="tc-appr-btn" onclick="openAppreciation()">
+        <i class="fa-solid fa-heart"></i> Thank Your Chauffeur
+      </button>
+      <div class="tc-secondary-actions">
+        <button class="tc-sec-btn" onclick="navigate('trip')">
+          <i class="fa-regular fa-calendar-check"></i> Book Again
+        </button>
+        <button class="tc-sec-btn" onclick="window.open('https://www.synergyluxlimodfw.com','_blank')">
+          <i class="fa-solid fa-globe"></i> Leave a Review
+        </button>
+      </div>
+      <div class="tc-note">Synergy Lux Limo DFW &nbsp;·&nbsp; Premium Black Car Service</div>
+    </div>
+  </div>`;
+}
+
 // ── MAIN RENDER ──
 function renderApp() {
   const app = document.getElementById("app");
@@ -895,6 +1146,7 @@ function renderApp() {
       case "services":   app.innerHTML = renderServices();   break;
       case "contact":    app.innerHTML = renderContact();    break;
       case "trip":       app.innerHTML = renderTripDetails(); break;
+      case "complete":   app.innerHTML = renderTripComplete(); break;
       default:           app.innerHTML = renderDashboard();
     }
   }
@@ -969,10 +1221,83 @@ setInterval(tick, 1000);
 document.addEventListener("click", function(e) {
   const el = e.target.closest(
     ".dash-card, .dash-primary, .dash-sug, .exp-btn, .sc1-btn, " +
-    ".ctc-cta, .svc-cta, .svc-circ, .enter-btn, .trip-submit, .dash-mode-btn"
+    ".ctc-cta, .svc-cta, .svc-circ, .enter-btn, .trip-submit, .dash-mode-btn, " +
+    ".dash-appr-link, .tc-appr-btn, .tc-sec-btn, .appr-tip, .appr-send, .appr-close"
   );
   if (el) addRipple(el, e);
 }, true);
+
+// ── APPRECIATION MODAL ──
+let selectedTipAmount = null;
+
+function openAppreciation() {
+  playClick();
+  const overlay = document.getElementById("appr-overlay");
+  // Reset to form state
+  document.getElementById("appr-form").style.display = "block";
+  document.getElementById("appr-confirm").style.display = "none";
+  document.getElementById("appr-send-btn").disabled = true;
+  // Clear previous selections
+  document.querySelectorAll(".appr-tip").forEach(t => t.classList.remove("active"));
+  document.getElementById("appr-custom-wrap").classList.remove("visible");
+  document.getElementById("appr-custom-inp").value = "";
+  selectedTipAmount = null;
+  overlay.style.display = "flex";
+  overlay.classList.remove("closing");
+  void overlay.offsetWidth;
+}
+
+function closeAppreciation() {
+  const overlay = document.getElementById("appr-overlay");
+  overlay.classList.add("closing");
+  setTimeout(() => { overlay.style.display = "none"; overlay.classList.remove("closing"); }, 300);
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById("appr-overlay")) closeAppreciation();
+}
+
+function selectTip(amount, el) {
+  playClick();
+  document.querySelectorAll(".appr-tip").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  const customWrap = document.getElementById("appr-custom-wrap");
+  if (amount === "custom") {
+    selectedTipAmount = null;
+    customWrap.classList.add("visible");
+    setTimeout(() => document.getElementById("appr-custom-inp").focus(), 350);
+    document.getElementById("appr-send-btn").disabled = true;
+  } else {
+    selectedTipAmount = amount;
+    customWrap.classList.remove("visible");
+    document.getElementById("appr-send-btn").disabled = false;
+  }
+}
+
+function setCustomTip(val) {
+  const n = parseFloat(val);
+  selectedTipAmount = (!isNaN(n) && n > 0) ? n : null;
+  document.getElementById("appr-send-btn").disabled = !selectedTipAmount;
+}
+
+function sendAppreciation() {
+  if (!selectedTipAmount) return;
+  playClick();
+  console.log("Appreciation sent:", "$" + selectedTipAmount);
+  // Animate button
+  const btn = document.getElementById("appr-send-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+  setTimeout(() => {
+    document.getElementById("appr-form").style.display = "none";
+    const confirm = document.getElementById("appr-confirm");
+    confirm.style.display = "flex";
+    // Re-trigger check animation
+    const path = confirm.querySelector(".appr-check-path");
+    if (path) { path.style.animation = "none"; void path.offsetWidth; path.style.animation = ""; }
+    showFeedback("Thank you for your generosity", 3000);
+  }, 900);
+}
 
 // ── INIT ──
 initRealtime();
