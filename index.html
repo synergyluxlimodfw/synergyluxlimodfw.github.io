@@ -1114,9 +1114,23 @@ function handleBooking(e){
     };
     fetch('https://hooks.zapier.com/hooks/catch/27079056/u73tqjh/', {
       method: 'POST',
-      body: JSON.stringify(zapierData)
-    }).then(function(r){
-      console.log('Zapier sent:', r.status);
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        client_name: name,
+        client_phone: phone,
+        client_email: email,
+        service_type: service,
+        pickup_location: pickup,
+        dropoff_location: dropoff,
+        trip_date: date,
+        trip_time: time,
+        passengers: passengers,
+        notes: notes,
+        submitted_at: submitted
+      })
+    }).then(function(){
+      console.log('Zapier fired');
     }).catch(function(e){
       console.log('Zapier error:', e);
     });
