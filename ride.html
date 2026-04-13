@@ -617,6 +617,53 @@ background:rgba(255,255,255,.06);}
 .trip-divider span{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.18);
 text-transform:uppercase;white-space:nowrap;}
 
+/* ── ADMIN ── */
+.admin-btn{position:fixed;bottom:48px;right:14px;z-index:800;
+width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.08);
+background:rgba(12,12,18,.7);backdrop-filter:blur(12px);
+display:flex;align-items:center;justify-content:center;
+font-size:13px;cursor:pointer;opacity:.22;transition:opacity .25s,box-shadow .25s;
+pointer-events:all;}
+.admin-btn:hover{opacity:1;box-shadow:0 0 14px rgba(212,175,55,.3);}
+
+.admin-modal{position:fixed;inset:0;z-index:3000;display:none;
+justify-content:center;align-items:center;padding:24px;
+background:rgba(0,0,0,.75);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+.admin-card{width:100%;max-width:360px;
+background:rgba(14,14,22,.95);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
+border:1px solid rgba(212,175,55,.18);border-radius:22px;padding:30px 26px 24px;
+box-shadow:0 32px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(212,175,55,.08);}
+.admin-card::before{content:'';display:block;width:56px;height:2px;border-radius:2px;
+background:linear-gradient(90deg,transparent,var(--g),transparent);margin:0 auto 22px;}
+.admin-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;
+text-align:center;letter-spacing:1px;margin-bottom:4px;}
+.admin-sub{font-size:9px;letter-spacing:4px;color:rgba(255,255,255,.22);
+text-transform:uppercase;text-align:center;margin-bottom:22px;}
+.admin-field{margin-bottom:10px;}
+.admin-field label{display:block;font-size:9px;letter-spacing:3px;
+color:rgba(212,175,55,.45);text-transform:uppercase;margin-bottom:5px;}
+.admin-inp{width:100%;background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.07);border-radius:10px;
+padding:12px 14px;color:rgba(255,255,255,.65);font-size:13px;
+font-family:'Outfit',sans-serif;font-weight:300;outline:none;transition:border-color .25s;}
+.admin-inp:focus{border-color:rgba(212,175,55,.35);}
+.admin-inp::placeholder{color:rgba(255,255,255,.16);}
+.admin-actions{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+.admin-start{width:100%;padding:14px;border-radius:12px;
+background:linear-gradient(135deg,var(--g),var(--g2));color:#000;
+font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+cursor:pointer;font-family:'Outfit',sans-serif;border:none;transition:all .3s;}
+.admin-start:hover{box-shadow:0 0 20px rgba(212,175,55,.5);transform:translateY(-1px);}
+.admin-cancel{width:100%;padding:11px;border-radius:10px;background:transparent;
+border:none;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.2);
+text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;transition:color .2s;}
+.admin-cancel:hover{color:rgba(255,255,255,.4);}
+.admin-clear{width:100%;padding:10px;border-radius:10px;background:transparent;
+border:1px solid rgba(255,255,255,.06);
+font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.16);
+text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.admin-clear:hover{border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.3);}
+
 /* ── ANIMATIONS ── */
 @keyframes roll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 </style>
@@ -638,6 +685,40 @@ text-transform:uppercase;white-space:nowrap;}
 <div class="ticker"><div class="ticker-t" id="tkr"></div></div>
 
 <div id="app"></div>
+
+<!-- Admin trigger -->
+<button class="admin-btn" onclick="openAdmin()" title="Ride Setup">⚙</button>
+
+<!-- Admin Modal -->
+<div id="adminModal" class="admin-modal" onclick="handleAdminOverlay(event)">
+  <div class="admin-card" id="adminCard">
+    <div class="admin-title">Ride Setup</div>
+    <div class="admin-sub">Configure this session</div>
+    <div class="admin-field">
+      <label>Passenger Name</label>
+      <input class="admin-inp" id="adminName" type="text" placeholder="Guest">
+    </div>
+    <div class="admin-field">
+      <label>Destination</label>
+      <input class="admin-inp" id="adminDestination" type="text" placeholder="DFW Airport">
+    </div>
+    <div class="admin-field">
+      <label>Chauffeur</label>
+      <input class="admin-inp" id="adminDriver" type="text" placeholder="Michael">
+    </div>
+    <div class="admin-field">
+      <label>Vehicle</label>
+      <input class="admin-inp" id="adminVehicle" type="text" placeholder="Cadillac Escalade">
+    </div>
+    <div class="admin-actions">
+      <button class="admin-start" onclick="applyRideData()">
+        <i class="fa-solid fa-star" style="font-size:10px;margin-right:6px;"></i> Start Ride
+      </button>
+      <button class="admin-clear" onclick="clearRideData()">Clear Saved Data</button>
+      <button class="admin-cancel" onclick="closeAdmin()">Maybe later</button>
+    </div>
+  </div>
+</div>
 
 <!-- Appreciation Modal (lives outside #app to overlay everything) -->
 <div id="appr-overlay" class="appr-overlay" style="display:none;" onclick="handleOverlayClick(event)">
@@ -716,8 +797,14 @@ let rideData = {
   }
 };
 
-// ── URL PARAMS + RIDE DATA INIT ──
+// ── RIDE DATA INIT (localStorage → URL params → defaults) ──
 (function initRideData() {
+  // 1. Load saved data first
+  const saved = localStorage.getItem("rideData");
+  if (saved) {
+    try { Object.assign(rideData, JSON.parse(saved)); } catch(e) {}
+  }
+  // 2. URL params override saved/defaults
   const p = new URLSearchParams(window.location.search);
   if (p.get("name"))        rideData.passengerName           = p.get("name");
   if (p.get("destination")) rideData.destination             = p.get("destination");
@@ -726,11 +813,11 @@ let rideData = {
   if (p.get("music"))       rideData.preferences.music       = p.get("music");
   if (p.get("temperature")) rideData.preferences.temperature = p.get("temperature");
   if (p.get("drink"))       rideData.preferences.drink       = p.get("drink");
-  // Fallbacks
+  // 3. Fallbacks
   rideData.passengerName = rideData.passengerName || "Guest";
   rideData.destination   = rideData.destination   || "Your destination";
   rideData.driverName    = rideData.driverName    || "Your chauffeur";
-  // Greeting — returning vs first-time
+  // 4. Greeting
   rideData.greeting = localStorage.getItem("returningUser")
     ? "Welcome back, " + rideData.passengerName
     : "Welcome aboard, " + rideData.passengerName;
@@ -1400,6 +1487,51 @@ function sendAppreciation() {
     if (path) { path.style.animation = "none"; void path.offsetWidth; path.style.animation = ""; }
     showFeedback("Thank you for your generosity", 3000);
   }, 900);
+}
+
+// ── ADMIN ──
+function openAdmin() {
+  // Pre-fill with current rideData
+  document.getElementById("adminName").value        = rideData.passengerName !== "Guest"        ? rideData.passengerName : "";
+  document.getElementById("adminDestination").value = rideData.destination   !== "Your destination" ? rideData.destination   : "";
+  document.getElementById("adminDriver").value      = rideData.driverName    !== "Your chauffeur"   ? rideData.driverName    : "";
+  document.getElementById("adminVehicle").value     = rideData.vehicle       || "";
+  document.getElementById("adminModal").style.display = "flex";
+}
+
+function closeAdmin() {
+  document.getElementById("adminModal").style.display = "none";
+}
+
+function handleAdminOverlay(e) {
+  if (e.target === document.getElementById("adminModal")) closeAdmin();
+}
+
+function applyRideData() {
+  const name  = document.getElementById("adminName").value.trim()        || "Guest";
+  const dest  = document.getElementById("adminDestination").value.trim() || "Your destination";
+  const drv   = document.getElementById("adminDriver").value.trim()      || "Your chauffeur";
+  const veh   = document.getElementById("adminVehicle").value.trim()     || rideData.vehicle;
+  rideData.passengerName = name;
+  rideData.destination   = dest;
+  rideData.driverName    = drv;
+  rideData.vehicle       = veh;
+  rideData.greeting      = localStorage.getItem("returningUser")
+    ? "Welcome back, " + name
+    : "Welcome aboard, " + name;
+  localStorage.setItem("rideData", JSON.stringify(rideData));
+  closeAdmin();
+  rideState    = "onboarding";
+  activeScreen = "welcome";
+  renderApp();
+  showFeedback("Ride configured for " + name, 2200);
+}
+
+function clearRideData() {
+  localStorage.removeItem("rideData");
+  localStorage.removeItem("returningUser");
+  closeAdmin();
+  showFeedback("Session cleared", 1800);
 }
 
 // ── INIT ──
