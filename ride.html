@@ -590,6 +590,33 @@ margin-top:8px;position:relative;overflow:hidden;}
 color:rgba(212,175,55,.7);box-shadow:0 0 16px rgba(212,175,55,.12);}
 .dash-appr-link i{font-size:11px;}
 
+/* ── WELCOME SCREEN ADDITIONS ── */
+.sc1-driver-ready{font-size:11px;font-weight:300;color:rgba(255,255,255,.28);
+letter-spacing:2px;margin-bottom:5px;display:flex;align-items:center;gap:7px;}
+.sc1-dest-line{font-size:11px;font-weight:300;color:rgba(255,255,255,.22);
+letter-spacing:2px;margin-bottom:18px;display:flex;align-items:center;gap:7px;}
+
+/* ── EXPERIENCE SUGGESTION CARD ── */
+.exp-suggestion-card{display:flex;align-items:center;gap:10px;
+background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.15);
+border-radius:12px;padding:10px 14px;margin-bottom:10px;
+font-size:11px;font-weight:300;color:rgba(255,255,255,.4);letter-spacing:1px;
+font-style:italic;}
+.exp-suggestion-card i{font-size:11px;color:rgba(212,175,55,.45);flex-shrink:0;}
+
+/* ── TRIP SUMMARY ── */
+.trip-summary{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;max-width:640px;}
+.trip-summary-row{display:flex;align-items:center;gap:12px;
+background:rgba(255,255,255,.035);backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px 16px;}
+.trip-summary-val{font-size:14px;font-weight:300;color:rgba(255,255,255,.65);
+font-family:'Cormorant Garamond',serif;margin-top:2px;}
+.trip-divider{display:flex;align-items:center;gap:12px;margin:16px 0 12px;max-width:640px;}
+.trip-divider::before,.trip-divider::after{content:'';flex:1;height:1px;
+background:rgba(255,255,255,.06);}
+.trip-divider span{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.18);
+text-transform:uppercase;white-space:nowrap;}
+
 /* ── ANIMATIONS ── */
 @keyframes roll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 </style>
@@ -674,18 +701,40 @@ let relaxMode    = false;
 let focusMode    = false;
 let socket;
 
-let userProfile = {
-  name: "Guest",
-  preferences: { music: "Jazz", temperature: "Cool", drink: "Sparkling Water" }
+let rideData = {
+  passengerName: "John",
+  destination:   "DFW Airport",
+  greeting:      "Welcome aboard, John",
+  driverName:    "Michael",
+  vehicle:       "Cadillac Escalade",
+  driverRating:  5.0,
+  driverTagline: "Your comfort, my commitment",
+  preferences: {
+    music:       "Jazz",
+    temperature: "Cool",
+    drink:       "Sparkling Water"
+  }
 };
 
-let driver = {
-  name: "Michael",
-  rating: 5.0,
-  car: "Escalade",
-  since: "2019",
-  tagline: "Your comfort, my commitment"
-};
+// ── URL PARAMS + RIDE DATA INIT ──
+(function initRideData() {
+  const p = new URLSearchParams(window.location.search);
+  if (p.get("name"))        rideData.passengerName           = p.get("name");
+  if (p.get("destination")) rideData.destination             = p.get("destination");
+  if (p.get("driver"))      rideData.driverName              = p.get("driver");
+  if (p.get("vehicle"))     rideData.vehicle                 = p.get("vehicle");
+  if (p.get("music"))       rideData.preferences.music       = p.get("music");
+  if (p.get("temperature")) rideData.preferences.temperature = p.get("temperature");
+  if (p.get("drink"))       rideData.preferences.drink       = p.get("drink");
+  // Fallbacks
+  rideData.passengerName = rideData.passengerName || "Guest";
+  rideData.destination   = rideData.destination   || "Your destination";
+  rideData.driverName    = rideData.driverName    || "Your chauffeur";
+  // Greeting — returning vs first-time
+  rideData.greeting = localStorage.getItem("returningUser")
+    ? "Welcome back, " + rideData.passengerName
+    : "Welcome aboard, " + rideData.passengerName;
+})();
 
 // ── REAL-TIME SYSTEM ──
 function initRealtime() {
@@ -724,6 +773,7 @@ function startRideSimulation() {
   setTimeout(() => {
     if (rideState === "near_destination" || rideState === "in_transit") {
       rideState = "complete";
+      localStorage.setItem("returningUser", "true");
       navigate("complete");
     }
   }, 90000);
@@ -785,17 +835,19 @@ function sendRequest(type) {
 
 // ── SMART SUGGESTIONS ──
 function getSmartSuggestions() {
+  const music = rideData.preferences.music || "Jazz";
+  const temp  = rideData.preferences.temperature || "Cool";
   if (rideState === "in_transit") {
     return [
-      { label: "Relax Mode",   icon: "fa-moon",             action: "toggleRelaxMode()" },
-      { label: "Play Jazz",    icon: "fa-music",            action: "sendRequest('music_jazz')" },
-      { label: "Cool Cabin",   icon: "fa-temperature-half", action: "sendRequest('temperature')" }
+      { label: "Relax Mode",       icon: "fa-moon",             action: "toggleRelaxMode()" },
+      { label: "Play " + music,    icon: "fa-music",            action: "sendRequest('music_jazz')" },
+      { label: temp + " Cabin",    icon: "fa-temperature-half", action: "sendRequest('temperature')" }
     ];
   }
   if (rideState === "near_destination") {
     return [
-      { label: "Extend Ride",  icon: "fa-clock",            action: "sendRequest('extend_ride')" },
-      { label: "Add Stop",     icon: "fa-location-dot",     action: "sendRequest('add_stop')" }
+      { label: "Extend Ride",      icon: "fa-clock",            action: "sendRequest('extend_ride')" },
+      { label: "Add Stop",         icon: "fa-location-dot",     action: "sendRequest('add_stop')" }
     ];
   }
   return [];
@@ -803,7 +855,6 @@ function getSmartSuggestions() {
 
 // ── RENDER WELCOME ──
 function renderWelcome() {
-  const name = userProfile.name;
   return `
   <div class="sc sc1">
     <img class="sc1-bg" src="wilmer_urban.jpg" alt="" onerror="this.style.opacity='0'">
@@ -815,9 +866,16 @@ function renderWelcome() {
       </div>
     </div>
     <div class="sc1-body">
-      <div class="sc1-greeting">Welcome, ${name}</div>
+      <div class="sc1-greeting">${rideData.greeting}</div>
       <div class="sc1-h">Intentional Service.<br><span class="gold">Experience Excellence.</span></div>
-      <div class="sc1-sub">Luxury Black Car Service &nbsp;·&nbsp; DFW</div>
+      <div class="sc1-driver-ready">
+        <i class="fa-solid fa-user-tie" style="font-size:10px;color:rgba(212,175,55,.45);"></i>
+        Your chauffeur <strong style="font-weight:500;color:rgba(255,255,255,.55);">${rideData.driverName}</strong> is ready
+      </div>
+      <div class="sc1-dest-line">
+        <i class="fa-solid fa-location-dot" style="font-size:10px;color:rgba(212,175,55,.45);"></i>
+        Destination: <span style="color:rgba(255,255,255,.5);">${rideData.destination}</span>
+      </div>
       <div class="sc1-tagline">Your luxury experience begins now</div>
       <div class="sc1-grid">
         <div class="sc1-btn" onclick="enterExperience()">
@@ -838,7 +896,7 @@ function renderWelcome() {
         </div>
       </div>
       <button class="enter-btn" onclick="enterExperience()">
-        <i class="fa-solid fa-star"></i> Enter Experience <i class="fa-solid fa-chevron-right"></i>
+        <i class="fa-solid fa-star"></i> Begin Your Journey <i class="fa-solid fa-chevron-right"></i>
       </button>
       <div class="sc1-trust" style="margin-top:14px;">
         <div class="sc1-tr">DFW Airport Specialists</div>
@@ -866,7 +924,7 @@ function renderDashboard() {
       <i class="fa-solid fa-location-dot"></i>
       <div class="near-dest-txt">
         <div class="near-dest-lbl">Approaching destination</div>
-        <div class="near-dest-val">Arriving in approximately 4 minutes</div>
+        <div class="near-dest-val">${rideData.destination}</div>
       </div>
     </div>` : "";
 
@@ -877,19 +935,19 @@ function renderDashboard() {
     <img class="dash-bg" src="city-poster.jpg" alt="" onerror="this.style.opacity='0'">
     <div class="dash-body">
       <div class="dash-hd">
-        <div class="dash-tag">Your comfort is our priority</div>
-        <div class="dash-title">Your <em>Experience</em></div>
+        <div class="dash-tag">Trip to ${rideData.destination}</div>
+        <div class="dash-title"><em>${rideData.passengerName}'s</em> Experience</div>
         <div class="focus-badge"><i class="fa-solid fa-crosshairs"></i>&nbsp;Focus Mode Active</div>
       </div>
       <div class="driver-card">
         <div class="driver-avatar"><i class="fa-solid fa-user-tie"></i></div>
         <div class="driver-info">
-          <div class="driver-name">${driver.name}</div>
-          <div class="driver-meta">${driver.car} &nbsp;·&nbsp; ${driver.tagline}</div>
+          <div class="driver-name">${rideData.driverName}</div>
+          <div class="driver-meta">${rideData.vehicle} &nbsp;·&nbsp; ${rideData.driverTagline}</div>
         </div>
         <div class="driver-rating">
-          <div class="driver-stars">${"<i class='fa-solid fa-star'></i>".repeat(Math.round(driver.rating))}</div>
-          <div class="driver-score">${driver.rating.toFixed(1)}</div>
+          <div class="driver-stars">${"<i class='fa-solid fa-star'></i>".repeat(Math.round(rideData.driverRating))}</div>
+          <div class="driver-score">${rideData.driverRating.toFixed(1)}</div>
         </div>
       </div>
       ${nearBanner}
@@ -940,9 +998,12 @@ function renderDashboard() {
 
 // ── RENDER EXPERIENCE ──
 function renderExperience() {
-  const pref = userProfile.preferences;
-  const jazzPreferred  = pref.music === "Jazz";
-  const drinkPreferred = pref.drink;
+  const pref  = rideData.preferences;
+  const music = pref.music || "Jazz";
+  const temp  = pref.temperature || "Cool";
+  const drink = pref.drink || "Water";
+  const musicWords = music.split(" ");
+  const drinkWords = drink.split(" ");
 
   return `
   <div class="sc exp">
@@ -962,10 +1023,10 @@ function renderExperience() {
         <div>
           <div class="exp-group-title">Comfort</div>
           <div class="exp-group-grid">
-            <div class="exp-btn${pref.temperature === "Cool" ? " preferred" : ""}" onclick="sendRequest('temperature')">
+            <div class="exp-btn preferred" onclick="sendRequest('temperature')">
               <div class="exp-ico"><i class="fa-solid fa-temperature-half"></i></div>
-              <div class="exp-lbl">Adjust<br>Temp</div>
-              ${pref.temperature === "Cool" ? '<div class="exp-pref-badge">Your setting</div>' : ""}
+              <div class="exp-lbl">Set to<br>${temp}</div>
+              <div class="exp-pref-badge">Your setting</div>
             </div>
             <div class="exp-btn" onclick="sendRequest('lighting')">
               <div class="exp-ico"><i class="fa-solid fa-lightbulb"></i></div>
@@ -975,11 +1036,15 @@ function renderExperience() {
         </div>
         <div>
           <div class="exp-group-title">Entertainment</div>
+          <div class="exp-suggestion-card">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            Would you like to enjoy ${music}?
+          </div>
           <div class="exp-group-grid">
-            <div class="exp-btn${jazzPreferred ? " preferred" : ""}" onclick="sendRequest('music_jazz')">
+            <div class="exp-btn preferred" onclick="sendRequest('music_jazz')">
               <div class="exp-ico"><i class="fa-solid fa-music"></i></div>
-              <div class="exp-lbl">Jazz<br>Music</div>
-              ${jazzPreferred ? '<div class="exp-pref-badge">Your pick</div>' : ""}
+              <div class="exp-lbl">Play<br>${musicWords[0]}</div>
+              <div class="exp-pref-badge">Your pick</div>
             </div>
             <div class="exp-btn" onclick="toggleRelaxMode()">
               <div class="exp-ico"><i class="fa-solid fa-moon"></i></div>
@@ -996,7 +1061,7 @@ function renderExperience() {
             </div>
             <div class="exp-btn preferred" onclick="sendRequest('refreshment')">
               <div class="exp-ico"><i class="fa-solid fa-glass-water"></i></div>
-              <div class="exp-lbl">${drinkPreferred.split(" ")[0]}<br>${drinkPreferred.split(" ").slice(1).join(" ") || "Water"}</div>
+              <div class="exp-lbl">${drinkWords[0]}<br>${drinkWords.slice(1).join(" ") || "Water"}</div>
               <div class="exp-pref-badge">Your drink</div>
             </div>
           </div>
@@ -1068,8 +1133,8 @@ function renderContact() {
     <img class="ctc-bg" src="interior-dashboard.jpg" alt="" onerror="this.style.opacity='0'">
     <div class="ctc-body">
       <button class="sc-back" onclick="navigate('dashboard')"><i class="fa-solid fa-chevron-left"></i>&nbsp; Back</button>
-      <div class="ctc-h">Contact Your <em>Chauffeur</em></div>
-      <div class="ctc-sub">Available 24 / 7 &nbsp;·&nbsp; ${driver.name}</div>
+      <div class="ctc-h">Message <em>${rideData.driverName}</em></div>
+      <div class="ctc-sub">Available 24 / 7 &nbsp;·&nbsp; Your dedicated chauffeur</div>
       <div class="ctc-ctas">
         <button class="ctc-cta ctc-call" onclick="window.location.href='tel:6468791391'">
           <div class="ctc-ci"><i class="fa-solid fa-phone"></i></div>CALL NOW — (646) 879-1391
@@ -1092,51 +1157,49 @@ function renderContact() {
 
 // ── RENDER TRIP ──
 function renderTripDetails() {
+  const rows = [
+    { icon: "fa-user",            label: "Passenger",   val: rideData.passengerName },
+    { icon: "fa-user-tie",        label: "Chauffeur",   val: rideData.driverName    },
+    { icon: "fa-car-side",        label: "Vehicle",     val: rideData.vehicle       },
+    { icon: "fa-location-dot",    label: "Destination", val: rideData.destination   }
+  ];
   return `
   <div class="sc trip">
     <img class="trip-bg" src="interior-dashboard.jpg" alt="" onerror="this.style.opacity='0'">
     <div class="trip-body">
       <button class="sc-back" onclick="navigate('dashboard')"><i class="fa-solid fa-chevron-left"></i>&nbsp; Back</button>
-      <div class="trip-h">Book Your <em>Ride</em></div>
-      <div class="trip-fields">
-        <div class="trip-f">
-          <div class="trip-fi"><i class="fa-solid fa-location-dot"></i></div>
+      <div class="trip-h">Your <em>Trip</em></div>
+      <div class="trip-summary">
+        ${rows.map(r => `
+        <div class="trip-summary-row">
+          <div class="trip-fi"><i class="fa-solid ${r.icon}"></i></div>
           <div class="trip-ft">
-            <div class="trip-fl">Pickup Location</div>
-            <input class="trip-inp" type="text" placeholder="Hotel, airport, address...">
+            <div class="trip-fl">${r.label}</div>
+            <div class="trip-summary-val">${r.val}</div>
           </div>
-        </div>
+        </div>`).join("")}
+      </div>
+      <div class="trip-divider">
+        <span>Request a Change</span>
+      </div>
+      <div class="trip-fields">
         <div class="trip-f">
           <div class="trip-fi"><i class="fa-solid fa-location-crosshairs"></i></div>
           <div class="trip-ft">
-            <div class="trip-fl">Dropoff Location</div>
-            <input class="trip-inp" type="text" placeholder="Destination...">
+            <div class="trip-fl">Update Dropoff</div>
+            <input class="trip-inp" type="text" placeholder="${rideData.destination}">
           </div>
         </div>
         <div class="trip-f">
-          <div class="trip-fi"><i class="fa-regular fa-calendar"></i></div>
+          <div class="trip-fi"><i class="fa-solid fa-location-dot"></i></div>
           <div class="trip-ft">
-            <div class="trip-fl">Date &amp; Time</div>
-            <input class="trip-inp" type="datetime-local">
-          </div>
-        </div>
-        <div class="trip-f">
-          <div class="trip-fi"><i class="fa-solid fa-list-ul"></i></div>
-          <div class="trip-ft">
-            <div class="trip-fl">Service Type</div>
-            <select class="trip-inp" style="appearance:none;cursor:pointer;">
-              <option value="" style="background:#06060A">Select service type</option>
-              <option style="background:#06060A">Airport Transfer — From $115</option>
-              <option style="background:#06060A">Wedding Package — From $625</option>
-              <option style="background:#06060A">Corporate Travel — From $125</option>
-              <option style="background:#06060A">Hourly Charter — $145/hr</option>
-              <option style="background:#06060A">FIFA 2026 — From $185</option>
-            </select>
+            <div class="trip-fl">Add a Stop</div>
+            <input class="trip-inp" type="text" placeholder="Address or landmark...">
           </div>
         </div>
       </div>
       <button class="trip-submit" onclick="window.open('https://www.synergyluxlimodfw.com','_blank')">
-        <i class="fa-solid fa-paper-plane"></i> SUBMIT REQUEST
+        <i class="fa-solid fa-paper-plane"></i> SEND REQUEST
       </button>
     </div>
   </div>`;
@@ -1151,7 +1214,7 @@ function renderTripComplete() {
       <div class="tc-emblem"><i class="fa-solid fa-star"></i></div>
       <div class="tc-eyebrow">Journey Complete</div>
       <div class="tc-title">Thank You<br>for <em>Riding</em> With Us</div>
-      <div class="tc-sub">Your chauffeur ${driver.name} ensured a smooth experience</div>
+      <div class="tc-sub">Your chauffeur ${rideData.driverName} ensured a smooth experience</div>
       <button class="tc-appr-btn" onclick="openAppreciation()">
         <i class="fa-solid fa-heart"></i> Thank Your Chauffeur
       </button>
@@ -1208,7 +1271,7 @@ function enterExperience() {
   rideState = "in_transit";
   activeScreen = "dashboard";
   renderApp();
-  showFeedback("Welcome aboard — enjoy your journey", 2800);
+  showFeedback("Welcome aboard, " + rideData.passengerName + " — enjoy your journey", 2800);
   startRideSimulation();
 }
 
@@ -1272,7 +1335,7 @@ function openAppreciation() {
   playClick();
   const overlay = document.getElementById("appr-overlay");
   const sub = document.getElementById("appr-subtitle-text");
-  if (sub) sub.innerHTML = `Your chauffeur ${driver.name} ensured<br>a smooth experience`;
+  if (sub) sub.innerHTML = `Your chauffeur ${rideData.driverName} ensured<br>a smooth experience`;
   // Reset to form state
   document.getElementById("appr-form").style.display = "block";
   document.getElementById("appr-confirm").style.display = "none";
