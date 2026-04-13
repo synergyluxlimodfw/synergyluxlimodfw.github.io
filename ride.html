@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Synergy Lux Limo DFW</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Outfit',sans-serif;color:#fff;}
+
+/* ─── CINEMATIC CANVAS ─── */
+#cvs{position:fixed;inset:0;z-index:0;}
+
+/* ─── GLASS LAYER ─── */
+.glass{background:rgba(255,255,255,0.03);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.06);}
+
+/* ─── PROGRESS ─── */
+#prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#C9A84C,#F5D98A,#C9A84C);z-index:500;transition:width 0.12s linear;box-shadow:0 0 8px rgba(201,168,76,0.6);}
+
+/* ─── TOP HUD ─── */
+.hud{position:fixed;top:0;left:0;right:0;z-index:200;padding:18px 40px;display:flex;justify-content:space-between;align-items:center;}
+.hud-logo{display:flex;align-items:center;gap:12px;}
+.hud-logo img{height:36px;filter:drop-shadow(0 0 8px rgba(201,168,76,0.4));}
+.hud-brand{font-size:11px;font-weight:300;letter-spacing:5px;color:rgba(255,255,255,0.4);text-transform:uppercase;}
+.hud-right{display:flex;align-items:center;gap:20px;}
+.hud-time{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:#C9A84C;}
+.hud-date{font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:2px;text-align:right;margin-top:2px;}
+
+/* ─── SLIDES ─── */
+.slide{position:fixed;inset:0;z-index:10;opacity:0;pointer-events:none;transition:opacity 1s ease;}
+.slide.active{opacity:1;pointer-events:all;}
+
+/* ─── SLIDE 1: HERO ─── */
+#s1{display:flex;align-items:center;justify-content:center;}
+.s1-center{text-align:center;position:relative;z-index:2;}
+.s1-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:320px;height:320px;border:1px solid rgba(201,168,76,0.08);border-radius:50%;animation:spinSlow 20s linear infinite;}
+.s1-ring2{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;border:1px solid rgba(201,168,76,0.04);border-radius:50%;animation:spinSlow 35s linear infinite reverse;}
+.s1-logo{width:110px;height:110px;margin:0 auto 28px;filter:drop-shadow(0 0 24px rgba(201,168,76,0.5));animation:floatLogo 4s ease-in-out infinite;}
+.s1-headline{font-family:'Cormorant Garamond',serif;font-size:80px;font-weight:300;line-height:0.95;letter-spacing:-2px;}
+.s1-headline em{font-style:italic;color:#C9A84C;display:block;}
+.s1-sub{font-size:12px;font-weight:300;color:rgba(255,255,255,0.35);letter-spacing:8px;text-transform:uppercase;margin-top:24px;}
+.s1-line{width:1px;height:48px;background:linear-gradient(180deg,#C9A84C,transparent);margin:24px auto 0;}
+.s1-tap{font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:4px;text-transform:uppercase;animation:breathe 3s ease-in-out infinite;}
+
+/* ─── SLIDE 2: SERVICES ─── */
+#s2{padding:80px 40px 80px;}
+.s2-label{font-size:10px;color:rgba(201,168,76,0.5);letter-spacing:6px;text-transform:uppercase;margin-bottom:12px;}
+.s2-h{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;margin-bottom:40px;}
+.s2-h em{font-style:italic;color:#C9A84C;}
+.s2-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;height:calc(100% - 160px);}
+.s2-card{border-radius:16px;padding:28px 24px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;transition:transform 0.3s;}
+.s2-card:active{transform:scale(0.98);}
+.s2-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#C9A84C,transparent);opacity:0;transition:opacity 0.3s;}
+.s2-card:active::after{opacity:1;}
+.s2-num{font-size:10px;color:rgba(201,168,76,0.4);letter-spacing:3px;margin-bottom:12px;}
+.s2-icon{font-size:32px;margin-bottom:12px;}
+.s2-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:4px;}
+.s2-price{font-size:26px;font-weight:200;color:#C9A84C;margin-bottom:8px;}
+.s2-desc{font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6;font-weight:300;}
+
+/* ─── SLIDE 3: BOOK ─── */
+#s3{display:flex;align-items:center;justify-content:center;padding:0 40px;}
+.s3-wrap{width:100%;max-width:960px;display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:24px;overflow:hidden;}
+.s3-left{padding:56px 48px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.12);border-right:none;border-radius:24px 0 0 24px;}
+.s3-right{padding:56px 48px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-left:none;border-radius:0 24px 24px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.s3-eyebrow{font-size:10px;color:rgba(201,168,76,0.5);letter-spacing:6px;text-transform:uppercase;margin-bottom:16px;}
+.s3-h{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;line-height:1;margin-bottom:8px;}
+.s3-h em{font-style:italic;color:#C9A84C;}
+.s3-tagline{font-size:13px;color:rgba(255,255,255,0.35);font-weight:300;line-height:1.8;margin-bottom:36px;}
+.s3-phone{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;color:#fff;letter-spacing:1px;margin-bottom:6px;}
+.s3-web{font-size:13px;color:rgba(201,168,76,0.6);letter-spacing:2px;margin-bottom:32px;}
+.s3-pills{display:flex;flex-wrap:wrap;gap:8px;}
+.s3-pill{font-size:11px;color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.07);padding:6px 14px;border-radius:20px;letter-spacing:1px;}
+.s3-qr-box{background:#fff;padding:14px;border-radius:12px;margin-bottom:12px;}
+.s3-qr-box img{width:150px;height:150px;display:block;}
+.s3-qr-label{font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:4px;text-transform:uppercase;}
+.s3-or{font-size:11px;color:rgba(255,255,255,0.15);letter-spacing:3px;margin:20px 0;}
+.s3-btn{width:100%;background:linear-gradient(135deg,#C9A84C,#E8C97A);color:#000;border:none;padding:16px;font-size:13px;font-weight:500;letter-spacing:3px;text-transform:uppercase;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;}
+
+/* ─── SLIDE 4: FIFA ─── */
+#s4{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
+.s4-marquee{overflow:hidden;width:100%;margin-bottom:36px;}
+.s4-marquee-inner{display:inline-block;white-space:nowrap;animation:marquee 30s linear infinite;font-size:30px;letter-spacing:8px;}
+.s4-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);padding:8px 20px;border-radius:20px;font-size:11px;color:rgba(201,168,76,0.8);letter-spacing:4px;text-transform:uppercase;margin-bottom:20px;}
+.s4-h{font-family:'Cormorant Garamond',serif;font-size:88px;font-weight:300;line-height:0.9;margin-bottom:4px;}
+.s4-h em{font-style:italic;color:#C9A84C;}
+.s4-loc{font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:6px;text-transform:uppercase;margin-bottom:40px;}
+.s4-counts{display:flex;gap:0;margin-bottom:48px;}
+.s4-count{padding:0 36px;text-align:center;}
+.s4-count + .s4-count{border-left:1px solid rgba(255,255,255,0.06);}
+.s4-num{font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;color:#C9A84C;line-height:1;}
+.s4-lbl{font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:5px;text-transform:uppercase;}
+.s4-cta{background:transparent;border:1px solid rgba(201,168,76,0.4);color:#C9A84C;padding:16px 52px;font-size:12px;font-weight:300;letter-spacing:5px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.3s;}
+.s4-cta:active{background:#C9A84C;color:#000;}
+
+/* ─── SLIDE 5: WIFI ─── */
+#s5{display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px;}
+.s5-icon{font-size:56px;margin-bottom:24px;filter:drop-shadow(0 0 16px rgba(201,168,76,0.3));}
+.s5-label{font-size:10px;color:rgba(201,168,76,0.5);letter-spacing:6px;text-transform:uppercase;margin-bottom:12px;}
+.s5-h{font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:300;margin-bottom:40px;}
+.s5-h em{font-style:italic;color:#C9A84C;}
+.s5-card{border-radius:20px;padding:40px 64px;margin-bottom:32px;}
+.s5-row{display:flex;align-items:center;gap:40px;margin-bottom:24px;}
+.s5-row:last-child{margin:0;}
+.s5-rlabel{font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:5px;text-transform:uppercase;width:80px;text-align:right;}
+.s5-rval{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:#fff;}
+.s5-social{font-size:14px;color:rgba(255,255,255,0.25);letter-spacing:3px;}
+.s5-social span{color:#C9A84C;}
+
+/* ─── BOTTOM NAV ─── */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;}
+.bnav-dots{display:flex;gap:6px;align-items:center;}
+.bdot{height:2px;width:20px;background:rgba(255,255,255,0.12);border-radius:1px;cursor:pointer;transition:all 0.4s;}
+.bdot.active{width:44px;background:#C9A84C;box-shadow:0 0 8px rgba(201,168,76,0.5);}
+.bnav-slide{font-size:11px;color:rgba(255,255,255,0.15);letter-spacing:3px;}
+
+@keyframes spinSlow{to{transform:translate(-50%,-50%) rotate(360deg);}}
+@keyframes floatLogo{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+@keyframes breathe{0%,100%{opacity:0.2;}50%{opacity:0.7;}}
+@keyframes marquee{from{transform:translateX(40vw);}to{transform:translateX(-100%);}}
+</style>
+</head>
+<body>
+
+<canvas id="cvs"></canvas>
+<div id="prog"></div>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="hud-logo">
+    <img src="synergy-logo-new.png" alt="Synergy Lux Limo DFW">
+    <div class="hud-brand">Synergy Lux Limo DFW</div>
+  </div>
+  <div class="hud-right">
+    <div>
+      <div class="hud-time" id="clk">--:--</div>
+      <div class="hud-date" id="dt">---</div>
+    </div>
+  </div>
+</div>
+
+<!-- S1 -->
+<div class="slide active" id="s1">
+  <div class="s1-ring"></div>
+  <div class="s1-ring2"></div>
+  <div class="s1-center">
+    <img class="s1-logo" src="synergy-logo-new.png" alt="">
+    <div class="s1-headline">Arrive in<em>Excellence</em></div>
+    <div class="s1-sub">Dallas · Fort Worth · Premium Black Car</div>
+    <div class="s1-line"></div>
+    <div class="s1-tap">Touch to explore</div>
+  </div>
+</div>
+
+<!-- S2 -->
+<div class="slide" id="s2">
+  <div class="s2-label">What We Offer</div>
+  <div class="s2-h">Our <em>Services</em></div>
+  <div class="s2-cards">
+    <div class="s2-card glass"><div class="s2-num">01</div><div class="s2-icon">✈️</div><div class="s2-name">Airport Transfer</div><div class="s2-price">From $115</div><div class="s2-desc">DFW & Love Field · Flight tracking included · Meet & greet</div></div>
+    <div class="s2-card glass"><div class="s2-num">02</div><div class="s2-icon">💒</div><div class="s2-name">Weddings</div><div class="s2-price">From $625</div><div class="s2-desc">4-hour package · Red carpet arrival · Décor included</div></div>
+    <div class="s2-card glass"><div class="s2-num">03</div><div class="s2-icon">💼</div><div class="s2-name">Corporate</div><div class="s2-price">From $125</div><div class="s2-desc">Executive travel · Net-30 billing · COI available</div></div>
+    <div class="s2-card glass"><div class="s2-num">04</div><div class="s2-icon">🌃</div><div class="s2-name">Night Out</div><div class="s2-price">From $450</div><div class="s2-desc">Uptown Dallas · Deep Ellum · Events · Sports</div></div>
+    <div class="s2-card glass"><div class="s2-num">05</div><div class="s2-icon">⏱️</div><div class="s2-name">Hourly Charter</div><div class="s2-price">$145 / hr</div><div class="s2-desc">2-hour minimum · Your schedule · Anywhere in DFW</div></div>
+    <div class="s2-card glass"><div class="s2-num">06</div><div class="s2-icon">⚽</div><div class="s2-name">FIFA 2026</div><div class="s2-price">From $185</div><div class="s2-desc">AT&T Stadium · VIP packages · World Cup transfers</div></div>
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="slide" id="s3">
+  <div class="s3-wrap">
+    <div class="s3-left">
+      <div class="s3-eyebrow">Book Your Ride</div>
+      <div class="s3-h">Your Next<br><em>Journey</em><br>Awaits</div>
+      <div class="s3-tagline">Flat rates · No surge pricing<br>On-time guarantee · 24 / 7 available</div>
+      <div class="s3-phone">(646) 879-1391</div>
+      <div class="s3-web">synergyluxlimodfw.com</div>
+      <div class="s3-pills">
+        <div class="s3-pill">Licensed</div>
+        <div class="s3-pill">Insured</div>
+        <div class="s3-pill">On-Time Guarantee</div>
+        <div class="s3-pill">24 / 7</div>
+      </div>
+    </div>
+    <div class="s3-right">
+      <div class="s3-qr-box">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.synergyluxlimodfw.com&bgcolor=ffffff&color=000000" alt="QR">
+      </div>
+      <div class="s3-qr-label">Scan to book</div>
+      <div class="s3-or">— or —</div>
+      <button class="s3-btn" onclick="window.open('https://www.synergyluxlimodfw.com','_blank')">Book Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- S4 -->
+<div class="slide" id="s4">
+  <div class="s4-marquee"><div class="s4-marquee-inner">🇧🇷 🇫🇷 🇦🇷 🇩🇪 🇪🇸 🇲🇽 🇺🇸 🇵🇹 🇯🇵 🇳🇱 🇲🇦 🇭🇷 🇸🇳 🇰🇷 🇨🇦 🇧🇪 🇺🇾 🇨🇭 🇬🇧 🇸🇪 &nbsp;&nbsp; 🇧🇷 🇫🇷 🇦🇷 🇩🇪 🇪🇸 🇲🇽 🇺🇸 🇵🇹 🇯🇵 🇳🇱</div></div>
+  <div class="s4-badge">⚽ &nbsp; Official Host City · Dallas Texas</div>
+  <div class="s4-h">FIFA<em>2026</em></div>
+  <div class="s4-loc">AT&T Stadium · Arlington · June – July 2026</div>
+  <div class="s4-counts">
+    <div class="s4-count"><div class="s4-num" id="fd">--</div><div class="s4-lbl">Days</div></div>
+    <div class="s4-count"><div class="s4-num" id="fh">--</div><div class="s4-lbl">Hours</div></div>
+    <div class="s4-count"><div class="s4-num" id="fm">--</div><div class="s4-lbl">Minutes</div></div>
+  </div>
+  <button class="s4-cta" onclick="window.open('https://www.synergyluxlimodfw.com/fifa-2026.html','_blank')">Reserve FIFA Transfer</button>
+</div>
+
+<!-- S5 -->
+<div class="slide" id="s5">
+  <div class="s5-icon">📶</div>
+  <div class="s5-label">Complimentary</div>
+  <div class="s5-h">Stay <em>Connected</em></div>
+  <div class="s5-card glass">
+    <div class="s5-row"><div class="s5-rlabel">Network</div><div class="s5-rval">SynergyLux</div></div>
+    <div class="s5-row"><div class="s5-rlabel">Password</div><div class="s5-rval">Ride2026!</div></div>
+  </div>
+  <div class="s5-social">Follow us &nbsp; <span>@synergyluxlimodfw</span></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <div class="bnav-dots" id="dots"></div>
+  <div class="bnav-slide" id="snum">01 / 05</div>
+</div>
+
+<script>
+var cur=0,tot=5,pv=0,DUR=9000,pt,at;
+
+/* CANVAS — liquid gold aurora */
+var cv=document.getElementById('cvs'),cx=cv.getContext('2d');
+function rsz(){cv.width=window.innerWidth;cv.height=window.innerHeight;}
+rsz();window.addEventListener('resize',rsz);
+var orbs=[];
+for(var i=0;i<6;i++){orbs.push({
+  x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,
+  r:Math.random()*200+120,
+  vx:(Math.random()-.5)*0.4,vy:(Math.random()-.5)*0.4,
+  hue:Math.random()*20+30,alpha:Math.random()*0.06+0.02
+});}
+var particles=[];
+for(var j=0;j<100;j++){particles.push({
+  x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,
+  r:Math.random()*1.2+0.3,
+  vx:(Math.random()-.5)*0.25,vy:(Math.random()-.5)*0.25,
+  alpha:Math.random()*0.5+0.1
+});}
+
+function paint(){
+  cx.fillStyle='rgba(2,2,2,0.08)';
+  cx.fillRect(0,0,cv.width,cv.height);
+  orbs.forEach(function(o){
+    o.x+=o.vx;o.y+=o.vy;
+    if(o.x<-o.r)o.x=cv.width+o.r;if(o.x>cv.width+o.r)o.x=-o.r;
+    if(o.y<-o.r)o.y=cv.height+o.r;if(o.y>cv.height+o.r)o.y=-o.r;
+    var g=cx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+    g.addColorStop(0,'hsla('+o.hue+',70%,55%,'+o.alpha+')');
+    g.addColorStop(1,'transparent');
+    cx.beginPath();cx.arc(o.x,o.y,o.r,0,Math.PI*2);
+    cx.fillStyle=g;cx.fill();
+  });
+  particles.forEach(function(p){
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>cv.width)p.vx*=-1;
+    if(p.y<0||p.y>cv.height)p.vy*=-1;
+    cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    cx.fillStyle='rgba(201,168,76,'+p.alpha+')';cx.fill();
+  });
+  requestAnimationFrame(paint);
+}
+paint();
+
+/* SLIDES */
+function initDots(){
+  var d=document.getElementById('dots');
+  for(var i=0;i<tot;i++){
+    var el=document.createElement('div');
+    el.className='bdot'+(i===0?' active':'');
+    el.setAttribute('data-i',i);
+    el.onclick=function(){go(parseInt(this.getAttribute('data-i')));};
+    d.appendChild(el);
+  }
+}
+function go(n){
+  document.querySelectorAll('.slide')[cur].classList.remove('active');
+  document.querySelectorAll('.bdot')[cur].classList.remove('active');
+  cur=(n+tot)%tot;
+  document.querySelectorAll('.slide')[cur].classList.add('active');
+  document.querySelectorAll('.bdot')[cur].classList.add('active');
+  document.getElementById('snum').textContent='0'+(cur+1)+' / 0'+tot;
+  resetP();
+}
+function resetP(){
+  clearInterval(pt);clearTimeout(at);pv=0;
+  document.getElementById('prog').style.width='0%';
+  pt=setInterval(function(){pv+=100/(DUR/100);document.getElementById('prog').style.width=Math.min(pv,100)+'%';},100);
+  at=setTimeout(function(){go(cur+1);},DUR);
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.bnav-dots')&&!e.target.closest('button'))go(cur+1);
+});
+
+/* CLOCK */
+function tick(){
+  var n=new Date(),h=n.getHours(),m=n.getMinutes(),ap=h>=12?'PM':'AM';
+  h=h%12||12;
+  document.getElementById('clk').textContent=h+':'+(m<10?'0'+m:m)+' '+ap;
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dt').textContent=days[n.getDay()]+' '+months[n.getMonth()]+' '+n.getDate();
+}tick();setInterval(tick,1000);
+
+/* FIFA */
+function fifa(){
+  var t=new Date('2026-06-11')-new Date();
+  if(t>0){
+    document.getElementById('fd').textContent=Math.floor(t/86400000);
+    document.getElementById('fh').textContent=Math.floor(t%86400000/3600000);
+    document.getElementById('fm').textContent=Math.floor(t%3600000/60000);
+  }
+}fifa();setInterval(fifa,60000);
+
+initDots();resetP();
+</script>
+</body>
+</html>
