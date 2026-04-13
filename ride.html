@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="version" content="luxury-app-v6-2026">
+<meta name="version" content="luxury-concierge-v7-2026">
 <title>Synergy Lux Limo DFW</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
@@ -18,15 +18,32 @@ background-size:300% 300%;animation:gradientMove 20s ease infinite;
 font-family:'Outfit',sans-serif;color:#fff;}
 
 /* ── RELAX MODE ── */
-@keyframes slowPulse{0%,100%{filter:saturate(.35) brightness(.62);}50%{filter:saturate(.45) brightness(.72);}}
-.relax-mode{background:radial-gradient(circle at 50% 50%,#0a0a0a 0%,#000 100%)!important;
+@keyframes slowPulse{0%,100%{filter:saturate(.3) brightness(.55);}50%{filter:saturate(.42) brightness(.68);}}
+@keyframes floatEl{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+.relax-mode{background:radial-gradient(circle at 50% 50%,#080808 0%,#000 100%)!important;
 background-size:100%!important;animation:none!important;}
-.relax-mode #app{animation:slowPulse 5s ease-in-out infinite;}
+.relax-mode #app{animation:slowPulse 6s ease-in-out infinite;}
+.relax-mode .dash-primary{animation:floatEl 7s ease-in-out infinite!important;transform:none!important;}
+.relax-mode .dash-grid{opacity:.35;}
+.relax-mode .dash-bg{filter:brightness(.08) saturate(.15) blur(6px)!important;}
 
-/* ── APP CONTAINER ── */
+/* ── FOCUS MODE ── */
+.focus-mode .dash-grid .dash-card:not(.dash-focus-keep){opacity:.2;pointer-events:none;}
+.focus-mode .dash-primary{opacity:.3;pointer-events:none;}
+.focus-mode .dash-relax{display:none;}
+.focus-badge{display:none;align-items:center;gap:8px;font-size:9px;letter-spacing:3px;
+color:rgba(255,255,255,.3);text-transform:uppercase;
+background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+border-radius:20px;padding:6px 12px;margin-top:8px;}
+.focus-badge i{font-size:10px;color:rgba(255,255,255,.3);}
+.focus-mode .focus-badge{display:inline-flex;}
+
+/* ── APP ── */
 #app{position:fixed;inset:0;z-index:10;}
-#app.fade{animation:appFade .45s ease both;}
-@keyframes appFade{from{opacity:0;transform:scale(1.025);}to{opacity:1;transform:scale(1);}}
+#app.fade{animation:appFade .45s cubic-bezier(.22,1,.36,1) both;}
+@keyframes appFade{from{opacity:0;transform:scale(1.022);}to{opacity:1;transform:scale(1);}}
+.screen-exit{animation:screenExit .2s ease forwards!important;}
+@keyframes screenExit{to{opacity:0;transform:scale(.985);}}
 
 /* ── PROGRESS ── */
 #prog{position:fixed;top:0;left:0;height:2px;z-index:999;
@@ -36,8 +53,7 @@ transition:width .1s linear;}
 
 /* ── STATUS BAR ── */
 .sb{position:fixed;top:0;left:0;right:0;z-index:600;padding:12px 28px;
-display:flex;justify-content:space-between;align-items:center;
-pointer-events:none;
+display:flex;justify-content:space-between;align-items:center;pointer-events:none;
 background:linear-gradient(180deg,rgba(6,6,10,.92) 0%,rgba(6,6,10,.5) 60%,transparent 100%);}
 .sb-l{display:flex;align-items:center;gap:11px;}
 .sb-logo{height:32px;filter:drop-shadow(0 0 10px rgba(212,175,55,.55));}
@@ -49,10 +65,9 @@ background:linear-gradient(180deg,rgba(6,6,10,.92) 0%,rgba(6,6,10,.5) 60%,transp
 /* ── SCREENS ── */
 .sc{position:absolute;inset:0;overflow:hidden;}
 
-/* ── SC1 WELCOME ── */
+/* ── WELCOME ── */
 .sc1-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-object-position:60% center;
-filter:brightness(.45) saturate(.55) contrast(1.15);z-index:1;
+object-position:60% center;filter:brightness(.45) saturate(.55) contrast(1.15);z-index:1;
 transform:scale(1.08);animation:zoomIn 12s ease forwards;}
 @keyframes zoomIn{to{transform:scale(1);}}
 .sc1:before{content:'';position:absolute;inset:0;z-index:2;
@@ -60,7 +75,6 @@ background:linear-gradient(112deg,rgba(6,6,10,.96) 0%,rgba(6,6,10,.65) 32%,rgba(
 linear-gradient(180deg,rgba(6,6,10,.35) 0%,transparent 22%,rgba(6,6,10,.5) 62%,rgba(6,6,10,.98) 100%);}
 .sc1:after{content:'';position:absolute;inset:0;z-index:2;
 background:radial-gradient(ellipse 55% 60% at 68% 52%,rgba(212,175,55,.06) 0%,transparent 65%);}
-
 @keyframes logoReveal{from{opacity:0;transform:scale(.82) translateY(-8px);}to{opacity:1;transform:scale(1) translateY(0);}}
 .sc1-brand{position:absolute;top:54px;left:36px;z-index:5;display:flex;align-items:center;gap:12px;
 animation:logoReveal .85s cubic-bezier(.22,1,.36,1) both;}
@@ -68,32 +82,30 @@ animation:logoReveal .85s cubic-bezier(.22,1,.36,1) both;}
 animation:logoReveal 1s .18s cubic-bezier(.22,1,.36,1) both;}
 .sc1-btxt .n{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;letter-spacing:2px;color:var(--g);}
 .sc1-btxt .s{font-size:9px;font-weight:300;letter-spacing:4px;color:rgba(255,255,255,.22);text-transform:uppercase;margin-top:2px;}
-
 @keyframes bodyReveal{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-.sc1-body{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;justify-content:flex-end;padding:0 36px 50px;
-animation:bodyReveal .9s .3s cubic-bezier(.22,1,.36,1) both;}
+.sc1-body{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;justify-content:flex-end;
+padding:0 36px 50px;animation:bodyReveal .9s .3s cubic-bezier(.22,1,.36,1) both;}
+.sc1-greeting{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;
+color:rgba(212,175,55,.6);letter-spacing:2px;margin-bottom:6px;}
 .sc1-h{font-family:'Cormorant Garamond',serif;font-size:58px;font-weight:500;
 line-height:.9;letter-spacing:-.5px;text-transform:uppercase;margin-bottom:8px;
 text-shadow:0 4px 40px rgba(0,0,0,.95);}
 .sc1-h .gold{color:var(--g);}
 .sc1-sub{font-size:11px;font-weight:300;color:rgba(255,255,255,.28);letter-spacing:6px;text-transform:uppercase;margin-bottom:4px;}
 .sc1-tagline{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;
-color:rgba(212,175,55,.58);letter-spacing:1px;margin-bottom:22px;}
+color:rgba(212,175,55,.52);letter-spacing:1px;margin-bottom:22px;}
 .sc1-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
 .sc1-btn{background:rgba(8,8,14,.78);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
 border:1px solid rgba(212,175,55,.13);border-radius:16px;
 padding:14px 6px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
 cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
-.sc1-btn::after{content:'';position:absolute;inset:0;border-radius:16px;
-background:linear-gradient(135deg,rgba(212,175,55,.08) 0%,transparent 55%);opacity:0;transition:.3s;}
-.sc1-btn:active::after,.sc1-btn:hover::after{opacity:1;}
-.sc1-btn:active,.sc1-btn:hover{border-color:rgba(212,175,55,.42);transform:scale(.97);
-box-shadow:0 0 20px rgba(212,175,55,.18);}
-.sc1-ico{width:38px;height:38px;border-radius:50%;
-background:rgba(212,175,55,.09);border:1px solid rgba(212,175,55,.2);
-display:flex;align-items:center;justify-content:center;}
+.sc1-btn:hover{border-color:rgba(212,175,55,.42);transform:scale(.97);box-shadow:0 0 20px rgba(212,175,55,.18);}
+.sc1-btn:active{transform:scale(.94);}
+.sc1-ico{width:38px;height:38px;border-radius:50%;background:rgba(212,175,55,.09);
+border:1px solid rgba(212,175,55,.2);display:flex;align-items:center;justify-content:center;}
 .sc1-ico i{font-size:14px;color:var(--g);}
-.sc1-lbl{font-size:9px;font-weight:400;letter-spacing:1.5px;color:rgba(255,255,255,.38);text-align:center;text-transform:uppercase;line-height:1.3;}
+.sc1-lbl{font-size:9px;font-weight:400;letter-spacing:1.5px;color:rgba(255,255,255,.38);
+text-align:center;text-transform:uppercase;line-height:1.3;}
 .sc1-trust{display:flex;gap:0;}
 .sc1-tr{font-size:9px;font-weight:300;color:rgba(255,255,255,.18);letter-spacing:2px;text-transform:uppercase;
 padding-right:18px;margin-right:18px;border-right:1px solid rgba(255,255,255,.07);}
@@ -103,19 +115,33 @@ background:linear-gradient(135deg,var(--g) 0%,var(--g2) 100%);color:#000;
 font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
 cursor:pointer;font-family:'Outfit',sans-serif;border:none;
 display:flex;align-items:center;justify-content:center;gap:12px;
-transition:all .3s;box-shadow:0 0 32px rgba(212,175,55,.25);}
+transition:all .3s;box-shadow:0 0 32px rgba(212,175,55,.25);position:relative;overflow:hidden;}
 .enter-btn:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(212,175,55,.6);}
 .enter-btn:active{transform:scale(.98);}
 
 /* ── DASHBOARD ── */
 .dash-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-filter:brightness(.18) saturate(.3) blur(2px);z-index:1;}
+filter:brightness(.18) saturate(.3) blur(2px);z-index:1;transition:filter .8s ease;}
 .dash:before{content:'';position:absolute;inset:0;z-index:2;background:rgba(6,6,10,.88);}
 .dash-body{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;padding:56px 28px 52px;}
-.dash-hd{margin-bottom:16px;text-align:center;}
-.dash-tag{font-size:9px;font-weight:300;letter-spacing:5px;color:rgba(212,175,55,.5);text-transform:uppercase;margin-bottom:5px;}
-.dash-title{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;line-height:1.1;}
+.dash-hd{margin-bottom:12px;}
+.dash-tag{font-size:9px;font-weight:300;letter-spacing:5px;color:rgba(212,175,55,.5);
+text-transform:uppercase;margin-bottom:4px;}
+.dash-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:400;line-height:1.1;}
 .dash-title em{font-style:italic;color:var(--g);}
+
+/* Smart suggestions strip */
+.dash-suggestions{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;
+scrollbar-width:none;}
+.dash-suggestions::-webkit-scrollbar{display:none;}
+.dash-sug{background:rgba(212,175,55,.06);backdrop-filter:blur(10px);
+border:1px solid rgba(212,175,55,.18);border-radius:30px;
+padding:8px 16px;display:flex;align-items:center;gap:8px;
+cursor:pointer;white-space:nowrap;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden;}
+.dash-sug:hover{background:rgba(212,175,55,.13);box-shadow:0 0 16px rgba(212,175,55,.3);}
+.dash-sug:active{transform:scale(.96);}
+.dash-sug i{font-size:11px;color:var(--g);}
+.dash-sug span{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.45);text-transform:uppercase;}
 
 /* Primary hero card */
 .dash-primary{width:100%;margin-bottom:11px;
@@ -134,41 +160,65 @@ display:flex;align-items:center;justify-content:center;
 box-shadow:0 4px 20px rgba(212,175,55,.4);}
 .dash-primary-ico i{font-size:21px;color:#000;}
 .dash-primary-txt{flex:1;}
-.dash-primary-lbl{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;color:#fff;letter-spacing:.5px;}
-.dash-primary-sub{font-size:9px;font-weight:300;color:rgba(255,255,255,.28);letter-spacing:3px;text-transform:uppercase;margin-top:4px;}
+.dash-primary-lbl{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;letter-spacing:.5px;}
+.dash-primary-sub{font-size:9px;font-weight:300;color:rgba(255,255,255,.28);letter-spacing:3px;
+text-transform:uppercase;margin-top:4px;}
 .dash-primary-arrow{font-size:14px;color:rgba(212,175,55,.45);}
 
-/* 2x2 secondary grid */
-.dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;flex:1;align-content:start;}
+/* 2x2 grid */
+.dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-bottom:11px;}
 .dash-card{background:rgba(255,255,255,.028);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-border:1px solid rgba(255,255,255,.055);
-border-radius:20px;padding:20px 14px 16px;display:flex;flex-direction:column;align-items:center;
+border:1px solid rgba(255,255,255,.055);border-radius:20px;
+padding:20px 14px 16px;display:flex;flex-direction:column;align-items:center;
 gap:10px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
 .dash-card::before{content:'';position:absolute;inset:0;border-radius:20px;
 background:linear-gradient(135deg,rgba(212,175,55,.06) 0%,transparent 60%);opacity:0;transition:.3s;}
 .dash-card:hover::before,.dash-card:active::before{opacity:1;}
 .dash-card:hover{border-color:rgba(212,175,55,.28);transform:translateY(-3px);
 box-shadow:0 0 20px rgba(212,175,55,.22);}
-.dash-card:active{transform:scale(.97);}
-.dash-ico{width:44px;height:44px;border-radius:50%;
-background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.18);
-display:flex;align-items:center;justify-content:center;}
+.dash-card:active{transform:scale(.96);}
+.dash-ico{width:44px;height:44px;border-radius:50%;background:rgba(212,175,55,.08);
+border:1px solid rgba(212,175,55,.18);display:flex;align-items:center;justify-content:center;}
 .dash-ico i{font-size:16px;color:var(--g);}
-.dash-lbl{font-size:9px;font-weight:400;letter-spacing:1.5px;color:rgba(255,255,255,.4);text-align:center;text-transform:uppercase;line-height:1.35;}
-.dash-relax{width:100%;margin-top:11px;padding:14px;border-radius:12px;
+.dash-lbl{font-size:9px;font-weight:400;letter-spacing:1.5px;color:rgba(255,255,255,.4);
+text-align:center;text-transform:uppercase;line-height:1.35;}
+.dash-relax{width:100%;padding:14px;border-radius:12px;
 background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.14);color:rgba(212,175,55,.75);
 font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;
 cursor:pointer;font-family:'Outfit',sans-serif;
-display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;}
+display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;
+position:relative;overflow:hidden;}
 .dash-relax:hover{background:rgba(212,175,55,.11);border-color:rgba(212,175,55,.3);
 box-shadow:0 0 20px rgba(212,175,55,.15);}
+.dash-modes{display:flex;gap:8px;margin-top:11px;}
+.dash-mode-btn{flex:1;padding:12px;border-radius:10px;border:none;
+font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;
+cursor:pointer;font-family:'Outfit',sans-serif;
+display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;
+position:relative;overflow:hidden;}
+.dash-mode-relax{background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.14);color:rgba(212,175,55,.72);}
+.dash-mode-relax:hover{background:rgba(212,175,55,.12);box-shadow:0 0 16px rgba(212,175,55,.2);}
+.dash-mode-focus{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.35);}
+.dash-mode-focus:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);}
+.dash-mode-btn i{font-size:12px;}
+
+/* Focus mode special panel */
+.dash-focus-panel{background:rgba(255,255,255,.03);backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.07);border-radius:16px;
+padding:16px 18px;margin-bottom:11px;display:flex;align-items:center;gap:12px;}
+.dash-focus-panel i{font-size:14px;color:rgba(255,255,255,.25);}
+.dash-focus-panel-txt{flex:1;}
+.dash-focus-panel-lbl{font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.3);
+text-transform:uppercase;margin-bottom:2px;}
+.dash-focus-panel-val{font-family:'Cormorant Garamond',serif;font-size:18px;color:rgba(255,255,255,.6);}
 
 /* ── EXPERIENCE PANEL ── */
 .exp-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
 filter:brightness(.12) saturate(.2) blur(3px);z-index:1;}
 .exp:before{content:'';position:absolute;inset:0;z-index:2;
 background:linear-gradient(180deg,rgba(6,6,10,.94) 0%,rgba(6,6,10,.7) 50%,rgba(6,6,10,.95) 100%);}
-.exp-body{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;padding:54px 28px 52px;overflow-y:auto;}
+.exp-body{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;
+padding:54px 28px 52px;overflow-y:auto;}
 .exp-hd{text-align:center;margin-bottom:18px;}
 .exp-deco{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;}
 .exp-deco-line{width:48px;height:1px;}
@@ -177,27 +227,30 @@ background:linear-gradient(180deg,rgba(6,6,10,.94) 0%,rgba(6,6,10,.7) 50%,rgba(6
 .exp-deco i{font-size:13px;color:var(--g);opacity:.55;}
 .exp-title{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;letter-spacing:2px;margin-bottom:4px;}
 .exp-sub{font-size:10px;color:rgba(255,255,255,.2);letter-spacing:5px;text-transform:uppercase;}
-
-/* Grouped sections */
 .exp-groups{display:flex;flex-direction:column;gap:18px;flex:1;}
-.exp-group-title{font-size:9px;font-weight:500;letter-spacing:4px;color:rgba(212,175,55,.42);
+.exp-group-title{font-size:9px;font-weight:500;letter-spacing:4px;color:rgba(212,175,55,.4);
 text-transform:uppercase;margin-bottom:10px;padding-left:2px;}
 .exp-group-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
 .exp-btn{background:rgba(255,255,255,.03);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
 border:1px solid rgba(255,255,255,.06);border-radius:18px;
-padding:20px 10px 16px;display:flex;flex-direction:column;align-items:center;gap:11px;
+padding:20px 10px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;
 cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
 .exp-btn::after{content:'';position:absolute;inset:0;border-radius:18px;
 background:linear-gradient(135deg,rgba(212,175,55,.08) 0%,transparent 60%);opacity:0;transition:.3s;}
 .exp-btn:hover::after,.exp-btn:active::after{opacity:1;}
 .exp-btn:hover{border-color:rgba(212,175,55,.32);transform:translateY(-3px);
 box-shadow:0 0 20px rgba(212,175,55,.2);}
-.exp-btn:active{transform:scale(.96);}
-.exp-ico{width:46px;height:46px;border-radius:50%;
-background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.16);
-display:flex;align-items:center;justify-content:center;}
+.exp-btn:active{transform:scale(.95);}
+.exp-btn.preferred{border-color:rgba(212,175,55,.32);background:rgba(212,175,55,.05);}
+.exp-btn.preferred::after{opacity:.5;}
+.exp-ico{width:46px;height:46px;border-radius:50%;background:rgba(212,175,55,.07);
+border:1px solid rgba(212,175,55,.16);display:flex;align-items:center;justify-content:center;}
 .exp-ico i{font-size:17px;color:var(--g);}
-.exp-lbl{font-size:9px;font-weight:400;letter-spacing:2px;color:rgba(255,255,255,.35);text-align:center;text-transform:uppercase;line-height:1.4;}
+.exp-lbl{font-size:9px;font-weight:400;letter-spacing:2px;color:rgba(255,255,255,.35);
+text-align:center;text-transform:uppercase;line-height:1.4;}
+.exp-pref-badge{font-size:8px;letter-spacing:1.5px;color:rgba(212,175,55,.55);
+text-transform:uppercase;padding:2px 8px;border:1px solid rgba(212,175,55,.2);
+border-radius:10px;white-space:nowrap;}
 
 /* ── SERVICES ── */
 .svc-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
@@ -220,7 +273,8 @@ text-transform:uppercase;letter-spacing:4px;margin-bottom:4px;}
 border:1px solid rgba(212,175,55,.2);
 box-shadow:0 12px 48px rgba(0,0,0,.8),0 0 0 4px rgba(212,175,55,.04),inset 0 1px 0 rgba(212,175,55,.12);
 transition:all .35s;}
-.svc-circ:hover{border-color:rgba(212,175,55,.55);box-shadow:0 0 32px rgba(212,175,55,.2),0 12px 48px rgba(0,0,0,.8);transform:scale(1.04);}
+.svc-circ:hover{border-color:rgba(212,175,55,.55);
+box-shadow:0 0 32px rgba(212,175,55,.2),0 12px 48px rgba(0,0,0,.8);transform:scale(1.04);}
 .svc-circ:active{transform:scale(.97);}
 .svc-photo{position:absolute;inset:-10%;width:120%;height:120%;object-fit:cover;
 filter:brightness(.38) saturate(.5) contrast(1.1);transition:filter .35s;}
@@ -236,8 +290,8 @@ text-align:center;line-height:1.2;color:rgba(255,255,255,.75);}
 background:linear-gradient(135deg,var(--g) 0%,var(--g2) 100%);color:#000;
 font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
 cursor:pointer;font-family:'Outfit',sans-serif;border:none;
-display:flex;align-items:center;justify-content:space-between;padding-right:20px;
-transition:all .3s;}
+display:flex;align-items:center;justify-content:space-between;
+transition:all .3s;position:relative;overflow:hidden;}
 .svc-cta:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(212,175,55,.6);}
 .svc-cta:active{transform:scale(.99);}
 .svc-cta i{font-size:13px;}
@@ -254,7 +308,8 @@ background:linear-gradient(135deg,rgba(6,6,10,.97) 0%,rgba(6,6,10,.88) 100%);}
 .ctc-ctas{display:flex;flex-direction:column;gap:12px;max-width:480px;}
 .ctc-cta{width:100%;padding:18px 22px;border-radius:14px;font-size:12px;font-weight:500;
 letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;
-border:none;display:flex;align-items:center;gap:14px;transition:all .3s;}
+border:none;display:flex;align-items:center;gap:14px;transition:all .3s;
+position:relative;overflow:hidden;}
 .ctc-cta:hover{transform:translateX(4px);}
 .ctc-cta:active{transform:scale(.98);}
 .ctc-ci{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -275,7 +330,7 @@ border:none;display:flex;align-items:center;gap:14px;transition:all .3s;}
 .ctc-web .ctc-ci i{color:#000;}
 .ctc-avail{margin-top:18px;font-size:10px;color:rgba(255,255,255,.14);letter-spacing:5px;text-transform:uppercase;}
 
-/* ── TRIP DETAILS ── */
+/* ── TRIP ── */
 .trip-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
 filter:brightness(.18) saturate(.3) blur(2px);z-index:1;}
 .trip:before{content:'';position:absolute;inset:0;z-index:2;
@@ -286,12 +341,10 @@ background:linear-gradient(135deg,rgba(6,6,10,.97) 0%,rgba(6,6,10,.85) 60%,rgba(
 .trip-fields{display:flex;flex-direction:column;gap:10px;max-width:640px;}
 .trip-f{display:flex;align-items:center;gap:12px;
 background:rgba(255,255,255,.035);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-border:1px solid rgba(255,255,255,.065);
-border-radius:14px;padding:13px 16px;transition:all .3s;}
+border:1px solid rgba(255,255,255,.065);border-radius:14px;padding:13px 16px;transition:all .3s;}
 .trip-f:focus-within{border-color:rgba(212,175,55,.32);box-shadow:0 0 16px rgba(212,175,55,.08);}
-.trip-fi{width:30px;height:30px;border-radius:50%;
-background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.18);
-display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.trip-fi{width:30px;height:30px;border-radius:50%;background:rgba(212,175,55,.08);
+border:1px solid rgba(212,175,55,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .trip-fi i{font-size:11px;color:var(--g);}
 .trip-ft{flex:1;}
 .trip-fl{font-size:9px;color:rgba(212,175,55,.5);letter-spacing:3px;text-transform:uppercase;margin-bottom:3px;}
@@ -303,11 +356,11 @@ background:linear-gradient(135deg,var(--g),var(--g2));color:#000;
 font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
 cursor:pointer;font-family:'Outfit',sans-serif;border:none;
 display:flex;align-items:center;justify-content:center;gap:12px;
-transition:all .3s;width:100%;max-width:640px;}
+transition:all .3s;width:100%;max-width:640px;position:relative;overflow:hidden;}
 .trip-submit:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(212,175,55,.6);}
 .trip-submit:active{transform:scale(.98);}
 
-/* ── BACK BUTTON ── */
+/* ── BACK ── */
 .sc-back{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:300;
 color:rgba(255,255,255,.25);letter-spacing:3px;text-transform:uppercase;
 margin-bottom:18px;cursor:pointer;background:none;border:none;transition:color .2s;}
@@ -318,17 +371,44 @@ margin-bottom:18px;cursor:pointer;background:none;border:none;transition:color .
 .ticker{position:fixed;bottom:0;left:0;right:0;z-index:500;height:36px;
 background:rgba(6,6,10,.96);border-top:1px solid rgba(212,175,55,.07);overflow:hidden;}
 .ticker-t{display:inline-flex;align-items:center;height:100%;white-space:nowrap;animation:roll 30s linear infinite;}
-.ti{display:flex;align-items:center;gap:8px;padding:0 26px;height:100%;border-right:1px solid rgba(255,255,255,.03);}
+.ti{display:flex;align-items:center;gap:8px;padding:0 26px;height:100%;
+border-right:1px solid rgba(255,255,255,.03);}
 .ti i{font-size:11px;color:var(--g);opacity:.5;}
 .ti span{font-size:9px;font-weight:400;letter-spacing:3.5px;color:rgba(255,255,255,.16);text-transform:uppercase;}
 
-/* ── TOAST ── */
+/* ── TOAST / FEEDBACK ── */
 .toast{position:fixed;bottom:52px;left:50%;transform:translateX(-50%) translateY(20px);
-z-index:9999;background:rgba(12,12,18,.95);border:1px solid rgba(212,175,55,.25);
+z-index:9999;background:rgba(10,10,16,.97);border:1px solid rgba(212,175,55,.22);
 border-radius:30px;padding:10px 22px;font-size:11px;font-weight:400;letter-spacing:2px;
-color:var(--g);text-transform:uppercase;opacity:0;transition:all .3s;white-space:nowrap;
-backdrop-filter:blur(20px);}
+color:var(--g);text-transform:uppercase;opacity:0;transition:all .35s;white-space:nowrap;
+backdrop-filter:blur(24px);}
 .toast.toast-in{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.driver-msg{color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.1);
+font-style:italic;letter-spacing:1.5px;}
+
+/* ── RIPPLE ── */
+.ripple-fx{position:absolute;border-radius:50%;
+background:radial-gradient(circle,rgba(212,175,55,.35),transparent 70%);
+width:120px;height:120px;pointer-events:none;
+transform:scale(0) translate(-50%,-50%);
+animation:rippleAnim .65s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes rippleAnim{to{transform:scale(2.8) translate(-50%,-50%);opacity:0;}}
+
+/* ── LOADING ── */
+.loading-sc{display:flex;align-items:center;justify-content:center;
+background:rgba(6,6,10,.96);}
+.loading-ring{width:36px;height:36px;border:2px solid rgba(212,175,55,.1);
+border-top-color:rgba(212,175,55,.6);border-radius:50%;animation:spin .75s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── NEAR DESTINATION BANNER ── */
+.near-dest-banner{background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);
+border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.near-dest-banner i{font-size:14px;color:var(--g);}
+.near-dest-txt{flex:1;}
+.near-dest-lbl{font-size:9px;letter-spacing:3px;color:rgba(212,175,55,.6);
+text-transform:uppercase;margin-bottom:2px;}
+.near-dest-val{font-family:'Cormorant Garamond',serif;font-size:16px;color:rgba(255,255,255,.75);}
 
 /* ── ANIMATIONS ── */
 @keyframes roll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
@@ -350,18 +430,132 @@ backdrop-filter:blur(20px);}
 </div>
 <div class="ticker"><div class="ticker-t" id="tkr"></div></div>
 
-<!-- App Mount Point -->
 <div id="app"></div>
 
 <script>
 // ── STATE ──
 let activeScreen = "welcome";
-let rideState = "onboarding";
-let relaxMode = false;
+let rideState    = "onboarding";
+let relaxMode    = false;
+let focusMode    = false;
+let socket;
 
-// ── SCREEN RENDER FUNCTIONS ──
+let userProfile = {
+  name: "Guest",
+  preferences: { music: "Jazz", temperature: "Cool", drink: "Sparkling Water" }
+};
 
+// ── REAL-TIME SYSTEM ──
+function initRealtime() {
+  socket = {
+    send: (msg) => console.log("Concierge request:", msg),
+    receive: (cb) => {
+      const messages = [
+        { text: "Temperature adjusted for your comfort", type: "driver" },
+        { text: "Driver en route · Running on schedule", type: "driver" },
+        { text: "Arriving in approximately 2 minutes", type: "driver" },
+        { text: "Your comfort is our priority", type: "driver" },
+        { text: "Route optimized · Smooth ride ahead", type: "driver" }
+      ];
+      let i = 0;
+      setInterval(() => {
+        cb({ type: "driver_update", message: messages[i % messages.length].text });
+        i++;
+      }, 15000);
+    }
+  };
+  socket.receive((data) => {
+    showFeedback(data.message, 3200, "driver-msg");
+  });
+}
+
+// ── SIMULATED STATE PROGRESSION ──
+function startRideSimulation() {
+  // After 45 seconds, simulate approach to destination
+  setTimeout(() => {
+    if (rideState === "in_transit") {
+      rideState = "near_destination";
+      showFeedback("Arriving in approximately 4 minutes", 3500, "driver-msg");
+      if (activeScreen === "dashboard") renderApp();
+    }
+  }, 45000);
+}
+
+// ── SOUND ──
+function playClick() { console.log("click sound"); }
+
+// ── RIPPLE ──
+function addRipple(el, e) {
+  const rect = el.getBoundingClientRect();
+  const x = (e?.clientX ?? rect.left + rect.width / 2) - rect.left;
+  const y = (e?.clientY ?? rect.top + rect.height / 2) - rect.top;
+  const r = document.createElement("span");
+  r.className = "ripple-fx";
+  r.style.left = x + "px";
+  r.style.top  = y + "px";
+  el.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+}
+
+// ── FEEDBACK ──
+function showFeedback(msg, duration, extraClass) {
+  duration = duration || 2400;
+  const t = document.createElement("div");
+  t.className = "toast" + (extraClass ? " " + extraClass : "");
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add("toast-in"), 10);
+  setTimeout(() => {
+    t.classList.remove("toast-in");
+    setTimeout(() => t.remove(), 350);
+  }, duration);
+}
+
+// ── SEND REQUEST ──
+function sendRequest(type) {
+  playClick();
+  socket.send({ type });
+  const processing = {
+    temperature: "Adjusting your comfort...",
+    lighting:    "Setting the ambiance...",
+    music_jazz:  "Cueing your music...",
+    add_stop:    "Updating your route...",
+    refreshment: "Notifying your chauffeur...",
+    extend_ride: "Adjusting your journey..."
+  };
+  const confirmation = {
+    temperature: "Temperature adjusted",
+    lighting:    "Ambiance set — enjoy",
+    music_jazz:  "Jazz is playing for you",
+    add_stop:    "Stop added to your route",
+    refreshment: "Refreshment on its way",
+    extend_ride: "Ride extended"
+  };
+  showFeedback(processing[type] || "Adjusting your experience...", 1100);
+  setTimeout(() => showFeedback(confirmation[type] || "Done"), 1350);
+}
+
+// ── SMART SUGGESTIONS ──
+function getSmartSuggestions() {
+  if (rideState === "in_transit") {
+    return [
+      { label: "Relax Mode",   icon: "fa-moon",             action: "toggleRelaxMode()" },
+      { label: "Play Jazz",    icon: "fa-music",            action: "sendRequest('music_jazz')" },
+      { label: "Cool Cabin",   icon: "fa-temperature-half", action: "sendRequest('temperature')" }
+    ];
+  }
+  if (rideState === "near_destination") {
+    return [
+      { label: "Extend Ride",  icon: "fa-clock",            action: "sendRequest('extend_ride')" },
+      { label: "Add Stop",     icon: "fa-location-dot",     action: "sendRequest('add_stop')" }
+    ];
+  }
+  return [];
+}
+
+// ── RENDER WELCOME ──
 function renderWelcome() {
+  const name = userProfile.name;
   return `
   <div class="sc sc1">
     <img class="sc1-bg" src="wilmer_urban.jpg" alt="" onerror="this.style.opacity='0'">
@@ -373,6 +567,7 @@ function renderWelcome() {
       </div>
     </div>
     <div class="sc1-body">
+      <div class="sc1-greeting">Welcome, ${name}</div>
       <div class="sc1-h">Intentional Service.<br><span class="gold">Experience Excellence.</span></div>
       <div class="sc1-sub">Luxury Black Car Service &nbsp;·&nbsp; DFW</div>
       <div class="sc1-tagline">Your luxury experience begins now</div>
@@ -381,15 +576,15 @@ function renderWelcome() {
           <div class="sc1-ico"><i class="fa-regular fa-calendar-check"></i></div>
           <div class="sc1-lbl">Book<br>Ride Now</div>
         </div>
-        <div class="sc1-btn" onclick="enterExperience(); navigate('services')">
+        <div class="sc1-btn" onclick="enterExperience(); setTimeout(()=>navigate('services'),230)">
           <div class="sc1-ico"><i class="fa-solid fa-car-side"></i></div>
           <div class="sc1-lbl">View<br>Services</div>
         </div>
-        <div class="sc1-btn" onclick="enterExperience(); navigate('experience')">
+        <div class="sc1-btn" onclick="enterExperience(); setTimeout(()=>navigate('experience'),230)">
           <div class="sc1-ico"><i class="fa-solid fa-sliders"></i></div>
           <div class="sc1-lbl">Ride<br>Controls</div>
         </div>
-        <div class="sc1-btn" onclick="enterExperience(); navigate('contact')">
+        <div class="sc1-btn" onclick="enterExperience(); setTimeout(()=>navigate('contact'),230)">
           <div class="sc1-ico"><i class="fa-solid fa-headset"></i></div>
           <div class="sc1-lbl">Contact<br>Driver</div>
         </div>
@@ -407,15 +602,39 @@ function renderWelcome() {
   </div>`;
 }
 
+// ── RENDER DASHBOARD ──
 function renderDashboard() {
+  const suggestions = getSmartSuggestions();
+  const suggestionsHTML = suggestions.length ? `
+    <div class="dash-suggestions">
+      ${suggestions.map(s => `
+        <div class="dash-sug" onclick="${s.action}">
+          <i class="fa-solid ${s.icon}"></i><span>${s.label}</span>
+        </div>`).join("")}
+    </div>` : "";
+
+  const nearBanner = rideState === "near_destination" ? `
+    <div class="near-dest-banner">
+      <i class="fa-solid fa-location-dot"></i>
+      <div class="near-dest-txt">
+        <div class="near-dest-lbl">Approaching destination</div>
+        <div class="near-dest-val">Arriving in approximately 4 minutes</div>
+      </div>
+    </div>` : "";
+
+  const focusKeepClass = 'dash-focus-keep';
+
   return `
   <div class="sc dash">
     <img class="dash-bg" src="city-poster.jpg" alt="" onerror="this.style.opacity='0'">
     <div class="dash-body">
       <div class="dash-hd">
-        <div class="dash-tag">Welcome aboard</div>
+        <div class="dash-tag">Your comfort is our priority</div>
         <div class="dash-title">Your <em>Experience</em></div>
+        <div class="focus-badge"><i class="fa-solid fa-crosshairs"></i>&nbsp;Focus Mode Active</div>
       </div>
+      ${nearBanner}
+      ${suggestionsHTML}
       <div class="dash-primary" onclick="navigate('experience')">
         <div class="dash-primary-ico"><i class="fa-solid fa-sliders"></i></div>
         <div class="dash-primary-txt">
@@ -433,7 +652,7 @@ function renderDashboard() {
           <div class="dash-ico"><i class="fa-solid fa-headset"></i></div>
           <div class="dash-lbl">Contact<br>Driver</div>
         </div>
-        <div class="dash-card" onclick="navigate('trip')">
+        <div class="dash-card ${focusKeepClass}" onclick="navigate('trip')">
           <div class="dash-ico"><i class="fa-regular fa-calendar-check"></i></div>
           <div class="dash-lbl">Trip<br>Details</div>
         </div>
@@ -442,15 +661,26 @@ function renderDashboard() {
           <div class="dash-lbl">Full<br>Website</div>
         </div>
       </div>
-      <button class="dash-relax" onclick="toggleRelaxMode()">
-        <i class="fa-solid fa-moon"></i>
-        <span>${relaxMode ? 'Exit Relax Mode' : 'Relax Mode'}</span>
-      </button>
+      <div class="dash-modes">
+        <button class="dash-mode-btn dash-mode-relax" onclick="toggleRelaxMode()">
+          <i class="fa-solid fa-moon"></i>
+          <span>${relaxMode ? "Exit Relax" : "Relax Mode"}</span>
+        </button>
+        <button class="dash-mode-btn dash-mode-focus" onclick="toggleFocusMode()">
+          <i class="fa-solid fa-crosshairs"></i>
+          <span>${focusMode ? "Exit Focus" : "Focus Mode"}</span>
+        </button>
+      </div>
     </div>
   </div>`;
 }
 
+// ── RENDER EXPERIENCE ──
 function renderExperience() {
+  const pref = userProfile.preferences;
+  const jazzPreferred  = pref.music === "Jazz";
+  const drinkPreferred = pref.drink;
+
   return `
   <div class="sc exp">
     <img class="exp-bg" src="interior-rear-seats.jpg" alt="" onerror="this.style.opacity='0'">
@@ -469,9 +699,10 @@ function renderExperience() {
         <div>
           <div class="exp-group-title">Comfort</div>
           <div class="exp-group-grid">
-            <div class="exp-btn" onclick="sendRequest('temperature')">
+            <div class="exp-btn${pref.temperature === "Cool" ? " preferred" : ""}" onclick="sendRequest('temperature')">
               <div class="exp-ico"><i class="fa-solid fa-temperature-half"></i></div>
               <div class="exp-lbl">Adjust<br>Temp</div>
+              ${pref.temperature === "Cool" ? '<div class="exp-pref-badge">Your setting</div>' : ""}
             </div>
             <div class="exp-btn" onclick="sendRequest('lighting')">
               <div class="exp-ico"><i class="fa-solid fa-lightbulb"></i></div>
@@ -482,9 +713,10 @@ function renderExperience() {
         <div>
           <div class="exp-group-title">Entertainment</div>
           <div class="exp-group-grid">
-            <div class="exp-btn" onclick="sendRequest('music_jazz')">
+            <div class="exp-btn${jazzPreferred ? " preferred" : ""}" onclick="sendRequest('music_jazz')">
               <div class="exp-ico"><i class="fa-solid fa-music"></i></div>
               <div class="exp-lbl">Jazz<br>Music</div>
+              ${jazzPreferred ? '<div class="exp-pref-badge">Your pick</div>' : ""}
             </div>
             <div class="exp-btn" onclick="toggleRelaxMode()">
               <div class="exp-ico"><i class="fa-solid fa-moon"></i></div>
@@ -499,9 +731,10 @@ function renderExperience() {
               <div class="exp-ico"><i class="fa-solid fa-location-dot"></i></div>
               <div class="exp-lbl">Add<br>Stop</div>
             </div>
-            <div class="exp-btn" onclick="sendRequest('refreshment')">
+            <div class="exp-btn preferred" onclick="sendRequest('refreshment')">
               <div class="exp-ico"><i class="fa-solid fa-glass-water"></i></div>
-              <div class="exp-lbl">Request<br>Refresh.</div>
+              <div class="exp-lbl">${drinkPreferred.split(" ")[0]}<br>${drinkPreferred.split(" ").slice(1).join(" ") || "Water"}</div>
+              <div class="exp-pref-badge">Your drink</div>
             </div>
           </div>
         </div>
@@ -510,6 +743,7 @@ function renderExperience() {
   </div>`;
 }
 
+// ── RENDER SERVICES ──
 function renderServices() {
   return `
   <div class="sc svc">
@@ -564,6 +798,7 @@ function renderServices() {
   </div>`;
 }
 
+// ── RENDER CONTACT ──
 function renderContact() {
   return `
   <div class="sc ctc">
@@ -592,6 +827,7 @@ function renderContact() {
   </div>`;
 }
 
+// ── RENDER TRIP ──
 function renderTripDetails() {
   return `
   <div class="sc trip">
@@ -662,14 +898,19 @@ function renderApp() {
       default:           app.innerHTML = renderDashboard();
     }
   }
-
   tick();
 }
 
-// ── NAVIGATION ──
+// ── NAVIGATION with loading delay ──
 function navigate(screen) {
-  activeScreen = screen;
-  renderApp();
+  playClick();
+  const app = document.getElementById("app");
+  app.classList.add("screen-exit");
+  setTimeout(() => {
+    app.classList.remove("screen-exit");
+    activeScreen = screen;
+    renderApp();
+  }, 210);
 }
 
 // ── ENTER EXPERIENCE ──
@@ -677,39 +918,28 @@ function enterExperience() {
   rideState = "in_transit";
   activeScreen = "dashboard";
   renderApp();
-}
-
-// ── SEND REQUEST ──
-function sendRequest(type) {
-  const labels = {
-    temperature: "Temperature adjusted",
-    lighting:    "Lighting adjusted",
-    music_jazz:  "Jazz playing",
-    add_stop:    "Stop added to route",
-    refreshment: "Refreshment on the way"
-  };
-  showToast(labels[type] || type);
+  showFeedback("Welcome aboard — enjoy your journey", 2800);
+  startRideSimulation();
 }
 
 // ── RELAX MODE ──
 function toggleRelaxMode() {
+  playClick();
   relaxMode = !relaxMode;
-  document.body.classList.toggle("relax-mode");
-  showToast(relaxMode ? "Relax Mode On" : "Relax Mode Off");
+  if (relaxMode && focusMode) { focusMode = false; document.body.classList.remove("focus-mode"); }
+  document.body.classList.toggle("relax-mode", relaxMode);
+  showFeedback(relaxMode ? "Relax Mode — sit back and unwind" : "Welcome back");
   if (activeScreen === "dashboard" || rideState === "onboarding") renderApp();
 }
 
-// ── TOAST ──
-function showToast(msg) {
-  const t = document.createElement("div");
-  t.className = "toast";
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.classList.add("toast-in"), 10);
-  setTimeout(() => {
-    t.classList.remove("toast-in");
-    setTimeout(() => t.remove(), 300);
-  }, 2200);
+// ── FOCUS MODE ──
+function toggleFocusMode() {
+  playClick();
+  focusMode = !focusMode;
+  if (focusMode && relaxMode) { relaxMode = false; document.body.classList.remove("relax-mode"); }
+  document.body.classList.toggle("focus-mode", focusMode);
+  showFeedback(focusMode ? "Focus Mode — trip details only" : "Full experience restored");
+  if (activeScreen === "dashboard") renderApp();
 }
 
 // ── CLOCK ──
@@ -735,7 +965,17 @@ setInterval(tick, 1000);
     tdata.map(t => `<div class="ti"><i class="fa-solid fa-${t[0]}"></i><span>${t[1]}</span></div>`).join("");
 })();
 
+// ── RIPPLE DELEGATION ──
+document.addEventListener("click", function(e) {
+  const el = e.target.closest(
+    ".dash-card, .dash-primary, .dash-sug, .exp-btn, .sc1-btn, " +
+    ".ctc-cta, .svc-cta, .svc-circ, .enter-btn, .trip-submit, .dash-mode-btn"
+  );
+  if (el) addRipple(el, e);
+}, true);
+
 // ── INIT ──
+initRealtime();
 renderApp();
 </script>
 </body>
