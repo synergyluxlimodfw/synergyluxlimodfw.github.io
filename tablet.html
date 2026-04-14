@@ -12,7 +12,15 @@
       html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #06060A; }
       body { -webkit-tap-highlight-color: transparent; }
     </style>
-    <script type="module" crossorigin src="/assets-tablet/index-BdlGMUJG.js"></script>
+    <script>
+      // URL personalization
+      const params = new URLSearchParams(window.location.search);
+      const guestName = params.get('name') || 'Valued Guest';
+      const hotelName = params.get('hotel') || 'Your Destination';
+      const partnerName = params.get('partner') || 'Omni Dallas Hotel';
+      window.__synergy = { guestName, hotelName, partnerName };
+    </script>
+    <script type="module" crossorigin src="/assets-tablet/index-wKkRB1z2.js"></script>
   </head>
   <body>
     <div id="root"></div>
