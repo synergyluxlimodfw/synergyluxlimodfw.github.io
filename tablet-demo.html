@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>In-Car Guest Experience | Synergy Lux</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0b0b;
+      color: white;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 64px;
+      border-bottom: 1px solid rgba(198,161,91,0.15);
+      position: sticky;
+      top: 0;
+      background: #0b0b0b;
+      z-index: 100;
+    }
+    .logo {
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .logo span { color: #c6a15b; }
+    .nav-back {
+      color: #c6a15b;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border: 1px solid rgba(198,161,91,0.35);
+      padding: 7px 16px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .nav-back:hover { background: rgba(198,161,91,0.1); }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      padding: 54px 20px 28px;
+    }
+    .header .eyebrow {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(198,161,91,0.55);
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      color: #c6a15b;
+      font-size: 34px;
+      margin: 0 0 16px;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .header p {
+      color: #aaa;
+      max-width: 620px;
+      margin: 0 auto;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    /* ── BADGE ROW ── */
+    .badges {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin: 28px 20px 0;
+    }
+    .badge {
+      background: rgba(198,161,91,0.08);
+      border: 1px solid rgba(198,161,91,0.22);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── IFRAME ── */
+    .iframe-wrapper {
+      max-width: 1100px;
+      margin: 36px auto 0;
+      padding: 0 20px;
+    }
+    .iframe-shell {
+      border: 1px solid rgba(198,161,91,0.2);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+      background: #111;
+    }
+    .iframe-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px;
+      background: #161616;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .iframe-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .iframe-url {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.5px;
+      margin-left: 8px;
+    }
+    .iframe-live {
+      font-size: 10px;
+      color: #10b981;
+      letter-spacing: 2px;
+      font-weight: 700;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+    iframe {
+      display: block;
+      width: 100%;
+      height: 80vh;
+      border: none;
+    }
+
+    /* ── CTA ── */
+    .cta {
+      text-align: center;
+      padding: 52px 20px 60px;
+    }
+    .cta-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 20px;
+    }
+    .cta h2 {
+      font-size: 26px;
+      font-weight: 400;
+      margin: 0 0 10px;
+      color: white;
+    }
+    .cta p {
+      color: #777;
+      font-size: 14px;
+      margin: 0 0 32px;
+    }
+    .btn-gold {
+      background: #c6a15b;
+      color: black;
+      padding: 15px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      transition: opacity 0.2s;
+    }
+    .btn-gold:hover { opacity: 0.88; }
+    .btn-outline {
+      display: inline-block;
+      margin-left: 14px;
+      border: 1px solid rgba(198,161,91,0.4);
+      color: #c6a15b;
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-outline:hover { background: rgba(198,161,91,0.08); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: rgba(198,161,91,0.3);
+      margin: 0 auto 28px;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 24px; }
+      iframe { height: 70vh; }
+      .btn-outline { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a href="/" class="logo">SYNERGY <span>LUX</span></a>
+    <a href="/" class="nav-back">← Back to Site</a>
+  </nav>
+
+  <div class="header">
+    <div class="eyebrow">Hotel Partner Preview</div>
+    <h1>In-Car Guest Experience</h1>
+    <p>
+      Discover how Synergy Lux extends your guest experience beyond the hotel.
+      This is the exact interface your guests interact with inside our vehicles —
+      live and fully functional.
+    </p>
+  </div>
+
+  <div class="badges">
+    <span class="badge">✦ Real-Time Driver Connection</span>
+    <span class="badge">✦ Corporate &amp; Nightlife Modes</span>
+    <span class="badge">✦ Hotel Concierge Integration</span>
+    <span class="badge">✦ Branded Per Property</span>
+  </div>
+
+  <div class="iframe-wrapper">
+    <div class="iframe-shell">
+      <div class="iframe-bar">
+        <div class="iframe-dot" style="background:#ff5f57;"></div>
+        <div class="iframe-dot" style="background:#febc2e;"></div>
+        <div class="iframe-dot" style="background:#28c840;"></div>
+        <div class="iframe-url">synergy-lux.vercel.app</div>
+        <span class="iframe-live">● LIVE</span>
+      </div>
+      <iframe
+        src="https://synergy-lux.vercel.app"
+        title="Synergy Lux In-Car Tablet Experience"
+        allow="autoplay"
+      ></iframe>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="cta-label">Ready to partner?</div>
+    <div class="divider"></div>
+    <h2>Bring this experience to your guests</h2>
+    <p>Custom-branded for your property. Available across Dallas–Fort Worth.</p>
+    <a href="mailto:info@synergyluxlimodfw.com" class="btn-gold">Request Partnership</a>
+    <a href="tel:6468791391" class="btn-outline">Call Us</a>
+  </div>
+
+</body>
+</html>
