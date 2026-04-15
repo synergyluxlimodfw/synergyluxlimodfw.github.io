@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hilton Anatole Dallas — In-Vehicle Guest Experience | Synergy Lux</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#0A0C0F;
+  --ink2:#111418;
+  --ink3:#181D22;
+  --card:#1C2128;
+  --amber:#C8882A;
+  --amber2:#E0A84A;
+  --amber3:#F0C878;
+  --teal:#1B4D5C;
+  --teal2:#256478;
+  --bronze:#8B5E3C;
+  --bronze2:#B07848;
+  --white:#F8F5F0;
+  --muted:#7A8490;
+  --light:#C8CDD4;
+}
+html,body{width:100%;min-height:100vh;background:var(--ink);font-family:'Jost',sans-serif;color:var(--white);overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(180deg,rgba(10,12,15,0.92) 0%,transparent 100%);}
+.nav-logo{display:flex;align-items:center;gap:12px;}
+.nav-logo img{height:30px;}
+.nav-logo-text{font-size:10px;font-weight:300;letter-spacing:4px;
+  color:rgba(200,205,212,0.35);text-transform:uppercase;}
+.nav-cta{background:var(--amber);color:var(--ink);padding:9px 24px;
+  font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;
+  border:none;cursor:pointer;font-family:'Jost',sans-serif;transition:all 0.3s;}
+.nav-cta:hover{background:var(--amber2);}
+
+/* ── HERO ── */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;z-index:0;
+  background:
+    linear-gradient(180deg,rgba(10,12,15,0.85) 0%,rgba(10,12,15,0.45) 45%,rgba(10,12,15,0.92) 100%),
+    url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1800&q=80') center/cover no-repeat;}
+/* Amber glow bottom */
+.hero-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;
+  background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(200,136,42,0.07) 0%,transparent 70%);}
+.hero-content{position:relative;z-index:2;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;flex:1;padding:130px 48px 80px;text-align:center;}
+
+/* Anatole identity badge */
+.anatole-badge{margin-bottom:28px;}
+.badge-ring{width:82px;height:82px;border-radius:50%;
+  border:1px solid rgba(200,136,42,0.3);
+  background:rgba(10,12,15,0.5);backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.badge-ring i{font-size:30px;color:var(--amber);}
+.badge-name{font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:400;
+  letter-spacing:5px;color:rgba(248,245,240,0.55);text-transform:uppercase;margin-bottom:3px;}
+.badge-sub{font-size:9px;font-weight:300;letter-spacing:4px;
+  color:rgba(200,136,42,0.5);text-transform:uppercase;}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:12px;justify-content:center;margin:22px auto;}
+.div-line{width:80px;height:1px;background:linear-gradient(90deg,transparent,rgba(200,136,42,0.35),transparent);}
+.div-gem{width:6px;height:6px;background:var(--amber);transform:rotate(45deg);opacity:0.5;}
+
+/* Hero text */
+.hero-eyebrow{font-size:10px;letter-spacing:6px;color:rgba(200,136,42,0.6);
+  text-transform:uppercase;margin-bottom:14px;}
+.hero-h{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,6.5vw,74px);
+  font-weight:300;line-height:.95;color:var(--white);margin-bottom:10px;}
+.hero-h em{font-style:italic;color:var(--amber2);}
+.hero-sub{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;
+  font-style:italic;color:rgba(248,245,240,0.38);letter-spacing:1px;margin-bottom:44px;}
+
+/* Buttons */
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:52px;}
+.btn-amber{background:var(--amber);color:var(--ink);padding:15px 40px;
+  font-size:10px;font-weight:500;letter-spacing:4px;text-transform:uppercase;
+  border:none;cursor:pointer;font-family:'Jost',sans-serif;transition:all 0.3s;}
+.btn-amber:hover{background:var(--amber2);}
+.btn-outline{background:transparent;color:var(--white);padding:14px 40px;
+  font-size:10px;font-weight:300;letter-spacing:4px;text-transform:uppercase;
+  border:1px solid rgba(248,245,240,0.2);cursor:pointer;font-family:'Jost',sans-serif;transition:all 0.3s;}
+.btn-outline:hover{border-color:var(--amber);color:var(--amber);}
+
+/* Trust */
+.hero-trust{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;}
+.tr{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:300;
+  color:rgba(248,245,240,0.25);letter-spacing:2px;text-transform:uppercase;}
+.tr i{font-size:11px;color:rgba(200,136,42,0.4);}
+
+/* Scroll */
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+  z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.scroll-hint span{font-size:9px;letter-spacing:3px;color:rgba(248,245,240,0.2);text-transform:uppercase;}
+.scroll-line{width:1px;height:36px;background:linear-gradient(180deg,rgba(200,136,42,0.35),transparent);}
+
+/* ── SECTIONS ── */
+.section{padding:88px 48px;}
+.sec-ink{background:var(--ink);}
+.sec-ink2{background:var(--ink2);}
+.sec-ink3{background:var(--ink3);}
+.sec-card{background:var(--card);}
+.sec-teal{background:var(--teal);}
+
+.sec-eyebrow{font-size:9px;letter-spacing:6px;color:var(--amber);
+  text-transform:uppercase;text-align:center;margin-bottom:10px;}
+.sec-h{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,52px);
+  font-weight:300;text-align:center;line-height:1.05;margin-bottom:8px;color:var(--white);}
+.sec-h em{font-style:italic;color:var(--amber2);}
+.sec-sub{font-size:13px;font-weight:300;color:var(--muted);text-align:center;
+  line-height:1.9;max-width:600px;margin:0 auto 52px;}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:rgba(200,136,42,0.08);max-width:960px;margin:0 auto 56px;}
+.stat{background:var(--ink3);padding:32px 24px;text-align:center;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;
+  color:var(--amber);line-height:1;margin-bottom:6px;}
+.stat-lbl{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+
+/* ── TABLET MOCKUP ── */
+.tablet-wrap{max-width:920px;margin:0 auto;position:relative;}
+.tablet-frame{background:var(--ink2);border-radius:22px;padding:18px;
+  box-shadow:0 48px 120px rgba(0,0,0,0.6),0 0 0 1px rgba(200,136,42,0.1);}
+.tablet-notch{width:60px;height:6px;border-radius:3px;
+  background:rgba(255,255,255,0.05);margin:0 auto 14px;}
+.tablet-screen{border-radius:12px;overflow:hidden;aspect-ratio:4/3;background:var(--ink);}
+.tablet-screen iframe{width:100%;height:100%;border:none;border-radius:12px;}
+.tablet-badge{position:absolute;top:-16px;right:28px;
+  background:var(--amber);color:var(--ink);
+  padding:6px 20px;font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;}
+.tablet-caption{text-align:center;margin-top:20px;
+  font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+/* ── UPGRADE PITCH ── */
+.upgrade-card{max-width:860px;margin:0 auto;
+  background:var(--card);border:1px solid rgba(200,136,42,0.12);padding:52px 48px;}
+.upgrade-header{display:flex;align-items:center;gap:18px;margin-bottom:32px;
+  padding-bottom:24px;border-bottom:1px solid rgba(200,136,42,0.1);}
+.upgrade-icon{width:60px;height:60px;border-radius:50%;
+  background:rgba(200,136,42,0.08);border:1px solid rgba(200,136,42,0.2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.upgrade-icon i{font-size:22px;color:var(--amber);}
+.upgrade-title{font-family:'Cormorant Garamond',serif;font-size:24px;
+  font-weight:400;color:var(--white);margin-bottom:4px;}
+.upgrade-sub{font-size:12px;color:var(--muted);font-weight:300;}
+
+/* Comparison */
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;}
+.comp-col{padding:28px 24px;border-radius:2px;}
+.comp-col.before{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);}
+.comp-col.after{background:rgba(200,136,42,0.07);border:1px solid rgba(200,136,42,0.2);}
+.comp-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;}
+.comp-label.before{color:var(--muted);}
+.comp-label.after{color:var(--amber);}
+.comp-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.comp-item i{font-size:12px;margin-top:2px;flex-shrink:0;}
+.comp-item.no i{color:rgba(255,80,80,0.5);}
+.comp-item.yes i{color:var(--amber);}
+.comp-item span{font-size:12px;color:var(--muted);font-weight:300;line-height:1.5;}
+.comp-item.yes span{color:rgba(248,245,240,0.7);}
+
+/* Mock screen */
+.mock-screen{background:var(--ink);border-radius:12px;padding:28px 24px;
+  margin-bottom:24px;text-align:center;border:1px solid rgba(200,136,42,0.1);}
+.mock-eyebrow{font-size:9px;letter-spacing:5px;color:rgba(200,136,42,0.4);
+  text-transform:uppercase;margin-bottom:10px;}
+.mock-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;
+  color:var(--white);line-height:1.1;margin-bottom:6px;}
+.mock-name em{font-style:italic;color:var(--amber2);}
+.mock-sub{font-size:11px;color:rgba(248,245,240,0.25);letter-spacing:3px;
+  text-transform:uppercase;margin-bottom:20px;}
+.mock-svcs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.mock-svc{background:rgba(255,255,255,0.03);border:1px solid rgba(200,136,42,0.08);
+  border-radius:8px;padding:14px 8px;text-align:center;}
+.mock-svc i{font-size:18px;color:var(--amber);display:block;margin-bottom:6px;}
+.mock-svc span{font-size:9px;letter-spacing:1px;color:rgba(248,245,240,0.3);text-transform:uppercase;}
+.upgrade-caption{font-size:12px;color:var(--muted);line-height:1.9;font-weight:300;}
+.upgrade-caption strong{color:var(--amber2);font-weight:500;}
+
+/* ── FEATURES ── */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;
+  background:rgba(200,136,42,0.06);max-width:1040px;margin:0 auto;}
+.feat{background:var(--ink2);padding:44px 36px;transition:background 0.3s;}
+.feat:hover{background:var(--ink3);}
+.feat-ico{width:54px;height:54px;border-radius:50%;
+  background:rgba(200,136,42,0.07);border:1px solid rgba(200,136,42,0.15);
+  display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.feat-ico i{font-size:20px;color:var(--amber);}
+.feat h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;
+  margin-bottom:10px;color:var(--white);}
+.feat p{font-size:12px;color:var(--muted);line-height:1.9;font-weight:300;}
+
+/* ── ART CALLOUT ── */
+.art-callout{max-width:820px;margin:0 auto;text-align:center;}
+.art-num{font-family:'Cormorant Garamond',serif;font-size:110px;font-weight:300;
+  color:rgba(200,136,42,0.12);line-height:1;margin-bottom:-20px;}
+.art-text{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3vw,32px);
+  font-weight:300;font-style:italic;color:var(--white);line-height:1.6;margin-bottom:16px;}
+.art-attr{font-size:10px;letter-spacing:4px;color:rgba(200,136,42,0.4);text-transform:uppercase;}
+
+/* ── PRICING ── */
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  max-width:960px;margin:0 auto;}
+.pkg{background:var(--ink2);border:1px solid rgba(200,136,42,0.08);
+  padding:44px 32px;text-align:center;transition:all 0.3s;}
+.pkg.featured{background:var(--card);border-color:rgba(200,136,42,0.3);}
+.pkg-tag{font-size:9px;letter-spacing:4px;color:var(--amber);text-transform:uppercase;margin-bottom:12px;}
+.pkg-name{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;
+  margin-bottom:8px;color:var(--white);}
+.pkg-price{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;
+  color:var(--amber);line-height:1;margin-bottom:4px;}
+.pkg.featured .pkg-price{color:var(--amber2);}
+.pkg-period{font-size:11px;color:var(--muted);margin-bottom:28px;}
+.pkg ul{list-style:none;display:flex;flex-direction:column;gap:12px;text-align:left;}
+.pkg ul li{font-size:12px;color:var(--muted);display:flex;align-items:flex-start;
+  gap:10px;font-weight:300;line-height:1.5;}
+.pkg ul li i{font-size:11px;color:var(--amber);margin-top:2px;flex-shrink:0;}
+
+/* ── CTA ── */
+.cta-inner{max-width:640px;margin:0 auto;text-align:center;}
+.cta-p{font-size:13px;font-weight:300;color:var(--muted);line-height:1.9;margin-bottom:36px;}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.cta-contact{margin-top:20px;font-size:11px;color:rgba(200,136,42,0.35);letter-spacing:1px;}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);border-top:1px solid rgba(200,136,42,0.08);padding:44px 48px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:'Cormorant Garamond',serif;font-size:16px;
+  font-weight:300;color:var(--amber);letter-spacing:3px;}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{color:var(--muted);font-size:11px;letter-spacing:1px;transition:color 0.2s;}
+.footer-links a:hover{color:var(--amber);}
+.footer-copy{font-size:11px;color:rgba(200,136,42,0.2);letter-spacing:1px;}
+
+@media(max-width:768px){
+  .nav{padding:14px 24px;}
+  .section{padding:56px 24px;}
+  .hero-content{padding:110px 24px 60px;}
+  .stats-bar,.features,.pricing{grid-template-columns:1fr;}
+  .comparison{grid-template-columns:1fr;}
+  .mock-svcs{grid-template-columns:repeat(2,1fr);}
+  .hero-btns{flex-direction:column;align-items:center;}
+  .upgrade-card{padding:32px 24px;}
+  footer{padding:32px 24px;flex-direction:column;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <img src="synergy-logo-new.png" alt="Synergy Lux">
+    <div class="nav-logo-text">Synergy Lux · Partner Preview</div>
+  </div>
+  <a href="mailto:wrodriguez@synergyluxlimodfw.com" class="nav-cta">Request Partnership</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+
+    <div class="anatole-badge">
+      <div class="badge-ring"><i class="fa-solid fa-gopuram"></i></div>
+      <div class="badge-name">Hilton Anatole · Dallas</div>
+      <div class="badge-sub">Urban Resort · Design District · Est. 1979</div>
+    </div>
+
+    <div class="divider">
+      <div class="div-line"></div>
+      <div class="div-gem"></div>
+      <div class="div-line"></div>
+    </div>
+
+    <div class="hero-eyebrow">Exclusive Partner Preview</div>
+    <h1 class="hero-h">Your Guests Deserve<br>an <em>Anatole Welcome</em><br>Before They Arrive</h1>
+    <div class="hero-sub">The in-vehicle experience your current car service doesn't offer</div>
+
+    <div class="hero-btns">
+      <a href="#demo" class="btn-amber">See the Experience</a>
+      <a href="mailto:wrodriguez@synergyluxlimodfw.com" class="btn-outline">Request Partnership</a>
+    </div>
+
+    <div class="hero-trust">
+      <div class="tr"><i class="fa-solid fa-car-side"></i>2023 Cadillac Escalade</div>
+      <div class="tr"><i class="fa-solid fa-user-tie"></i>Owner-Operated</div>
+      <div class="tr"><i class="fa-solid fa-satellite-dish"></i>Flight Tracking Included</div>
+      <div class="tr"><i class="fa-solid fa-shield-halved"></i>Licensed & Insured DFW</div>
+    </div>
+
+  </div>
+  <div class="scroll-hint">
+    <span>Discover</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<section class="section sec-ink3" id="demo">
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">1,610</div><div class="stat-lbl">Guest Rooms</div></div>
+    <div class="stat"><div class="stat-num">1,000+</div><div class="stat-lbl">Art Pieces — Largest in US Hotels</div></div>
+    <div class="stat"><div class="stat-num">45</div><div class="stat-lbl">Acres — Urban Resort Campus</div></div>
+    <div class="stat"><div class="stat-num">$100M</div><div class="stat-lbl">Renovation Committed 2025–2028</div></div>
+  </div>
+
+  <div class="sec-eyebrow">The Platform</div>
+  <div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+  <h2 class="sec-h">What Your Guests See<br>on the Way <em>to the Anatole</em></h2>
+  <p class="sec-sub">A fully interactive in-vehicle experience branded to the Hilton Anatole — featuring your restaurants, your spa, your art collection, and your services. Live and touchable below.</p>
+
+  <div class="tablet-wrap">
+    <div class="tablet-badge">Live Interactive Demo</div>
+    <div class="tablet-frame">
+      <div class="tablet-notch"></div>
+      <div class="tablet-screen">
+        <iframe
+          src="https://www.synergyluxlimodfw.com/tablet.html?name=Mr.+Davidson&hotel=Hilton+Anatole+Dallas&partner=Hilton+Anatole"
+          title="Synergy Lux In-Car Experience — Hilton Anatole">
+        </iframe>
+      </div>
+    </div>
+    <div class="tablet-caption">Touch and explore all screens · This is exactly what your guests experience</div>
+  </div>
+</section>
+
+<!-- UPGRADE PITCH — KEY DIFFERENTIATOR -->
+<section class="section sec-ink2">
+  <div class="sec-eyebrow">The Upgrade</div>
+  <div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+  <h2 class="sec-h">Your Current Car Service<br>vs. <em>Synergy Lux</em></h2>
+  <p class="sec-sub">The Anatole already provides airport transfers at $59 from DFW. We're not asking you to replace that. We're offering what your current vendor can't — a personalized guest experience platform that makes every ride an extension of the Anatole brand.</p>
+
+  <div class="upgrade-card">
+    <div class="upgrade-header">
+      <div class="upgrade-icon"><i class="fa-solid fa-arrow-up"></i></div>
+      <div>
+        <div class="upgrade-title">The Difference That Matters to Guests</div>
+        <div class="upgrade-sub">Same journey — completely different experience</div>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="comp-col before">
+        <div class="comp-label before">Current Transportation</div>
+        <div class="comp-item no"><i class="fa-solid fa-xmark"></i><span>Generic black car — no hotel connection</span></div>
+        <div class="comp-item no"><i class="fa-solid fa-xmark"></i><span>Guest not greeted by name</span></div>
+        <div class="comp-item no"><i class="fa-solid fa-xmark"></i><span>No Anatole branding on screen</span></div>
+        <div class="comp-item no"><i class="fa-solid fa-xmark"></i><span>Cannot pre-book SER or Verandah Spa</span></div>
+        <div class="comp-item no"><i class="fa-solid fa-xmark"></i><span>Concierge has no advance notice</span></div>
+        <div class="comp-item no"><i class="fa-solid fa-xmark"></i><span>Ride ends when they arrive — no upsell</span></div>
+      </div>
+      <div class="comp-col after">
+        <div class="comp-label after">Synergy Lux Platform</div>
+        <div class="comp-item yes"><i class="fa-solid fa-check"></i><span>Anatole-branded welcome screen on tablet</span></div>
+        <div class="comp-item yes"><i class="fa-solid fa-check"></i><span>Guest greeted by name — personalized</span></div>
+        <div class="comp-item yes"><i class="fa-solid fa-check"></i><span>Your art collection, dining & spa featured</span></div>
+        <div class="comp-item yes"><i class="fa-solid fa-check"></i><span>SER, JadeWaters & Verandah pre-bookable</span></div>
+        <div class="comp-item yes"><i class="fa-solid fa-check"></i><span>Real-time concierge alert on approach</span></div>
+        <div class="comp-item yes"><i class="fa-solid fa-check"></i><span>Revenue generated before guests arrive</span></div>
+      </div>
+    </div>
+
+    <div class="mock-screen">
+      <div class="mock-eyebrow">Hilton Anatole · Dallas Design District</div>
+      <div class="mock-name">Welcome, <em>Mr. Davidson</em></div>
+      <div class="mock-sub">Hilton Anatole · ETA 22 min · Design District</div>
+      <div class="mock-svcs">
+        <div class="mock-svc"><i class="fa-solid fa-utensils"></i><span>SER Steak+Spirits</span></div>
+        <div class="mock-svc"><i class="fa-solid fa-spa"></i><span>Verandah Spa</span></div>
+        <div class="mock-svc"><i class="fa-solid fa-water"></i><span>JadeWaters</span></div>
+        <div class="mock-svc"><i class="fa-solid fa-bell-concierge"></i><span>Concierge</span></div>
+      </div>
+    </div>
+
+    <p class="upgrade-caption">
+      Your concierge sends us: <strong>"Guest: Mr. Davidson, arriving UA 441, 6PM, DFW Terminal E, standard room."</strong><br>
+      We preload the screen. Mr. Davidson sits down and sees Hilton Anatole branding, his name, and your signature experiences.<br>
+      By the time he reaches Stemmons Freeway, he has already reserved his table at SER on the 27th floor and booked a Verandah Spa treatment for tomorrow morning.
+    </p>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section sec-ink">
+  <div class="sec-eyebrow">Partnership Benefits</div>
+  <div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+  <h2 class="sec-h">Everything We Bring<br>to the <em>Anatole Guest</em></h2>
+  <p class="sec-sub">Six ways the Synergy Lux partnership generates revenue and elevates the Anatole guest experience before they set foot on your 45-acre campus.</p>
+
+  <div class="features">
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-utensils"></i></div>
+      <h3>SER Steak+Spirits</h3>
+      <p>Your 27th-floor signature restaurant with sweeping Dallas skyline views — reservable with one tap during the airport transfer. Guests arrive hungry and already committed to dinner before they check in.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-spa"></i></div>
+      <h3>Verandah Spa</h3>
+      <p>Personalized massages, rejuvenating facials, and curated treatments — all bookable during the 20-30 minute ride from DFW or Love Field. Convert commute time into confirmed spa revenue.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-water"></i></div>
+      <h3>JadeWaters Resort Pool</h3>
+      <p>Lazy river, water slides, private cabanas — showcase Dallas' most extraordinary hotel pool complex to guests before they arrive. Pre-book cabanas and set the excitement from the road.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-gopuram"></i></div>
+      <h3>Art Collection Preview</h3>
+      <p>1,000+ pieces from Asian royal palaces. The Nebula kinetic sculpture. The Crow family collection. Introduce guests to the Anatole's extraordinary art experience while they're still in the vehicle.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-bell-concierge"></i></div>
+      <h3>Concierge Activation</h3>
+      <p>Your front desk and concierge team receive a real-time alert as guests approach. Mr. Davidson's preferences are already known. His arrival is an experience — not just a check-in line.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-chart-line"></i></div>
+      <h3>Monthly Performance Report</h3>
+      <p>Clear monthly reporting on guest impressions, service taps, dining reservations, and spa bookings generated from your Synergy Lux partnership. Fully measurable ROI every single month.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ART CALLOUT -->
+<section class="section sec-card">
+  <div class="art-callout">
+    <div class="art-num">1,000+</div>
+    <div class="art-text">Rare treasures from Asian royal palaces — the largest private art collection in any American hotel — and now the first thing your guests hear about on the way from the airport.</div>
+    <div class="art-attr">Hilton Anatole · Dallas Design District · Crow Family Collection</div>
+    <div class="divider" style="margin-top:28px;">
+      <div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div>
+    </div>
+    <p style="font-size:14px;color:rgba(200,136,42,0.4);margin-top:16px;font-style:italic;font-family:'Cormorant Garamond',serif;">
+      Your $100 million renovation deserves a first impression that matches it.
+    </p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section sec-ink2">
+  <div class="sec-eyebrow">Partnership Investment</div>
+  <div class="divider"><div class="div-line"></div><div class="div-gem"></div><div class="div-line"></div></div>
+  <h2 class="sec-h">Transparent Pricing.<br><em>No Long-Term Contracts.</em></h2>
+  <p class="sec-sub">Month-to-month partnership. 30-day zero-commitment pilot to begin. Your guests decide whether it continues.</p>
+
+  <div class="pricing">
+    <div class="pkg">
+      <div class="pkg-tag">Entry</div>
+      <div class="pkg-name">Anatole</div>
+      <div class="pkg-price">$400</div>
+      <div class="pkg-period">per month</div>
+      <ul>
+        <li><i class="fa-solid fa-check"></i>Hilton Anatole branding on home screen</li>
+        <li><i class="fa-solid fa-check"></i>Logo & property name displayed</li>
+        <li><i class="fa-solid fa-check"></i>Direct concierge contact button</li>
+        <li><i class="fa-solid fa-check"></i>Monthly impression report</li>
+      </ul>
+    </div>
+    <div class="pkg featured">
+      <div class="pkg-tag">Most Popular</div>
+      <div class="pkg-name">Design District</div>
+      <div class="pkg-price">$800</div>
+      <div class="pkg-period">per month</div>
+      <ul>
+        <li><i class="fa-solid fa-check"></i>Full branded concierge panel</li>
+        <li><i class="fa-solid fa-check"></i>Guest name personalization</li>
+        <li><i class="fa-solid fa-check"></i>SER & Verandah Spa pre-booking</li>
+        <li><i class="fa-solid fa-check"></i>JadeWaters cabana reservations</li>
+        <li><i class="fa-solid fa-check"></i>Real-time concierge alerts</li>
+        <li><i class="fa-solid fa-check"></i>Bi-weekly performance report</li>
+      </ul>
+    </div>
+    <div class="pkg">
+      <div class="pkg-tag">Enterprise</div>
+      <div class="pkg-name">Platinum</div>
+      <div class="pkg-price">$1,500</div>
+      <div class="pkg-period">per month</div>
+      <ul>
+        <li><i class="fa-solid fa-check"></i>Everything in Design District tier</li>
+        <li><i class="fa-solid fa-check"></i>All 9 restaurant & bar integrations</li>
+        <li><i class="fa-solid fa-check"></i>Full custom Anatole-branded app</li>
+        <li><i class="fa-solid fa-check"></i>Priority guest routing</li>
+        <li><i class="fa-solid fa-check"></i>Dedicated account manager</li>
+        <li><i class="fa-solid fa-check"></i>Real-time analytics dashboard</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section sec-teal">
+  <div class="cta-inner">
+    <div class="sec-eyebrow" style="color:rgba(200,136,42,0.65);">Begin the Partnership</div>
+    <div class="divider"><div class="div-line" style="background:linear-gradient(90deg,transparent,rgba(200,136,42,0.25),transparent);"></div><div class="div-gem"></div><div class="div-line" style="background:linear-gradient(90deg,transparent,rgba(200,136,42,0.25),transparent);"></div></div>
+    <h2 class="sec-h" style="margin-bottom:20px;">Start with a<br><em>30-Day Pilot</em></h2>
+    <p class="cta-p">No contracts. No commitment beyond 30 days. Simply refer us 5 guest arrivals this month and let your guests tell you what they experienced. Your $100 million renovation deserves a first impression that begins before they arrive.</p>
+    <div class="cta-btns">
+      <a href="mailto:wrodriguez@synergyluxlimodfw.com?subject=Hilton Anatole Partnership Inquiry" class="btn-amber">Begin Partnership</a>
+      <a href="tel:6468791391" class="btn-outline">Call (646) 879-1391</a>
+    </div>
+    <div class="cta-contact">W. Rodriguez · Founder & CEO · Synergy Lux Limo DFW</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">SYNERGY LUX LIMO DFW</div>
+  <div class="footer-links">
+    <a href="/">Main Site</a>
+    <a href="/dfw-airport-car-service">Airport Service</a>
+    <a href="/corporate-chauffeur-dallas">Corporate</a>
+    <a href="mailto:wrodriguez@synergyluxlimodfw.com">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 Synergy Lux Limo DFW LLC</div>
+</footer>
+
+</body>
+</html>
