@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haynes Boone — In-Vehicle Client Experience | Synergy Lux</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#0C0E12;
+  --ink2:#13161C;
+  --ink3:#1A1E26;
+  --card:#1E2330;
+  --hb-blue:#1B3A6B;
+  --hb-blue2:#2A5298;
+  --hb-blue3:#3A6EC0;
+  --hb-light:#4A8FD8;
+  --silver:#8A9BB0;
+  --white:#F6F8FA;
+  --warm:#EEF2F6;
+  --muted:#6A7A90;
+  --accent:#C8A84A;
+  --accent2:#E0C068;
+}
+html,body{width:100%;min-height:100vh;background:var(--ink);font-family:'Jost',sans-serif;color:var(--white);overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(180deg,rgba(12,14,18,0.95) 0%,transparent 100%);}
+.nav-logo{display:flex;align-items:center;gap:12px;}
+.nav-logo img{height:30px;}
+.nav-logo-text{font-size:10px;font-weight:300;letter-spacing:4px;color:rgba(246,248,250,0.3);text-transform:uppercase;}
+.nav-cta{background:var(--hb-blue);color:var(--white);padding:9px 24px;font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;border:none;cursor:pointer;font-family:'Jost',sans-serif;transition:all 0.3s;}
+.nav-cta:hover{background:var(--hb-blue2);}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;z-index:0;
+  background:
+    linear-gradient(110deg,rgba(12,14,18,0.97) 0%,rgba(12,14,18,0.75) 55%,rgba(12,14,18,0.4) 100%),
+    linear-gradient(180deg,rgba(12,14,18,0.4) 0%,transparent 40%,rgba(12,14,18,0.95) 100%),
+    url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1800&q=80') center/cover no-repeat;}
+/* Blue glow left */
+.hero-bg::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 80% at 0% 50%,rgba(27,58,107,0.15) 0%,transparent 60%);}
+.hero-content{position:relative;z-index:2;display:flex;flex-direction:column;
+  justify-content:center;flex:1;padding:130px 80px 80px;max-width:800px;}
+
+/* HB Identity */
+.hb-identity{margin-bottom:32px;}
+.hb-wordmark{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+.hb-bar{width:4px;height:52px;background:linear-gradient(180deg,var(--hb-blue2),var(--hb-light));}
+.hb-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;
+  color:var(--white);letter-spacing:1px;}
+.hb-sub{font-size:10px;font-weight:300;letter-spacing:5px;
+  color:rgba(246,248,250,0.35);text-transform:uppercase;margin-left:18px;}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:12px;margin:24px 0;}
+.div-line{width:60px;height:1px;background:linear-gradient(90deg,var(--hb-blue2),transparent);}
+.div-dot{width:5px;height:5px;background:var(--hb-light);border-radius:50%;opacity:0.6;}
+
+/* Hero text */
+.hero-eyebrow{font-size:10px;letter-spacing:6px;color:rgba(74,143,216,0.65);
+  text-transform:uppercase;margin-bottom:14px;}
+.hero-h{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,5.5vw,68px);
+  font-weight:300;line-height:1;color:var(--white);margin-bottom:16px;}
+.hero-h em{font-style:italic;color:var(--hb-light);}
+.hero-h strong{font-weight:600;color:var(--white);}
+.hero-p{font-size:14px;font-weight:300;color:rgba(246,248,250,0.5);
+  line-height:1.9;max-width:520px;margin-bottom:40px;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:48px;}
+.btn-hb{background:var(--hb-blue2);color:var(--white);padding:14px 36px;
+  font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;
+  border:none;cursor:pointer;font-family:'Jost',sans-serif;transition:all 0.3s;}
+.btn-hb:hover{background:var(--hb-blue3);}
+.btn-outline{background:transparent;color:var(--white);padding:13px 36px;
+  font-size:10px;font-weight:300;letter-spacing:3px;text-transform:uppercase;
+  border:1px solid rgba(246,248,250,0.15);cursor:pointer;
+  font-family:'Jost',sans-serif;transition:all 0.3s;}
+.btn-outline:hover{border-color:var(--hb-light);color:var(--hb-light);}
+
+/* Stats inline */
+.hero-stats{display:flex;gap:32px;flex-wrap:wrap;}
+.hstat{border-left:2px solid rgba(27,58,107,0.6);padding-left:14px;}
+.hstat-num{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;
+  color:var(--hb-light);line-height:1;margin-bottom:2px;}
+.hstat-lbl{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+
+/* SECTIONS */
+.section{padding:88px 48px;}
+.sec-ink{background:var(--ink);}
+.sec-ink2{background:var(--ink2);}
+.sec-ink3{background:var(--ink3);}
+.sec-card{background:var(--card);}
+.sec-blue{background:var(--hb-blue);}
+
+.sec-eyebrow{font-size:9px;letter-spacing:6px;color:var(--hb-light);
+  text-transform:uppercase;text-align:center;margin-bottom:10px;}
+.sec-h{font-family:'Cormorant Garamond',serif;font-size:clamp(30px,4vw,50px);
+  font-weight:300;text-align:center;line-height:1.05;margin-bottom:8px;color:var(--white);}
+.sec-h em{font-style:italic;color:var(--hb-light);}
+.sec-sub{font-size:13px;font-weight:300;color:var(--muted);text-align:center;
+  line-height:1.9;max-width:620px;margin:0 auto 52px;}
+
+/* THE PITCH — law firm specific */
+.pitch-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;
+  background:rgba(27,58,107,0.15);max-width:960px;margin:0 auto 52px;}
+.pitch-card{background:var(--ink2);padding:40px 36px;}
+.pitch-card.highlight{background:var(--card);}
+.pitch-num{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;
+  color:rgba(27,58,107,0.3);line-height:1;margin-bottom:12px;}
+.pitch-icon{font-size:26px;color:var(--hb-light);margin-bottom:14px;display:block;}
+.pitch-title{font-size:15px;font-weight:500;color:var(--white);margin-bottom:8px;letter-spacing:.5px;}
+.pitch-body{font-size:12px;color:var(--muted);line-height:1.8;font-weight:300;}
+
+/* TABLET */
+.tablet-wrap{max-width:920px;margin:0 auto;position:relative;}
+.tablet-frame{background:var(--ink);border-radius:22px;padding:18px;
+  box-shadow:0 48px 120px rgba(0,0,0,0.6),0 0 0 1px rgba(27,58,107,0.3);}
+.tablet-notch{width:60px;height:6px;border-radius:3px;background:rgba(255,255,255,0.05);margin:0 auto 14px;}
+.tablet-screen{border-radius:12px;overflow:hidden;aspect-ratio:4/3;background:#060810;}
+.tablet-screen iframe{width:100%;height:100%;border:none;border-radius:12px;}
+.tablet-badge{position:absolute;top:-16px;right:28px;background:var(--hb-blue2);color:var(--white);padding:6px 20px;font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;}
+.tablet-caption{text-align:center;margin-top:20px;font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+/* PERSONALIZATION */
+.personal-wrap{max-width:820px;margin:0 auto;}
+.personal-card{background:var(--card);border:1px solid rgba(27,58,107,0.2);padding:52px 48px;}
+.personal-header{display:flex;align-items:center;gap:18px;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid rgba(27,58,107,0.15);}
+.personal-icon{width:60px;height:60px;border-radius:50%;background:rgba(27,58,107,0.12);border:1px solid rgba(74,143,216,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.personal-icon i{font-size:22px;color:var(--hb-light);}
+.personal-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;color:var(--white);margin-bottom:4px;}
+.personal-sub{font-size:12px;color:var(--muted);font-weight:300;}
+.mock-screen{background:var(--ink);border-radius:12px;padding:28px 24px;margin-bottom:24px;text-align:center;border:1px solid rgba(27,58,107,0.2);}
+.mock-eyebrow{font-size:9px;letter-spacing:5px;color:rgba(74,143,216,0.4);text-transform:uppercase;margin-bottom:10px;}
+.mock-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--white);line-height:1.1;margin-bottom:6px;}
+.mock-name em{font-style:italic;color:var(--hb-light);}
+.mock-sub{font-size:11px;color:rgba(246,248,250,0.25);letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;}
+.mock-svcs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.mock-svc{background:rgba(255,255,255,0.03);border:1px solid rgba(27,58,107,0.15);border-radius:8px;padding:14px 8px;text-align:center;}
+.mock-svc i{font-size:18px;color:var(--hb-light);display:block;margin-bottom:6px;}
+.mock-svc span{font-size:9px;letter-spacing:1px;color:rgba(246,248,250,0.28);text-transform:uppercase;}
+.personal-caption{font-size:12px;color:var(--muted);line-height:1.9;font-weight:300;}
+.personal-caption strong{color:var(--hb-light);font-weight:500;}
+
+/* ROI CALC */
+.roi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:860px;margin:0 auto 0;}
+.roi-card{background:var(--ink2);border:1px solid rgba(27,58,107,0.2);padding:36px 28px;text-align:center;}
+.roi-card.featured{background:var(--card);border-color:rgba(74,143,216,0.3);}
+.roi-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--hb-light);line-height:1;margin-bottom:6px;}
+.roi-lbl{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.roi-sub{font-size:12px;color:rgba(246,248,250,0.4);font-weight:300;line-height:1.7;}
+
+/* FEATURES */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(27,58,107,0.1);max-width:1040px;margin:0 auto;}
+.feat{background:var(--ink2);padding:40px 32px;transition:background 0.3s;}
+.feat:hover{background:var(--ink3);}
+.feat-ico{width:50px;height:50px;border-radius:50%;background:rgba(27,58,107,0.1);border:1px solid rgba(74,143,216,0.15);display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+.feat-ico i{font-size:18px;color:var(--hb-light);}
+.feat h3{font-size:14px;font-weight:500;margin-bottom:8px;color:var(--white);letter-spacing:.5px;}
+.feat p{font-size:12px;color:var(--muted);line-height:1.8;font-weight:300;}
+
+/* PRICING */
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:960px;margin:0 auto;}
+.pkg{background:var(--card);border:1px solid rgba(27,58,107,0.15);padding:40px 28px;text-align:center;}
+.pkg.featured{border-color:rgba(74,143,216,0.35);}
+.pkg-tag{font-size:9px;letter-spacing:4px;color:var(--hb-light);text-transform:uppercase;margin-bottom:12px;}
+.pkg-name{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:8px;color:var(--white);}
+.pkg-price{font-family:'Cormorant Garamond',serif;font-size:50px;font-weight:300;color:var(--hb-light);line-height:1;margin-bottom:4px;}
+.pkg.featured .pkg-price{color:var(--accent2);}
+.pkg-period{font-size:11px;color:var(--muted);margin-bottom:24px;}
+.pkg ul{list-style:none;display:flex;flex-direction:column;gap:10px;text-align:left;}
+.pkg ul li{font-size:12px;color:var(--muted);display:flex;align-items:flex-start;gap:9px;font-weight:300;line-height:1.5;}
+.pkg ul li i{font-size:10px;color:var(--hb-light);margin-top:3px;flex-shrink:0;}
+
+/* CTA */
+.cta-inner{max-width:640px;margin:0 auto;text-align:center;}
+.cta-p{font-size:13px;font-weight:300;color:rgba(246,248,250,0.4);line-height:1.9;margin-bottom:36px;}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.cta-contact{margin-top:20px;font-size:11px;color:rgba(27,58,107,0.5);letter-spacing:1px;}
+
+footer{background:var(--ink);border-top:1px solid rgba(27,58,107,0.15);padding:44px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;color:var(--hb-light);letter-spacing:3px;}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{color:var(--muted);font-size:11px;letter-spacing:1px;transition:color 0.2s;}
+.footer-links a:hover{color:var(--hb-light);}
+.footer-copy{font-size:11px;color:rgba(27,58,107,0.35);letter-spacing:1px;}
+
+@media(max-width:768px){
+  .nav{padding:14px 24px;}.section{padding:56px 24px;}
+  .hero-content{padding:110px 24px 60px;max-width:100%;}
+  .pitch-grid,.roi-grid,.features,.pricing{grid-template-columns:1fr;}
+  .mock-svcs{grid-template-columns:repeat(2,1fr);}
+  .hero-btns{flex-direction:column;}
+  .hero-stats{gap:20px;}
+  .personal-card{padding:32px 24px;}
+  footer{padding:32px 24px;flex-direction:column;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <img src="synergy-logo-new.png" alt="Synergy Lux">
+    <div class="nav-logo-text">Synergy Lux · Partner Preview</div>
+  </div>
+  <a href="mailto:wrodriguez@synergyluxlimodfw.com" class="nav-cta">Request Partnership</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+
+    <div class="hb-identity">
+      <div class="hb-wordmark">
+        <div class="hb-bar"></div>
+        <div>
+          <div class="hb-name">Haynes Boone</div>
+          <div class="hb-sub">Founded Dallas 1970 · 700 Attorneys · 20 Global Offices</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider">
+      <div class="div-line"></div>
+      <div class="div-dot"></div>
+    </div>
+
+    <div class="hero-eyebrow">Exclusive Partner Preview</div>
+    <h1 class="hero-h">Your Clients Deserve<br>a <em>Haynes Boone</em><br><strong>Welcome</strong> Before<br>They Walk In</h1>
+    <p class="hero-p">Every client or witness you transport from DFW or Love Field sees your firm's name, your practice areas, and your attorneys on a premium in-vehicle tablet — before they arrive at Harwood No. 14.</p>
+
+    <div class="hero-btns">
+      <a href="#demo" class="btn-hb">See the Experience</a>
+      <a href="mailto:wrodriguez@synergyluxlimodfw.com" class="btn-outline">Request Partnership</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-num">700</div><div class="hstat-lbl">Attorneys Worldwide</div></div>
+      <div class="hstat"><div class="hstat-num">20%</div><div class="hstat-lbl">Fortune 500 Clients Served</div></div>
+      <div class="hstat"><div class="hstat-num">56yrs</div><div class="hstat-lbl">Dallas Roots</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- THE PITCH — WHY LAW FIRMS -->
+<section class="section sec-ink3" id="demo">
+  <div class="sec-eyebrow">The Opportunity</div>
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(74,143,216,0.35),transparent);"></div>
+    <div style="width:5px;height:5px;background:var(--hb-light);border-radius:50%;opacity:0.6;"></div>
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(74,143,216,0.35),transparent);"></div>
+  </div>
+  <h2 class="sec-h">Your Client Development<br>Begins <em>at the Airport</em></h2>
+  <p class="sec-sub">Every executive Haynes Boone transports from DFW or Love Field is a high-value relationship. That 25-minute ride is the most undistracted, receptive moment in their day. Right now, nothing is happening in that window. We change that.</p>
+
+  <div class="pitch-grid">
+    <div class="pitch-card">
+      <div class="pitch-num">01</div>
+      <i class="pitch-icon fa-solid fa-handshake"></i>
+      <div class="pitch-title">First Impression — Before the Lobby</div>
+      <p class="pitch-body">Your client sees the Haynes Boone name, your key practice areas, and your attorneys on a premium branded screen the moment they sit down. Confidence and trust are established before a single word is spoken in your conference room.</p>
+    </div>
+    <div class="pitch-card highlight">
+      <div class="pitch-num">02</div>
+      <i class="pitch-icon fa-solid fa-user-tie"></i>
+      <div class="pitch-title">Personalized by Name</div>
+      <p class="pitch-body">Your team sends us the client's name and arrival details. The screen greets them personally: "Welcome, Ms. Chen. Haynes Boone is honored to have you." That level of preparation signals the standard of service they can expect throughout the engagement.</p>
+    </div>
+    <div class="pitch-card">
+      <div class="pitch-num">03</div>
+      <i class="pitch-icon fa-solid fa-scale-balanced"></i>
+      <div class="pitch-title">Practice Area Showcase</div>
+      <p class="pitch-body">Highlight your key practice areas — M&A, Energy, Private Equity, Litigation — to clients during the ride. A client arriving for a corporate matter sees your full capabilities before they sit down. Cross-selling happens naturally.</p>
+    </div>
+    <div class="pitch-card highlight">
+      <div class="pitch-num">04</div>
+      <i class="pitch-icon fa-solid fa-phone"></i>
+      <div class="pitch-title">Direct Attorney Contact</div>
+      <p class="pitch-body">One-tap button to call or text the lead attorney directly from the vehicle. If a client has a question or update on the way, they reach you immediately. That accessibility differentiates Haynes Boone from every other firm they work with.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="section sec-ink2">
+  <div class="sec-eyebrow">Live Demo</div>
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(74,143,216,0.35),transparent);"></div>
+    <div style="width:5px;height:5px;background:var(--hb-light);border-radius:50%;opacity:0.6;"></div>
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(74,143,216,0.35),transparent);"></div>
+  </div>
+  <h2 class="sec-h">What Your Clients See<br>on the Way to <em>Harwood No. 14</em></h2>
+  <p class="sec-sub">This is the exact interface your clients interact with inside our 2023 Cadillac Escalade — branded to Haynes Boone, personalized with their name, featuring your firm's services. Touch it.</p>
+
+  <div class="tablet-wrap">
+    <div class="tablet-badge">Live Interactive Demo</div>
+    <div class="tablet-frame">
+      <div class="tablet-notch"></div>
+      <div class="tablet-screen">
+        <iframe
+          src="https://www.synergyluxlimodfw.com/tablet.html?name=Ms.+Chen&hotel=Haynes+Boone+Dallas&partner=Haynes+Boone"
+          title="Synergy Lux — Haynes Boone Client Experience">
+        </iframe>
+      </div>
+    </div>
+    <div class="tablet-caption">Touch and explore all screens · This is exactly what your clients experience</div>
+  </div>
+</section>
+
+<!-- PERSONALIZATION -->
+<section class="section sec-ink">
+  <div class="sec-eyebrow">The Personalization</div>
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(74,143,216,0.35),transparent);"></div>
+    <div style="width:5px;height:5px;background:var(--hb-light);border-radius:50%;opacity:0.6;"></div>
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(74,143,216,0.35),transparent);"></div>
+  </div>
+  <h2 class="sec-h">Every Client.<br><em>Welcomed by Name.</em></h2>
+  <p class="sec-sub">Your assistant or paralegal sends us the client's name and flight details. We preload the screen. The client sits down and sees Haynes Boone before they see anything else.</p>
+
+  <div class="personal-wrap">
+    <div class="personal-card">
+      <div class="personal-header">
+        <div class="personal-icon"><i class="fa-solid fa-user-tie"></i></div>
+        <div>
+          <div class="personal-title">How It Works — 30 Seconds of Setup</div>
+          <div class="personal-sub">Your team sends one message · We handle everything else</div>
+        </div>
+      </div>
+
+      <div class="mock-screen">
+        <div class="mock-eyebrow">Haynes Boone · Dallas · Harwood District</div>
+        <div class="mock-name">Welcome, <em>Ms. Chen</em></div>
+        <div class="mock-sub">Haynes Boone · ETA 22 min · Harwood No. 14</div>
+        <div class="mock-svcs">
+          <div class="mock-svc"><i class="fa-solid fa-scale-balanced"></i><span>Practice Areas</span></div>
+          <div class="mock-svc"><i class="fa-solid fa-users"></i><span>Your Attorneys</span></div>
+          <div class="mock-svc"><i class="fa-solid fa-phone"></i><span>Direct Contact</span></div>
+          <div class="mock-svc"><i class="fa-solid fa-building-columns"></i><span>Firm Profile</span></div>
+        </div>
+      </div>
+
+      <p class="personal-caption">
+        Your assistant sends us: <strong>"Client: Ms. Chen, arriving AA 1847, 2PM, DFW Terminal C, M&A matter."</strong><br>
+        We preload the screen. Ms. Chen sits down and sees Haynes Boone branding, her name, and your firm's capabilities.<br>
+        By the time she reaches Harwood No. 14, she has already reviewed your M&A team and feels the precision Haynes Boone brings to every engagement. That is client development in the most valuable window of the day.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ROI -->
+<section class="section sec-ink3">
+  <div class="sec-eyebrow">The Business Case</div>
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(74,143,216,0.35),transparent);"></div>
+    <div style="width:5px;height:5px;background:var(--hb-light);border-radius:50%;opacity:0.6;"></div>
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(74,143,216,0.35),transparent);"></div>
+  </div>
+  <h2 class="sec-h">The Math Is<br><em>Simple</em></h2>
+  <p class="sec-sub">One new client matter generated from a transportation relationship more than pays for the platform — many times over.</p>
+
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-num">$800</div>
+      <div class="roi-lbl">Monthly Platform Fee</div>
+      <div class="roi-sub">~$26/day · Less than one billable hour from any associate at the firm</div>
+    </div>
+    <div class="roi-card featured">
+      <div class="roi-num">~40</div>
+      <div class="roi-lbl">Executive Client Impressions / Month</div>
+      <div class="roi-sub">$20 cost per high-value impression — compared to thousands for traditional client development</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-num">1</div>
+      <div class="roi-lbl">New Matter Closes the ROI</div>
+      <div class="roi-sub">A single new engagement generated by a transported client pays back the annual platform fee many times over</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section sec-ink2">
+  <div class="sec-eyebrow">Partnership Benefits</div>
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(74,143,216,0.35),transparent);"></div>
+    <div style="width:5px;height:5px;background:var(--hb-light);border-radius:50%;opacity:0.6;"></div>
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(74,143,216,0.35),transparent);"></div>
+  </div>
+  <h2 class="sec-h">Six Ways This Partnership<br><em>Serves Haynes Boone</em></h2>
+  <p class="sec-sub">From client development to operational efficiency — every aspect of the partnership is designed for how a top-tier Dallas law firm actually works.</p>
+
+  <div class="features">
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-plane-arrival"></i></div>
+      <h3>Airport Transfers — DFW & Love Field</h3>
+      <p>Professional chauffeur, real-time flight tracking, meet & greet. Every client or witness arriving from out of town experiences the Haynes Boone standard from the moment they land.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-id-badge"></i></div>
+      <h3>Branded Welcome by Name</h3>
+      <p>Personalized screen greets every client personally. "Welcome, Ms. Chen. Haynes Boone is honored to have you." That preparation signals the level of attention the firm brings to every matter.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-scale-balanced"></i></div>
+      <h3>Practice Area Showcase</h3>
+      <p>M&A, Energy, Private Equity, Litigation, Banking & Finance — your full capabilities featured on screen. Clients arriving for one matter discover the breadth of what Haynes Boone offers.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+      <h3>Net-30 Corporate Billing</h3>
+      <p>Monthly consolidated invoicing for the firm. No individual receipts, no reimbursement hassle. One clean monthly statement covering all client and witness transportation across DFW.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-shield-halved"></i></div>
+      <h3>COI & Compliance Documentation</h3>
+      <p>Certificate of Insurance available on request. Fully licensed and insured for corporate transportation programs. Your compliance and risk teams will have everything they need.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-ico"><i class="fa-solid fa-lock"></i></div>
+      <h3>Complete Discretion — Always</h3>
+      <p>Client names, meeting details, and conversations stay completely confidential. No third-party dispatching, no data sharing. The same discretion Haynes Boone brings to every matter.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section sec-ink">
+  <div class="sec-eyebrow">Partnership Investment</div>
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(74,143,216,0.35),transparent);"></div>
+    <div style="width:5px;height:5px;background:var(--hb-light);border-radius:50%;opacity:0.6;"></div>
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(74,143,216,0.35),transparent);"></div>
+  </div>
+  <h2 class="sec-h">Transparent Pricing.<br><em>No Long-Term Contracts.</em></h2>
+  <p class="sec-sub">Month-to-month. Net-30 billing available for approved accounts. 30-day pilot to begin — no commitment required.</p>
+
+  <div class="pricing">
+    <div class="pkg">
+      <div class="pkg-tag">Entry</div>
+      <div class="pkg-name">Harwood</div>
+      <div class="pkg-price">$600</div>
+      <div class="pkg-period">per month</div>
+      <ul>
+        <li><i class="fa-solid fa-check"></i>Haynes Boone branding on screen</li>
+        <li><i class="fa-solid fa-check"></i>Client name personalization</li>
+        <li><i class="fa-solid fa-check"></i>Direct attorney contact button</li>
+        <li><i class="fa-solid fa-check"></i>Net-30 monthly billing</li>
+        <li><i class="fa-solid fa-check"></i>Monthly impression report</li>
+      </ul>
+    </div>
+    <div class="pkg featured">
+      <div class="pkg-tag">Most Popular</div>
+      <div class="pkg-name">Premier</div>
+      <div class="pkg-price">$1,000</div>
+      <div class="pkg-period">per month</div>
+      <ul>
+        <li><i class="fa-solid fa-check"></i>Full firm-branded concierge panel</li>
+        <li><i class="fa-solid fa-check"></i>Practice area showcase</li>
+        <li><i class="fa-solid fa-check"></i>Attorney profiles on screen</li>
+        <li><i class="fa-solid fa-check"></i>COI documentation provided</li>
+        <li><i class="fa-solid fa-check"></i>Priority scheduling for matters</li>
+        <li><i class="fa-solid fa-check"></i>Bi-weekly performance report</li>
+      </ul>
+    </div>
+    <div class="pkg">
+      <div class="pkg-tag">Enterprise</div>
+      <div class="pkg-name">Firmwide</div>
+      <div class="pkg-price">$2,000</div>
+      <div class="pkg-period">per month</div>
+      <ul>
+        <li><i class="fa-solid fa-check"></i>Everything in Premier tier</li>
+        <li><i class="fa-solid fa-check"></i>Full custom firm-branded app</li>
+        <li><i class="fa-solid fa-check"></i>All practice group integrations</li>
+        <li><i class="fa-solid fa-check"></i>Dedicated account manager</li>
+        <li><i class="fa-solid fa-check"></i>Witness & deposition transport</li>
+        <li><i class="fa-solid fa-check"></i>Real-time analytics dashboard</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section sec-blue">
+  <div class="cta-inner">
+    <div class="sec-eyebrow" style="color:rgba(200,168,74,0.7);">Begin the Partnership</div>
+    <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,74,0.3),transparent);"></div>
+      <div style="width:5px;height:5px;background:var(--accent);border-radius:50%;opacity:0.6;"></div>
+      <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(200,168,74,0.3),transparent);"></div>
+    </div>
+    <h2 class="sec-h" style="margin-bottom:20px;">Start with a<br><em style="color:var(--accent2);">30-Day Pilot</em></h2>
+    <p class="cta-p">No contracts. No commitment beyond 30 days. Simply use us for 5 client transfers this month and measure the difference in how clients arrive. Founded in Dallas 56 years ago — now extended to every vehicle on the way to Harwood No. 14.</p>
+    <div class="cta-btns">
+      <a href="mailto:wrodriguez@synergyluxlimodfw.com?subject=Haynes Boone Partnership Inquiry" class="btn-hb" style="background:var(--accent);color:var(--ink);">Begin Partnership</a>
+      <a href="tel:6468791391" class="btn-outline">Call (646) 879-1391</a>
+    </div>
+    <div class="cta-contact">W. Rodriguez · Founder & CEO · Synergy Lux Limo DFW</div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">SYNERGY LUX LIMO DFW</div>
+  <div class="footer-links">
+    <a href="/">Main Site</a>
+    <a href="/corporate-chauffeur-dallas">Corporate Service</a>
+    <a href="/dfw-airport-car-service">Airport Transfers</a>
+    <a href="mailto:wrodriguez@synergyluxlimodfw.com">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 Synergy Lux Limo DFW LLC</div>
+</footer>
+
+</body>
+</html>
