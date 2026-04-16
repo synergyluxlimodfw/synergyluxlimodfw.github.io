@@ -101,12 +101,13 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .hero-eyebrow{font-size:9px;font-weight:500;letter-spacing:7px;text-transform:uppercase;color:var(--gold);margin-bottom:36px;opacity:0;animation:fadeUp 1.1s ease 0.4s forwards;}
 .hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,6.5vw,88px);font-weight:300;line-height:1.08;margin-bottom:32px;max-width:720px;opacity:0;animation:fadeUp 1.3s cubic-bezier(0.16,1,0.3,1) 0.65s forwards;}
 .hero h1 em{font-style:italic;color:var(--gold);}
-.hero-sub{font-size:14px;color:rgba(239,239,239,0.6);max-width:440px;line-height:1.8;margin-bottom:52px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;opacity:0;animation:fadeUp 1.2s ease 0.95s forwards;}
-.hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp 1.1s ease 1.25s forwards;}
-.btn-gold{background:var(--gold);color:#000;padding:16px 44px;font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;text-decoration:none;transition:background 0.4s ease,box-shadow 0.4s ease;display:inline-block;}
-.btn-gold:hover{background:var(--gold2);box-shadow:0 0 40px rgba(201,168,76,0.2);}
-.btn-outline{border:1px solid rgba(239,239,239,0.25);color:var(--white);padding:16px 44px;font-size:11px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;text-decoration:none;transition:border-color 0.4s ease,color 0.4s ease,box-shadow 0.4s ease;display:inline-block;}
-.btn-outline:hover{border-color:rgba(201,168,76,0.5);color:var(--gold);box-shadow:0 0 32px rgba(201,168,76,0.08);}
+.hero-sub{font-size:12px;color:rgba(239,239,239,0.55);max-width:440px;line-height:1.8;margin-bottom:16px;font-weight:300;letter-spacing:2.5px;text-transform:uppercase;opacity:0;animation:fadeUp 1.2s ease 0.95s forwards;}
+.hero-third{font-size:14px;color:rgba(239,239,239,0.42);max-width:480px;line-height:1.7;margin-bottom:52px;font-weight:300;letter-spacing:0.3px;font-style:italic;font-family:'Cormorant Garamond',serif;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp 1.1s ease 1.5s forwards;}
+.btn-gold{background:var(--gold);color:#000;padding:14px 40px;font-size:10px;font-weight:600;letter-spacing:3.5px;text-transform:uppercase;text-decoration:none;transition:background 0.45s ease,box-shadow 0.45s ease;display:inline-block;}
+.btn-gold:hover{background:var(--gold2);box-shadow:0 0 36px rgba(201,168,76,0.18);}
+.btn-outline{border:1px solid rgba(239,239,239,0.2);color:rgba(239,239,239,0.75);padding:14px 40px;font-size:10px;font-weight:400;letter-spacing:3.5px;text-transform:uppercase;text-decoration:none;transition:border-color 0.45s ease,color 0.45s ease,box-shadow 0.45s ease;display:inline-block;}
+.btn-outline:hover{border-color:rgba(201,168,76,0.4);color:var(--gold);box-shadow:0 0 28px rgba(201,168,76,0.07);}
 .hero-scroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;animation:fadeUp 1s ease 2s forwards;}
 .hero-scroll span{font-size:8px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.2);}
 .scroll-line{width:1px;height:44px;background:linear-gradient(to bottom,rgba(201,168,76,0.45),transparent);animation:scrollPulse 2.5s ease-in-out infinite;}
@@ -119,22 +120,22 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .trust-item::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--gold);opacity:0.6;flex-shrink:0;}
 
 /* ── SHARED SECTION STYLES ── */
-.sec{padding:120px 80px;}
-.sec-dark{background:var(--card);}
-.sec-alt{background:var(--card2);}
-.eyebrow{font-size:9px;font-weight:500;letter-spacing:6px;text-transform:uppercase;color:var(--gold);margin-bottom:22px;display:flex;align-items:center;gap:12px;opacity:0.7;}
-.eyebrow::before{content:'';width:24px;height:1px;background:var(--gold);flex-shrink:0;}
-.sec-h2{font-family:'Cormorant Garamond',serif;font-size:clamp(30px,4.5vw,52px);font-weight:300;line-height:1.12;margin-bottom:24px;letter-spacing:-0.2px;}
+.sec{padding:140px 80px;}
+.sec-dark{background:var(--card);border-top:1px solid rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.03);}
+.sec-alt{background:var(--card2);border-top:1px solid rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.03);}
+.eyebrow{font-size:9px;font-weight:500;letter-spacing:6px;text-transform:uppercase;color:var(--gold);margin-bottom:28px;display:flex;align-items:center;gap:12px;opacity:0.6;}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);flex-shrink:0;}
+.sec-h2{font-family:'Cormorant Garamond',serif;font-size:clamp(30px,4.5vw,52px);font-weight:300;line-height:1.14;margin-bottom:28px;letter-spacing:-0.2px;}
 .sec-h2 em{font-style:italic;color:var(--gold);}
 .sec-h2 strong{font-weight:600;color:var(--gold);}
-.sec-body{font-size:15px;font-weight:300;line-height:1.9;color:rgba(239,239,239,0.55);letter-spacing:0.2px;max-width:620px;}
-.sec-body p+p{margin-top:1.6em;}
-.sec-rule{width:1px;height:72px;background:linear-gradient(to bottom,transparent,rgba(201,168,76,0.25),transparent);margin:0 auto;}
+.sec-body{font-size:15px;font-weight:300;line-height:1.9;color:rgba(239,239,239,0.52);letter-spacing:0.2px;max-width:580px;}
+.sec-body p+p{margin-top:1.8em;}
+.sec-rule{width:1px;height:80px;background:linear-gradient(to bottom,transparent,rgba(201,168,76,0.2),transparent);margin:0 auto;}
 
 /* ── SECTION 2 — VALUE ── */
-#value{text-align:center;padding:140px 28px;}
-#value .sec-inner{max-width:600px;margin:0 auto;}
-#value .statement{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3.5vw,34px);font-weight:300;line-height:1.65;color:rgba(239,239,239,0.82);letter-spacing:0.2px;}
+#value{text-align:center;padding:160px 28px;border-top:1px solid rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.03);}
+#value .sec-inner{max-width:580px;margin:0 auto;}
+#value .statement{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3.5vw,34px);font-weight:300;line-height:1.7;color:rgba(239,239,239,0.75);letter-spacing:0.2px;}
 
 /* ── FIFA BANNER ── */
 .fifa-banner{background:#0A0A0A;border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);padding:18px 48px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;text-align:center;}
@@ -173,9 +174,9 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .svc-card p{font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;font-weight:300;}
 
 /* ── SECTION 4 — EXPERIENCE BRIDGE ── */
-#exp-bridge{background:var(--card);border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);padding:140px 28px;text-align:center;}
-#exp-bridge .bridge-inner{max-width:600px;margin:0 auto;}
-#exp-bridge .sec-h2{font-size:clamp(34px,4.5vw,56px);margin-bottom:28px;}
+#exp-bridge{background:var(--card);border-top:1px solid rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.03);padding:160px 28px;text-align:center;}
+#exp-bridge .bridge-inner{max-width:540px;margin:0 auto;}
+#exp-bridge .sec-h2{font-size:clamp(34px,4.5vw,56px);margin-bottom:32px;}
 .btn-text-link{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--gold);font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;transition:gap 0.45s ease,opacity 0.35s;opacity:0.7;margin-top:40px;}
 .btn-text-link:hover{gap:18px;opacity:1;}
 .btn-text-link::after{content:'→';font-size:14px;}
@@ -439,9 +440,10 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <p class="hero-eyebrow">Synergy Lux Limo DFW</p>
   <h1>Private Chauffeur Experience<br><em>Dallas–Fort Worth</em></h1>
   <p class="hero-sub">Discreet. Consistent. Precisely executed.</p>
+  <p class="hero-third reveal" style="opacity:0;animation:fadeUp 1.2s ease 1.2s forwards;">For clients who expect more than transportation.</p>
   <div class="hero-btns">
     <a href="#booking" class="btn-gold">Book a Ride</a>
-    <a href="/experience.html" class="btn-outline">View the Experience</a>
+    <a href="/experience.html" class="btn-outline">View Private Experience &nbsp;→</a>
   </div>
 
   <div class="hero-scroll">
@@ -576,10 +578,10 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     <p class="eyebrow reveal" style="justify-content:center;">For Select Partners</p>
     <h2 class="sec-h2 reveal d1">More Than<br><em>Transportation</em></h2>
     <div class="sec-body reveal d2" style="margin:0 auto;">
-      <p>For select partners, we extend the experience beyond the vehicle.</p>
+      <p>For select partners, the arrival experience extends beyond the vehicle.</p>
     </div>
     <div class="reveal d3">
-      <a href="/experience.html" class="btn-text-link" style="justify-content:center;">Explore the Experience</a>
+      <a href="/experience.html" class="btn-text-link" style="justify-content:center;">View Private Experience</a>
     </div>
   </div>
 </div>
