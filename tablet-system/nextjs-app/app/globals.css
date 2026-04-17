@@ -38,6 +38,20 @@
   }
 }
 
+@layer components {
+  /* Luxury input — use className="lux-input" */
+  .lux-input {
+    @apply w-full rounded-xl px-4 py-3 text-sm text-lux-white;
+    @apply bg-lux-card2 border border-lux-border;
+    @apply outline-none transition-all duration-200;
+    @apply placeholder:text-lux-muted;
+  }
+  .lux-input:focus {
+    border-color: rgba(201,168,76,0.45);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  }
+}
+
 @layer utilities {
   .font-serif-lux   { font-family: 'Cormorant Garamond', Georgia, serif; }
   .text-gold        { color: #C9A84C; }
