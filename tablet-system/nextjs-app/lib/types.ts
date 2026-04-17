@@ -26,6 +26,8 @@ export type Service = {
   description: string;
   price: string;
   priceNote: string;
+  originalPrice?: string;
+  savings?: string;
   deposit?: string;
   depositAmount?: string;
   fullLink?: string;
