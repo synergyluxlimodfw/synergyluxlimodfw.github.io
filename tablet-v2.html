@@ -181,41 +181,6 @@
     }
     .quick-btn:hover svg, .quick-btn.active svg { color: var(--gold2); }
 
-    /* ── VIP STATUS ── */
-    .vip-header {
-      display: flex; justify-content: space-between; align-items: baseline;
-      margin-bottom: 6px;
-    }
-    .vip-header h3 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 20px; font-weight: 400; color: var(--white);
-    }
-    .vip-badge {
-      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--gold); background: var(--gold-dim);
-      border: 1px solid var(--border);
-      border-radius: 20px; padding: 3px 10px;
-    }
-    .vip-sub {
-      font-size: 12px; color: var(--muted); margin-bottom: 16px;
-    }
-    .progress-track {
-      width: 100%; height: 4px;
-      background: rgba(255,255,255,0.07);
-      border-radius: 2px; overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--gold), var(--gold2));
-      border-radius: 2px;
-      transition: width 1.2s ease;
-    }
-    .progress-labels {
-      display: flex; justify-content: space-between;
-      margin-top: 8px;
-      font-size: 10px; color: var(--muted); letter-spacing: 0.5px;
-    }
-
     /* ── OFFER ── */
     .card-offer {
       background: var(--green);
@@ -366,24 +331,6 @@
       </div>
     </div>
 
-    <!-- ── VIP STATUS ── -->
-    <div class="card">
-      <div class="card-inner">
-        <div class="vip-header">
-          <h3>VIP Status</h3>
-          <div class="vip-badge" id="vip-tier">Gold</div>
-        </div>
-        <div class="vip-sub" id="vip-sub">2 rides away from Platinum</div>
-        <div class="progress-track">
-          <div class="progress-fill" id="vip-bar" style="width:0%"></div>
-        </div>
-        <div class="progress-labels">
-          <span>Gold</span>
-          <span>Platinum</span>
-        </div>
-      </div>
-    </div>
-
     <!-- ── SPECIAL OFFER ── -->
     <div class="card card-offer">
       <div class="card-inner">
@@ -438,8 +385,6 @@
     const partner  = params.get('partner')   || '';
     const chauffeur= params.get('chauffeur') || 'James';
     const eta      = params.get('eta')       || '24';
-    const rides    = parseInt(params.get('rides') || '8');  // rides toward next tier (out of 10)
-
     document.getElementById('guest-name').textContent   = name;
     document.getElementById('hotel-chip').textContent   = partner || hotel;
     document.getElementById('chauffeur-chip').textContent = 'Chauffeur: ' + chauffeur;
@@ -448,15 +393,6 @@
     if (partner) {
       document.getElementById('welcome-eyebrow').textContent = partner + ' · In-Car Experience';
     }
-
-    // VIP progress
-    const pct = Math.min(Math.round((rides / 10) * 100), 100);
-    const remaining = 10 - rides;
-    document.getElementById('vip-sub').textContent =
-      remaining > 0 ? remaining + ' ride' + (remaining > 1 ? 's' : '') + ' away from Platinum' : 'Platinum status unlocked';
-    setTimeout(() => {
-      document.getElementById('vip-bar').style.width = pct + '%';
-    }, 300);
 
     // ── LIVE CLOCK ──
     function updateClock() {
