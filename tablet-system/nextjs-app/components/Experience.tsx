@@ -84,7 +84,7 @@ export default function Experience({ session }: ExperienceProps) {
             <ScreenGallery onNext={() => navigate(1)} onPrev={() => navigate(-1)} />
           )}
           {currentScreen === 'booking' && (
-            <ScreenBooking onPrev={() => navigate(-1)} customerId={customerId} />
+            <ScreenBooking onPrev={() => navigate(-1)} customerId={customerId} guestName={session.name} />
           )}
         </motion.div>
       </AnimatePresence>

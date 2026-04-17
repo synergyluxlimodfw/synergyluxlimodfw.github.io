@@ -9,7 +9,10 @@ export type EventName =
   | 'midway_prompt'
   | 'pre_dropoff_prompt'
   | 'ride_completed'
-  | 'rebook_clicked';
+  | 'rebook_clicked'
+  | 'viewed_offer'
+  | 'clicked_book'
+  | 'completed_payment';
 
 export type TrackEvent = {
   name: EventName;
@@ -18,12 +21,15 @@ export type TrackEvent = {
 };
 
 export type ConversionMetrics = {
-  ridesStarted:   number;
-  midwayPrompts:  number;
-  preDropPrompts: number;
-  ridesCompleted: number;
-  rebookClicks:   number;
-  conversionRate: number; // rebookClicks / ridesStarted * 100
+  ridesStarted:      number;
+  midwayPrompts:     number;
+  preDropPrompts:    number;
+  ridesCompleted:    number;
+  rebookClicks:      number;
+  conversionRate:    number; // rebookClicks / ridesStarted * 100
+  offerViews:        number;
+  bookClicks:        number;
+  completedPayments: number;
 };
 
 const STORAGE_KEY = 'slux_events';
@@ -70,9 +76,11 @@ export function getMetrics(): ConversionMetrics {
   const events = safeRead();
   const count = (name: EventName) => events.filter(e => e.name === name).length;
 
-  const ridesStarted   = count('ride_started');
-  const rebookClicks   = count('rebook_clicked');
-  const conversionRate = ridesStarted > 0
+  const ridesStarted      = count('ride_started');
+  const rebookClicks      = count('rebook_clicked');
+  const bookClicks        = count('clicked_book');
+  const completedPayments = count('completed_payment');
+  const conversionRate    = ridesStarted > 0
     ? Math.round((rebookClicks / ridesStarted) * 100)
     : 0;
 
@@ -83,6 +91,9 @@ export function getMetrics(): ConversionMetrics {
     ridesCompleted: count('ride_completed'),
     rebookClicks,
     conversionRate,
+    offerViews:        count('viewed_offer'),
+    bookClicks,
+    completedPayments,
   };
 }
 

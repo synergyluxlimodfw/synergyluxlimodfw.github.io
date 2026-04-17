@@ -62,10 +62,10 @@ export default function DriverOverlay({ phase, onPhaseChange, onModalOpen, onRes
       {/* Invisible long-press zone — bottom-right corner */}
       <div
         {...longPress}
-        onMouseDown={(e) => { setPressing(true);  longPress.onMouseDown(e); }}
-        onMouseUp={(e)   => { setPressing(false); longPress.onMouseUp(e);   }}
-        onTouchStart={(e) => { setPressing(true);  longPress.onTouchStart(e); }}
-        onTouchEnd={(e)   => { setPressing(false); longPress.onTouchEnd(e);   }}
+        onMouseDown={() => { setPressing(true);  longPress.onMouseDown(); }}
+        onMouseUp={() =>   { setPressing(false); longPress.onMouseUp();   }}
+        onTouchStart={() => { setPressing(true);  longPress.onTouchStart(); }}
+        onTouchEnd={() =>   { setPressing(false); longPress.onTouchEnd();   }}
         className="fixed bottom-0 right-0 w-24 h-24 z-40 select-none"
         aria-label="Driver mode (long press)"
       >
