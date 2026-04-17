@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    background: #06060A;
+    color: #EFEFEF;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  /* ── INPUT RESETS ── */
+  input, textarea, select {
+    background: #141419;
+    color: #EFEFEF;
+    border: 1px solid rgba(201,168,76,0.14);
+    border-radius: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.875rem;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: rgba(201,168,76,0.45);
+  }
+  input::placeholder, textarea::placeholder {
+    color: #666672;
+  }
+
+  /* ── DATE INPUT ── */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+  }
+}
+
+@layer utilities {
+  .font-serif-lux   { font-family: 'Cormorant Garamond', Georgia, serif; }
+  .text-gold        { color: #C9A84C; }
+  .text-gold2       { color: #DEB96A; }
+  .text-muted-lux   { color: #666672; }
+  .bg-lux-card      { background: #0F0F14; }
+  .bg-lux-card2     { background: #141419; }
+  .border-lux       { border-color: rgba(201,168,76,0.14); }
+  .bg-gold-dim      { background: rgba(201,168,76,0.12); }
+}

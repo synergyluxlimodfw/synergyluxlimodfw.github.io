@@ -1,0 +1,100 @@
+'use client';
+
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import ScreenWelcome from './ScreenWelcome';
+import ScreenWhy from './ScreenWhy';
+import ScreenGallery from './ScreenGallery';
+import ScreenBooking from './ScreenBooking';
+import DriverOverlay from './DriverOverlay';
+import Modal from './Modal';
+import type { Session, Screen, RidePhase, ModalType } from '@/lib/types';
+
+interface ExperienceProps {
+  session: Session;
+}
+
+const SCREENS: Screen[] = ['welcome', 'why', 'gallery', 'booking'];
+
+const slideVariants = {
+  enter: (dir: number) => ({
+    x: dir > 0 ? 40 : -40,
+    opacity: 0,
+  }),
+  center: { x: 0, opacity: 1 },
+  exit:   (dir: number) => ({
+    x: dir > 0 ? -40 : 40,
+    opacity: 0,
+  }),
+};
+
+export default function Experience({ session }: ExperienceProps) {
+  const [screenIdx, setScreenIdx] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [phase, setPhase]         = useState<RidePhase>('active');
+  const [modal, setModal]         = useState<ModalType>(null);
+
+  function navigate(delta: number) {
+    const next = screenIdx + delta;
+    if (next < 0 || next >= SCREENS.length) return;
+    setDirection(delta);
+    setScreenIdx(next);
+  }
+
+  const currentScreen = SCREENS[screenIdx];
+
+  return (
+    <div
+      className="relative w-full h-screen overflow-hidden bg-lux-black"
+      style={{ borderTop: '1px solid rgba(201,168,76,0.07)' }}
+    >
+      {/* ── Screen container ── */}
+      <AnimatePresence mode="wait" custom={direction}>
+        <motion.div
+          key={currentScreen}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-0"
+        >
+          {currentScreen === 'welcome' && (
+            <ScreenWelcome session={session} onNext={() => navigate(1)} />
+          )}
+          {currentScreen === 'why' && (
+            <ScreenWhy onNext={() => navigate(1)} onPrev={() => navigate(-1)} />
+          )}
+          {currentScreen === 'gallery' && (
+            <ScreenGallery onNext={() => navigate(1)} onPrev={() => navigate(-1)} />
+          )}
+          {currentScreen === 'booking' && (
+            <ScreenBooking onPrev={() => navigate(-1)} />
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* ── Driver overlay (long press corner) ── */}
+      <DriverOverlay
+        phase={phase}
+        onPhaseChange={setPhase}
+        onModalOpen={setModal}
+      />
+
+      {/* ── Rebook modals ── */}
+      <Modal
+        type={modal}
+        session={session}
+        onClose={() => setModal(null)}
+        onBook={(route) => {
+          setModal(null);
+          // Navigate to booking screen
+          setDirection(1);
+          setScreenIdx(SCREENS.indexOf('booking'));
+          console.log('[Mock] Rebook triggered:', route);
+        }}
+      />
+    </div>
+  );
+}
