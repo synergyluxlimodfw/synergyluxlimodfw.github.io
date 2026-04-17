@@ -8,7 +8,7 @@ import type { Session } from '@/lib/types';
 // Constants
 // ─────────────────────────────────────────────────────────
 
-const CHAUFFEUR  = 'James';
+const DEFAULT_CHAUFFEUR = 'W. Rodriguez';
 const BASE_ETA   = 24;
 const OCCASIONS  = [
   'Airport Transfer',
@@ -36,6 +36,7 @@ export default function OperatorPanel({ onStart }: OperatorPanelProps) {
   // Core inputs
   const [name,        setName]        = useState('');
   const [destination, setDestination] = useState('');
+  const [chauffeur,   setChauffeur]   = useState(DEFAULT_CHAUFFEUR);
   const [occasion,    setOccasion]    = useState('');
 
   // Advanced (collapsible)
@@ -83,7 +84,7 @@ export default function OperatorPanel({ onStart }: OperatorPanelProps) {
       occasion,
       destination: destination.trim(),
       vipNote:     vipNote.trim(),
-      chauffeur:   CHAUFFEUR,
+      chauffeur:   chauffeur.trim() || DEFAULT_CHAUFFEUR,
       etaMinutes:  eta,
     });
   }
@@ -98,7 +99,7 @@ export default function OperatorPanel({ onStart }: OperatorPanelProps) {
             key="success"
             name={name}
             destination={destination}
-            chauffeur={CHAUFFEUR}
+            chauffeur={chauffeur.trim() || DEFAULT_CHAUFFEUR}
             eta={eta}
           />
         )}
@@ -138,6 +139,16 @@ export default function OperatorPanel({ onStart }: OperatorPanelProps) {
                 />
               </InputGroup>
 
+              <InputGroup label="Chauffeur Name">
+                <input
+                  type="text"
+                  value={chauffeur}
+                  onChange={e => setChauffeur(e.target.value)}
+                  placeholder="W. Rodriguez"
+                  className="lux-input"
+                />
+              </InputGroup>
+
               <InputGroup label="Occasion">
                 <div className="relative">
                   <select
@@ -158,7 +169,7 @@ export default function OperatorPanel({ onStart }: OperatorPanelProps) {
 
             {/* ── Auto-generated summary panel ───────────── */}
             <SummaryPanel
-              chauffeur={CHAUFFEUR}
+              chauffeur={chauffeur.trim() || DEFAULT_CHAUFFEUR}
               eta={eta}
               temperature={temperature}
               musicEnabled={musicEnabled}
@@ -336,7 +347,7 @@ function SummaryPanel({
       </p>
 
       <div className="space-y-3">
-        <SummaryRow label="Chauffeur" value={chauffeur} fixed />
+        <SummaryRow label="Chauffeur" value={chauffeur} animateKey={chauffeur} />
         <SummaryRow label="ETA" value={`${eta} minutes`} animateKey={eta} />
         <SummaryRow label="Route" value="Optimized" fixed />
         <SummaryRow
