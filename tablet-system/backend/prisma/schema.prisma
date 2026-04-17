@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String   @unique
+  email     String?
+  rides     Ride[]
+  bookings  Booking[]
+  createdAt DateTime @default(now())
+}
+
+model Ride {
+  id            String   @id @default(uuid())
+  customerId    String
+  pickup        String
+  dropoff       String
+  status        RideStatus @default(ACTIVE)
+  chauffeurName String
+  etaMinutes    Int
+  startedAt     DateTime @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  customer      Customer @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model Booking {
+  id               String        @id @default(uuid())
+  customerId       String
+  pickup           String
+  dropoff          String
+  scheduledAt      DateTime
+  price            Int           // cents
+  status           BookingStatus @default(PENDING)
+  stripeSessionId  String?       @unique
+  createdAt        DateTime      @default(now())
+  customer         Customer      @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+  @@index([stripeSessionId])
+}
+
+enum RideStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
