@@ -8,6 +8,7 @@ import ScreenGallery from './ScreenGallery';
 import ScreenBooking from './ScreenBooking';
 import DriverOverlay from './DriverOverlay';
 import Modal from './Modal';
+import { track } from '@/lib/events';
 import type { Session, Screen, RidePhase, ModalType } from '@/lib/types';
 
 interface ExperienceProps {
@@ -41,7 +42,20 @@ export default function Experience({ session }: ExperienceProps) {
     setScreenIdx(next);
   }
 
+  function handleReset() {
+    setDirection(1);
+    setScreenIdx(0);
+    setModal(null);
+  }
+
+  function handleModalOpen(type: ModalType) {
+    setModal(type);
+    if (type === 'midway')      track('midway_prompt');
+    if (type === 'pre_dropoff') track('pre_dropoff_prompt');
+  }
+
   const currentScreen = SCREENS[screenIdx];
+  const customerId = session.rideId ?? 'demo';
 
   return (
     <div
@@ -70,7 +84,7 @@ export default function Experience({ session }: ExperienceProps) {
             <ScreenGallery onNext={() => navigate(1)} onPrev={() => navigate(-1)} />
           )}
           {currentScreen === 'booking' && (
-            <ScreenBooking onPrev={() => navigate(-1)} />
+            <ScreenBooking onPrev={() => navigate(-1)} customerId={customerId} />
           )}
         </motion.div>
       </AnimatePresence>
@@ -79,7 +93,8 @@ export default function Experience({ session }: ExperienceProps) {
       <DriverOverlay
         phase={phase}
         onPhaseChange={setPhase}
-        onModalOpen={setModal}
+        onModalOpen={handleModalOpen}
+        onReset={handleReset}
       />
 
       {/* ── Rebook modals ── */}
@@ -89,10 +104,9 @@ export default function Experience({ session }: ExperienceProps) {
         onClose={() => setModal(null)}
         onBook={(route) => {
           setModal(null);
-          // Navigate to booking screen
+          track('rebook_clicked', { route });
           setDirection(1);
           setScreenIdx(SCREENS.indexOf('booking'));
-          console.log('[Mock] Rebook triggered:', route);
         }}
       />
     </div>

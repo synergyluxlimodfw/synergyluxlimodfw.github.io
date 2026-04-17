@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { getMetrics, getEvents, clearEvents } from '@/lib/events';
+import type { ConversionMetrics, TrackEvent } from '@/lib/events';
 
 type MockRide = {
   id: string;
@@ -15,16 +17,9 @@ type MockRide = {
 };
 
 const MOCK_RIDES: MockRide[] = [
-  { id: 'r1', guest: 'Mr. Smith',   pickup: 'Hotel Crescent Court', dropoff: 'DFW Terminal D', chauffeur: 'James', eta: 12, phase: 'ACTIVE',   time: '3:45 PM' },
-  { id: 'r2', guest: 'Ms. Johnson', pickup: 'Rosewood Mansion',     dropoff: 'Downtown Dallas', chauffeur: 'Carlos', eta: 8, phase: 'PRE DROP-OFF', time: '3:52 PM' },
-  { id: 'r3', guest: 'Mr. Lee',     pickup: 'Ritz-Carlton Dallas',  dropoff: 'Love Field',      chauffeur: 'James', eta: 0, phase: 'COMPLETE', time: '3:30 PM' },
-];
-
-const STATS = [
-  { label: 'Active Rides',   value: '2' },
-  { label: 'Rides Today',    value: '7' },
-  { label: 'Revenue Today',  value: '$1,240' },
-  { label: 'Avg ETA',        value: '18 min' },
+  { id: 'r1', guest: 'Mr. Smith',   pickup: 'Hotel Crescent Court', dropoff: 'DFW Terminal D',  chauffeur: 'James',  eta: 12, phase: 'ACTIVE',       time: '3:45 PM' },
+  { id: 'r2', guest: 'Ms. Johnson', pickup: 'Rosewood Mansion',     dropoff: 'Downtown Dallas', chauffeur: 'Carlos', eta: 8,  phase: 'PRE DROP-OFF', time: '3:52 PM' },
+  { id: 'r3', guest: 'Mr. Lee',     pickup: 'Ritz-Carlton Dallas',  dropoff: 'Love Field',      chauffeur: 'James',  eta: 0,  phase: 'COMPLETE',     time: '3:30 PM' },
 ];
 
 const PHASE_COLORS: Record<string, string> = {
@@ -34,8 +29,37 @@ const PHASE_COLORS: Record<string, string> = {
   'COMPLETE':     '#4ADE80',
 };
 
+const EVENT_COLORS: Record<string, string> = {
+  'ride_started':       '#C9A84C',
+  'midway_prompt':      '#818CF8',
+  'pre_dropoff_prompt': '#FCD34D',
+  'ride_completed':     '#4ADE80',
+  'rebook_clicked':     '#F472B6',
+};
+
 export default function AdminPage() {
-  const [rides] = useState<MockRide[]>(MOCK_RIDES);
+  const [rides]   = useState<MockRide[]>(MOCK_RIDES);
+  const [metrics, setMetrics] = useState<ConversionMetrics | null>(null);
+  const [events,  setEvents]  = useState<TrackEvent[]>([]);
+
+  const refresh = useCallback(() => {
+    setMetrics(getMetrics());
+    setEvents(getEvents().slice(0, 50)); // newest 50
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  function handleClear() {
+    clearEvents();
+    refresh();
+  }
+
+  const conversionStats = metrics ? [
+    { label: 'Total Rides',      value: String(metrics.ridesStarted) },
+    { label: 'Rebook Clicks',    value: String(metrics.rebookClicks) },
+    { label: 'Conversion Rate',  value: `${metrics.conversionRate}%` },
+    { label: 'Rides Completed',  value: String(metrics.ridesCompleted) },
+  ] : null;
 
   return (
     <div className="min-h-screen bg-lux-black">
@@ -48,31 +72,99 @@ export default function AdminPage() {
         <p className="text-[12px] font-semibold tracking-[4px] uppercase">
           SYNERGY <span className="text-gold">LUX</span>
         </p>
-        <p className="text-[10px] tracking-[3px] uppercase text-lux-muted">Admin Dashboard</p>
+        <div className="flex items-center gap-4">
+          <p className="text-[10px] tracking-[3px] uppercase text-lux-muted">Admin Dashboard</p>
+          <button
+            onClick={refresh}
+            className="text-[10px] tracking-[2px] uppercase text-gold/70 hover:text-gold transition-colors px-3 py-1.5 rounded-lg"
+            style={{ border: '1px solid rgba(201,168,76,0.20)' }}
+          >
+            Refresh
+          </button>
+        </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-8 py-10">
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-10">
-          {STATS.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="rounded-2xl p-5"
-              style={{ background: '#0F0F14', border: '1px solid rgba(201,168,76,0.10)' }}
+        {/* Conversion Metrics */}
+        {conversionStats && (
+          <>
+            <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted mb-4">In-Car Conversion Tracking</p>
+            <div className="grid grid-cols-4 gap-4 mb-10">
+              {conversionStats.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="rounded-2xl p-5"
+                  style={{ background: '#0F0F14', border: '1px solid rgba(201,168,76,0.10)' }}
+                >
+                  <p className="text-[10px] tracking-[2.5px] uppercase text-lux-muted mb-2">{stat.label}</p>
+                  <p className="font-serif-lux text-[36px] font-light text-gold leading-none">{stat.value}</p>
+                </motion.div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Event Log */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted">Event Log</p>
+            {events.length > 0 && (
+              <button
+                onClick={handleClear}
+                className="text-[10px] tracking-[2px] uppercase text-lux-muted hover:text-red-400 transition-colors"
+              >
+                Clear All
+              </button>
+            )}
+          </div>
+
+          {events.length === 0 ? (
+            <div
+              className="rounded-2xl p-6 text-center"
+              style={{ background: '#0F0F14', border: '1px solid rgba(201,168,76,0.08)' }}
             >
-              <p className="text-[10px] tracking-[2.5px] uppercase text-lux-muted mb-2">{stat.label}</p>
-              <p className="font-serif-lux text-[36px] font-light text-gold leading-none">{stat.value}</p>
-            </motion.div>
-          ))}
+              <p className="text-[12px] text-lux-muted tracking-wide">No events yet — start a demo ride to see tracking in action.</p>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {events.map((evt, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.02 }}
+                  className="rounded-xl px-5 py-3 flex items-center gap-4"
+                  style={{ background: '#0F0F14', border: '1px solid rgba(201,168,76,0.06)' }}
+                >
+                  <span
+                    className="text-[9px] font-bold tracking-[2px] uppercase rounded-full px-2.5 py-1 flex-shrink-0"
+                    style={{
+                      color: EVENT_COLORS[evt.name] ?? '#666672',
+                      background: `${EVENT_COLORS[evt.name] ?? '#666672'}14`,
+                      border: `1px solid ${EVENT_COLORS[evt.name] ?? '#666672'}28`,
+                    }}
+                  >
+                    {evt.name.replace(/_/g, ' ')}
+                  </span>
+                  <span className="text-[12px] text-lux-muted flex-1">
+                    {evt.meta ? Object.entries(evt.meta).map(([k, v]) => `${k}: ${v}`).join(' · ') : '—'}
+                  </span>
+                  <span className="text-[11px] text-lux-muted/60 flex-shrink-0 tabular-nums">
+                    {new Date(evt.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Active Rides */}
-        <div className="mb-2">
-          <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted mb-5">Active Rides</p>
+        <div className="mb-3">
+          <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted mb-5">Active Rides (Mock)</p>
         </div>
 
         <div className="space-y-3">
@@ -119,25 +211,9 @@ export default function AdminPage() {
 
         {/* Quick Actions */}
         <div className="mt-10 grid grid-cols-3 gap-4">
-          <ActionCard
-            icon="+"
-            title="Start New Ride"
-            sub="Open operator panel"
-            href="/"
-          />
-          <ActionCard
-            icon="↗"
-            title="View Experience"
-            sub="Live tablet preview"
-            href="/drivers"
-          />
-          <ActionCard
-            icon="✦"
-            title="Synergy Lux"
-            sub="Return to main site"
-            href="https://synergyluxlimodfw.github.io"
-            external
-          />
+          <ActionCard icon="+" title="Start New Ride"    sub="Open operator panel"  href="/" />
+          <ActionCard icon="↗" title="View Experience"   sub="Live tablet preview"  href="/drivers" />
+          <ActionCard icon="✦" title="Synergy Lux"       sub="Return to main site"  href="https://synergyluxlimodfw.github.io" external />
         </div>
 
       </main>

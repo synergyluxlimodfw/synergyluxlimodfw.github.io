@@ -17,7 +17,7 @@ export type RidePhase =
   | 'pre_dropoff'
   | 'complete';
 
-export type ModalType = 'midway' | 'pre_dropoff' | null;
+export type ModalType = 'midway' | 'pre_dropoff' | 'complete' | null;
 
 export type Service = {
   id: string;

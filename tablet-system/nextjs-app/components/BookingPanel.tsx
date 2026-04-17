@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { track } from '@/lib/events';
 import type { Service } from '@/lib/types';
 
 interface BookingPanelProps {
@@ -9,6 +10,10 @@ interface BookingPanelProps {
 }
 
 export default function BookingPanel({ service, onClose }: BookingPanelProps) {
+  function handleCTAClick() {
+    track('rebook_clicked', { service: service.id });
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 24 }}
@@ -21,10 +26,21 @@ export default function BookingPanel({ service, onClose }: BookingPanelProps) {
       {/* Close */}
       <button
         onClick={onClose}
-        className="self-end text-lux-muted hover:text-lux-white transition-colors mb-6"
+        className="self-end text-lux-muted hover:text-lux-white transition-colors mb-5"
       >
         ✕
       </button>
+
+      {/* In-ride exclusive badge */}
+      <div
+        className="flex items-center gap-2 rounded-xl px-3 py-2 mb-5 self-start"
+        style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.22)' }}
+      >
+        <span className="text-[10px]">✦</span>
+        <p className="text-[10px] font-bold tracking-[2px] uppercase" style={{ color: '#4ADE80' }}>
+          10% In-Ride Exclusive
+        </p>
+      </div>
 
       {/* Service info */}
       <p className="text-[10px] tracking-[3.5px] uppercase text-gold/55 mb-2">Book Now</p>
@@ -32,7 +48,7 @@ export default function BookingPanel({ service, onClose }: BookingPanelProps) {
       <p className="text-[12px] text-lux-muted mb-6 leading-relaxed">{service.description}</p>
 
       {/* Price */}
-      <div className="rounded-2xl p-5 mb-6" style={{ background: '#141419', border: '1px solid rgba(201,168,76,0.10)' }}>
+      <div className="rounded-2xl p-5 mb-5" style={{ background: '#141419', border: '1px solid rgba(201,168,76,0.10)' }}>
         <p className="text-[42px] font-serif-lux font-light text-gold leading-none mb-1">{service.price}</p>
         <p className="text-[12px] text-lux-muted">{service.priceNote}</p>
         {service.deposit && (
@@ -42,6 +58,11 @@ export default function BookingPanel({ service, onClose }: BookingPanelProps) {
         )}
       </div>
 
+      {/* Urgency note */}
+      <p className="text-[11px] text-lux-muted text-center mb-5 tracking-wide">
+        Most clients book before drop-off.
+      </p>
+
       {/* CTAs */}
       <div className="flex flex-col gap-3 mt-auto">
         {service.fullLink && (
@@ -49,8 +70,9 @@ export default function BookingPanel({ service, onClose }: BookingPanelProps) {
             href={service.fullLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full text-center rounded-xl py-4 text-[10px] font-bold tracking-[3px] uppercase transition-opacity hover:opacity-90"
-            style={{ background: '#C9A84C', color: '#06060A' }}
+            onClick={handleCTAClick}
+            className="block w-full text-center rounded-xl text-[10px] font-bold tracking-[3px] uppercase transition-opacity hover:opacity-90 active:scale-[0.98]"
+            style={{ background: '#C9A84C', color: '#06060A', minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             Pay Full — {service.price}
           </a>
@@ -60,16 +82,17 @@ export default function BookingPanel({ service, onClose }: BookingPanelProps) {
             href={service.depositLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full text-center rounded-xl py-4 text-[10px] font-bold tracking-[3px] uppercase transition-colors hover:bg-gold/[0.08]"
-            style={{ border: '1px solid rgba(201,168,76,0.3)', color: '#C9A84C' }}
+            onClick={handleCTAClick}
+            className="block w-full text-center rounded-xl text-[10px] font-bold tracking-[3px] uppercase transition-colors hover:bg-gold/[0.08] active:scale-[0.98]"
+            style={{ border: '1px solid rgba(201,168,76,0.3)', color: '#C9A84C', minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            Reserve — {service.depositAmount} Deposit
+            Secure Your Next Ride — {service.depositAmount}
           </a>
         )}
         <a
           href="tel:6468791391"
-          className="block w-full text-center rounded-xl py-4 text-[10px] font-bold tracking-[3px] uppercase text-lux-muted hover:text-lux-white transition-colors"
-          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+          className="block w-full text-center rounded-xl text-[10px] font-bold tracking-[3px] uppercase text-lux-muted hover:text-lux-white transition-colors"
+          style={{ border: '1px solid rgba(255,255,255,0.06)', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           Call to Book
         </a>
