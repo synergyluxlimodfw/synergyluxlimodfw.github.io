@@ -150,7 +150,7 @@
     /* ── CTA ── */
     .cta {
       text-align: center;
-      padding: 52px 20px 60px;
+      padding: 72px 20px 80px;
     }
     .cta-label {
       font-size: 11px;
@@ -165,34 +165,76 @@
       margin: 0 0 10px;
       color: white;
     }
-    .cta p {
+    .cta > p {
       color: #777;
       font-size: 14px;
-      margin: 0 0 32px;
+      margin: 0 0 52px;
+    }
+
+    /* ── PATH CARDS ── */
+    .paths {
+      display: flex;
+      gap: 24px;
+      max-width: 860px;
+      margin: 0 auto;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .path-card {
+      flex: 1;
+      min-width: 300px;
+      max-width: 400px;
+      background: #111;
+      border: 1px solid rgba(198,161,91,0.18);
+      border-radius: 16px;
+      padding: 36px 32px;
+      text-align: left;
+    }
+    .path-card .path-eyebrow {
+      font-size: 10px;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: rgba(198,161,91,0.6);
+      margin-bottom: 14px;
+    }
+    .path-card h3 {
+      font-size: 18px;
+      font-weight: 500;
+      color: white;
+      margin: 0 0 14px;
+      letter-spacing: 0.3px;
+    }
+    .path-card p {
+      font-size: 13.5px;
+      color: #888;
+      line-height: 1.7;
+      margin: 0 0 28px;
     }
     .btn-gold {
       background: #c6a15b;
       color: black;
-      padding: 15px 32px;
-      border-radius: 10px;
+      padding: 13px 28px;
+      border-radius: 8px;
       text-decoration: none;
       font-weight: 700;
-      font-size: 15px;
-      letter-spacing: 0.5px;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
       display: inline-block;
       transition: opacity 0.2s;
     }
     .btn-gold:hover { opacity: 0.88; }
     .btn-outline {
       display: inline-block;
-      margin-left: 14px;
       border: 1px solid rgba(198,161,91,0.4);
       color: #c6a15b;
-      padding: 14px 28px;
-      border-radius: 10px;
+      padding: 12px 28px;
+      border-radius: 8px;
       text-decoration: none;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
       transition: background 0.2s;
     }
     .btn-outline:hover { background: rgba(198,161,91,0.08); }
@@ -208,7 +250,8 @@
     @media (max-width: 600px) {
       .header h1 { font-size: 24px; }
       iframe { height: 70vh; }
-      .btn-outline { display: none; }
+      .paths { flex-direction: column; align-items: center; }
+      .path-card { min-width: unset; width: 100%; }
     }
   </style>
 </head>
@@ -255,12 +298,28 @@
   </div>
 
   <div class="cta">
-    <div class="cta-label">Ready to partner?</div>
+    <div class="cta-label">Work With Us</div>
     <div class="divider"></div>
-    <h2>Bring this experience to your guests</h2>
-    <p>Custom-branded for your property. Available across Dallas–Fort Worth.</p>
-    <a href="mailto:info@synergyluxlimodfw.com" class="btn-gold">Request Partnership</a>
-    <a href="tel:6468791391" class="btn-outline">Call Us</a>
+    <h2>Two ways to get started</h2>
+    <p>Choose the path that fits your organization.</p>
+
+    <div class="paths">
+
+      <div class="path-card">
+        <div class="path-eyebrow">For Corporate Accounts</div>
+        <h3>Executive Travel, Simplified</h3>
+        <p>Set up a corporate account with 4+ rides/month and your executives get this experience included free on every ride. 10–15% off all rides. Monthly invoicing available.</p>
+        <a href="tel:6468791391" class="btn-gold">Set Up Corporate Account</a>
+      </div>
+
+      <div class="path-card">
+        <div class="path-eyebrow">For Hotel &amp; Venue Partners</div>
+        <h3>Branded for Your Property</h3>
+        <p>Custom-branded for your property. Your guests get a seamless in-car experience every time they ride with Synergy Lux.</p>
+        <a href="mailto:info@synergyluxlimodfw.com" class="btn-outline">Request Partnership</a>
+      </div>
+
+    </div>
   </div>
 
 </body>
