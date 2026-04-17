@@ -148,7 +148,7 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 /* ── SECTION 3 — SERVICES ── */
 #services{border-top:1px solid rgba(255,255,255,0.04);}
 .services-intro{max-width:560px;margin-bottom:72px;}
-.services-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+.services-cols{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);}
 .svc-col{background:var(--black);padding:48px 40px;border:1px solid rgba(255,255,255,0.03);position:relative;overflow:hidden;transition:background 0.4s ease;}
 .svc-col::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--gold);transition:width 0.5s ease;}
 .svc-col:hover{background:rgba(201,168,76,0.025);}
@@ -508,18 +508,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 
     <div class="svc-col">
       <div class="svc-num">02</div>
-      <h3>Corporate Transportation</h3>
-      <p>Professional, consistent, and aligned with your standards.</p>
-      <span class="svc-price">From $155</span>
-      <div class="svc-btns">
-        <a href="tel:6468791391" class="btn-svc-pay">Call to Book</a>
-        <a href="#booking" class="btn-svc-dep">Request a Quote</a>
-      </div>
-    </div>
-
-    <div class="svc-col">
-      <div class="svc-num">03</div>
-      <h3>Private Chauffeur</h3>
+      <h3>Hourly Charter</h3>
       <p>Discreet service for evenings, events, and personal travel.</p>
       <span class="svc-price">From $165 / hr</span>
       <div class="svc-btns">
@@ -533,30 +522,33 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <!-- All services grid -->
   <div class="services-grid-full reveal d2">
     <div class="svc-card">
-      <span class="svc-icon">✈︎</span>
-      <h3>Love Field Transfer</h3>
-      <p>Flat rate service from Love Field Airport. Same professional standard, same guaranteed pricing.</p>
-      <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $140</span>
-      <div class="svc-btns">
-        <a href="https://buy.stripe.com/cNi6oBaVe2BhafFgL58Vi08" target="_blank" class="btn-svc-dep">Deposit — $70</a>
-      </div>
-    </div>
-    <div class="svc-card">
       <span class="svc-icon">💍</span>
       <h3>Weddings</h3>
       <p>Red carpet arrival for your most important day. Complimentary vehicle décor and full coordination.</p>
       <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $625 · 4 hrs</span>
       <div class="svc-btns">
-        <a href="https://buy.stripe.com/3cIfZb4wQejZgE39iD8Vi02" target="_blank" class="btn-svc-dep">Deposit — $313</a>
+        <a href="https://buy.stripe.com/aFa4gtaVe3Fl87x1Qb8Vi0a" target="_blank" class="btn-svc-pay">Pay Full — $1,100</a>
+        <a href="https://buy.stripe.com/6oU00d9Ra8ZF0F5cuP8Vi0b" target="_blank" class="btn-svc-dep">Deposit — $550</a>
       </div>
     </div>
     <div class="svc-card">
       <span class="svc-icon">🎓</span>
-      <h3>Proms &amp; Events</h3>
+      <h3>Prom &amp; Events</h3>
       <p>Professional, safe, and on time for concerts, proms, and special occasions across DFW.</p>
       <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $575</span>
       <div class="svc-btns">
-        <a href="https://buy.stripe.com/9B6eV73sM1xd2NdgL58Vi03" target="_blank" class="btn-svc-dep">Deposit — $288</a>
+        <a href="https://buy.stripe.com/9B6dR3gfy8ZFafFcuP8Vi0c" target="_blank" class="btn-svc-pay">Pay Full — $575</a>
+        <a href="https://buy.stripe.com/4gM5kx8N6b7N1J9eCX8Vi0d" target="_blank" class="btn-svc-dep">Deposit — $288</a>
+      </div>
+    </div>
+    <div class="svc-card">
+      <span class="svc-icon">🌙</span>
+      <h3>Night Out</h3>
+      <p>Evenings out, dinner reservations, and personal travel. Professional and discreet.</p>
+      <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $475 · 3 hrs</span>
+      <div class="svc-btns">
+        <a href="https://buy.stripe.com/7sYeV70gAfo387xcuP8Vi0g" target="_blank" class="btn-svc-pay">Pay Full — $475</a>
+        <a href="https://buy.stripe.com/3cI8wJ4wQ8ZF1J91Qb8Vi0h" target="_blank" class="btn-svc-dep">Deposit — $238</a>
       </div>
     </div>
     <div class="svc-card">
@@ -565,7 +557,8 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <p>Cowboys, Mavericks, Stars, Rangers — skip the parking, arrive in comfort.</p>
       <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $300 roundtrip</span>
       <div class="svc-btns">
-        <a href="tel:6468791391" class="btn-svc-dep">Call to Book</a>
+        <a href="https://buy.stripe.com/3cIfZb7J2cbR5Zp8ez8Vi0e" target="_blank" class="btn-svc-pay">Pay Full — $300</a>
+        <a href="https://buy.stripe.com/aFafZb7J2dfVevV3Yj8Vi0f" target="_blank" class="btn-svc-dep">Deposit — $150</a>
       </div>
     </div>
   </div>
@@ -800,24 +793,24 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     </div>
     <div class="pay-card">
       <div class="pay-icon">💍</div>
-      <h3>Wedding Package</h3>
-      <div class="pay-price">$625</div>
-      <div class="pay-sub">4-hour minimum · Complimentary décor<br>Full day from $1,100</div>
-      <div class="pay-dep-info">50% deposit to reserve: <strong>$313</strong></div>
+      <h3>Wedding — Full Day</h3>
+      <div class="pay-price">$1,100</div>
+      <div class="pay-sub">8-hour · Full day package<br>Complimentary décor · Full coordination</div>
+      <div class="pay-dep-info">50% deposit to reserve: <strong>$550</strong></div>
       <div class="pay-btns">
-        <a href="tel:6468791391" class="btn-pay-full">Call to Pay Full</a>
-        <a href="https://buy.stripe.com/3cIfZb4wQejZgE39iD8Vi02" target="_blank" class="btn-pay-dep">Reserve with Deposit — $313</a>
+        <a href="https://buy.stripe.com/aFa4gtaVe3Fl87x1Qb8Vi0a" target="_blank" class="btn-pay-full">Pay Full — $1,100</a>
+        <a href="https://buy.stripe.com/6oU00d9Ra8ZF0F5cuP8Vi0b" target="_blank" class="btn-pay-dep">Reserve with Deposit — $550</a>
       </div>
     </div>
     <div class="pay-card">
       <div class="pay-icon">🎓</div>
       <h3>Prom / Event</h3>
       <div class="pay-price">$575</div>
-      <div class="pay-sub">4-hour package · Professional chauffeur<br>Night out from $475</div>
+      <div class="pay-sub">4-hour package · Professional chauffeur<br>Concerts, proms, and special occasions</div>
       <div class="pay-dep-info">50% deposit to reserve: <strong>$288</strong></div>
       <div class="pay-btns">
-        <a href="tel:6468791391" class="btn-pay-full">Call to Pay Full</a>
-        <a href="https://buy.stripe.com/9B6eV73sM1xd2NdgL58Vi03" target="_blank" class="btn-pay-dep">Reserve with Deposit — $288</a>
+        <a href="https://buy.stripe.com/9B6dR3gfy8ZFafFcuP8Vi0c" target="_blank" class="btn-pay-full">Pay Full — $575</a>
+        <a href="https://buy.stripe.com/4gM5kx8N6b7N1J9eCX8Vi0d" target="_blank" class="btn-pay-dep">Reserve with Deposit — $288</a>
       </div>
     </div>
     <div class="pay-card">
@@ -832,25 +825,36 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       </div>
     </div>
     <div class="pay-card">
-      <div class="pay-icon">🏢</div>
-      <h3>Corporate Account</h3>
-      <div class="pay-price" style="font-size:36px;">Custom</div>
-      <div class="pay-sub">Monthly invoicing · Net-30 billing<br>COI provided · W-9 on request</div>
-      <div class="pay-dep-info">No deposit for approved accounts</div>
+      <div class="pay-icon">🌙</div>
+      <h3>Night Out</h3>
+      <div class="pay-price">$475</div>
+      <div class="pay-sub">3-hour minimum · Evenings &amp; dinner<br>Professional and discreet</div>
+      <div class="pay-dep-info">50% deposit to reserve: <strong>$238</strong></div>
       <div class="pay-btns">
-        <a href="tel:6468791391" class="btn-pay-full">Call to Set Up Account</a>
-        <a href="#booking" class="btn-pay-dep">Submit Inquiry</a>
+        <a href="https://buy.stripe.com/7sYeV70gAfo387xcuP8Vi0g" target="_blank" class="btn-pay-full">Pay Full — $475</a>
+        <a href="https://buy.stripe.com/3cI8wJ4wQ8ZF1J91Qb8Vi0h" target="_blank" class="btn-pay-dep">Reserve with Deposit — $238</a>
       </div>
     </div>
     <div class="pay-card">
-      <div class="pay-icon">🌙</div>
-      <h3>Night Out / Sporting</h3>
-      <div class="pay-price">$475</div>
-      <div class="pay-sub">Night out 3 hrs · Sporting events<br>Cowboys · Mavs · Stars · Rangers</div>
-      <div class="pay-dep-info">50% deposit to reserve: <strong>$238</strong></div>
+      <div class="pay-icon">🏟</div>
+      <h3>Sporting Events</h3>
+      <div class="pay-price">$300</div>
+      <div class="pay-sub">Roundtrip · Cowboys · Mavs · Stars<br>Rangers · Skip the parking</div>
+      <div class="pay-dep-info">50% deposit to reserve: <strong>$150</strong></div>
       <div class="pay-btns">
-        <a href="tel:6468791391" class="btn-pay-full">Call to Pay Full</a>
-        <a href="#booking" class="btn-pay-dep">Request &amp; Reserve</a>
+        <a href="https://buy.stripe.com/3cIfZb7J2cbR5Zp8ez8Vi0e" target="_blank" class="btn-pay-full">Pay Full — $300</a>
+        <a href="https://buy.stripe.com/aFafZb7J2dfVevV3Yj8Vi0f" target="_blank" class="btn-pay-dep">Reserve with Deposit — $150</a>
+      </div>
+    </div>
+    <div class="pay-card">
+      <div class="pay-icon">🏢</div>
+      <h3>Corporate Account</h3>
+      <div class="pay-price" style="font-size:36px;">Custom</div>
+      <div class="pay-sub">4+ rides/month · 10–15% off all rides<br>In-car tablet experience included free</div>
+      <div class="pay-dep-info">Monthly invoicing · No deposit required</div>
+      <div class="pay-btns">
+        <a href="tel:6468791391" class="btn-pay-full">Set Up Account</a>
+        <a href="#booking" class="btn-pay-dep">Submit Inquiry</a>
       </div>
     </div>
   </div>
@@ -1075,12 +1079,13 @@ var STRIPE_LINKS={
   airport_dfw:'https://buy.stripe.com/00w3cp7J2b7NafF2Uf8Vi06',
   airport_love:'https://buy.stripe.com/cNi6oBaVe2BhafFgL58Vi08',
   corporate:'#booking',
-  wedding_4:'https://buy.stripe.com/3cIfZb4wQejZgE39iD8Vi02',
-  wedding_8:'https://buy.stripe.com/3cIfZb4wQejZgE39iD8Vi02',
-  prom:'https://buy.stripe.com/9B6eV73sM1xd2NdgL58Vi03',
+  wedding_4:'https://buy.stripe.com/6oU00d9Ra8ZF0F5cuP8Vi0b',
+  wedding_8:'https://buy.stripe.com/6oU00d9Ra8ZF0F5cuP8Vi0b',
+  prom:'https://buy.stripe.com/4gM5kx8N6b7N1J9eCX8Vi0d',
   hourly_2:'https://buy.stripe.com/6oU5kxe7q7VB2NdamH8Vi09',
   hourly_3:'#booking',hourly_4:'#booking',hourly_5:'#booking',
-  nightout:'#booking',sporting:'#booking',nye:'#booking'
+  nightout:'https://buy.stripe.com/3cI8wJ4wQ8ZF1J91Qb8Vi0h',
+  sporting:'https://buy.stripe.com/aFafZb7J2dfVevV3Yj8Vi0f',nye:'#booking'
 };
 function calculatePrice(){
   var svc=document.getElementById('calcService').value;
