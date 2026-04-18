@@ -196,7 +196,7 @@ export default function OperatorPage() {
                         setName(e.target.value);
                         setErrors(p => ({ ...p, name: undefined }));
                       }}
-                      placeholder="e.g. Mr. Smith"
+                      placeholder="e.g. Marcus or Mr. Smith"
                       className={`lux-input ${errors.name ? 'lux-input-error' : ''}`}
                     />
                   </LuxInput>
