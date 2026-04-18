@@ -10,6 +10,7 @@
  */
 
 import { useSyncExternalStore } from 'react';
+import { supabase } from '@/lib/supabase';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -29,6 +30,7 @@ export interface ExperienceState {
   notes:        string;
   // System
   status: ExperienceStatus;
+  rideId: string | null;
 }
 
 /** Future backend payload shape — no business logic depends on this yet */
@@ -59,6 +61,7 @@ const DEFAULTS: ExperienceState = {
   music:        false,
   notes:        '',
   status:       'idle',
+  rideId:       null,
 };
 
 // ── Session persistence ────────────────────────────────────────────────────
@@ -98,6 +101,10 @@ export const experienceStore = {
     _subscribers.forEach(fn => fn());
   },
 
+  setRideId(id: string): void {
+    commit({ rideId: id });
+  },
+
   setBasicInfo(info: { guestName: string; destination: string; occasion: string; chauffeurName?: string }): void {
     commit(info);
   },
@@ -118,11 +125,17 @@ export const experienceStore = {
   /** Ride is actively in progress — chauffeur has picked up the guest. */
   setActive(): void {
     commit({ status: 'active' });
+    if (_state.rideId) {
+      supabase.from('rides').update({ status: 'active' }).eq('id', _state.rideId).then(() => {});
+    }
   },
 
   /** Ride is complete — triggers transition to thank-you + gratuity screen. */
   completeRide(): void {
     commit({ status: 'complete' });
+    if (_state.rideId) {
+      supabase.from('rides').update({ status: 'complete' }).eq('id', _state.rideId).then(() => {});
+    }
   },
 
   reset(): void {

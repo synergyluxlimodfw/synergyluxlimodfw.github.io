@@ -5,10 +5,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SERVICES } from '@/lib/services';
 import { ProgressDots } from './ScreenWhy';
 import { track } from '@/lib/events';
+import { supabase } from '@/lib/supabase';
+import { experienceStore } from '@/lib/experienceStore';
 import type { Service } from '@/lib/types';
 
-function openStripe(url: string | undefined) {
-  if (url) window.open(url, '_blank');
+function parseDollar(s?: string): number | null {
+  if (!s) return null;
+  const n = parseFloat(s.replace(/[^0-9.]/g, ''));
+  return isNaN(n) ? null : n;
+}
+
+function openStripe(svc: Service, type: 'deposit' | 'full') {
+  const url = type === 'deposit' ? (svc.depositLink || svc.fullLink) : svc.fullLink;
+  if (!url) return;
+  const { rideId } = experienceStore.getState();
+  supabase.from('bookings').insert({
+    ride_id:      rideId,
+    service:      svc.name,
+    amount:       parseDollar(svc.price),
+    deposit:      parseDollar(svc.deposit),
+    stripe_link:  url,
+    payment_type: type,
+  }).then(() => {});
+  window.open(url, '_blank');
 }
 
 interface ScreenBookingProps {
@@ -248,7 +267,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
 
         {/* Primary CTA — deposit */}
         <button
-          onClick={() => openStripe(selected?.depositLink || selected?.fullLink)}
+          onClick={() => selected && openStripe(selected, 'deposit')}
           disabled={!canSubmit}
           className="w-full text-center py-4 rounded-xl text-sm font-bold uppercase transition-all active:scale-[0.98] disabled:cursor-not-allowed"
           style={{
@@ -269,7 +288,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
         {selected?.fullLink && (
           <button
             type="button"
-            onClick={() => openStripe(selected.fullLink)}
+            onClick={() => openStripe(selected, 'full')}
             className="w-full text-center mt-3 py-3 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all active:scale-[0.98] hover:bg-gold/[0.05]"
             style={{ border: '1px solid rgba(201,168,76,0.22)', color: '#C9A84C', letterSpacing: '0.10em' }}
           >

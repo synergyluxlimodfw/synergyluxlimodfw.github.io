@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import TipQRCode from '@/components/TipQRCode';
 import { TIP_LINKS } from '@/lib/tipLinks';
+import { supabase } from '@/lib/supabase';
+import { experienceStore } from '@/lib/experienceStore';
 import type { TipKey } from '@/lib/tipLinks';
 
 // ─────────────────────────────────────────────────────────
@@ -15,10 +17,10 @@ import type { TipKey } from '@/lib/tipLinks';
 
 type PresetKey = 'ten' | 'fifteen' | 'twenty';
 
-const PRESETS: { key: PresetKey; label: string }[] = [
-  { key: 'ten',     label: '10%' },
-  { key: 'fifteen', label: '15%' },
-  { key: 'twenty',  label: '20%' },
+const PRESETS: { key: PresetKey; label: string; percent: number }[] = [
+  { key: 'ten',     label: '10%', percent: 10 },
+  { key: 'fifteen', label: '15%', percent: 15 },
+  { key: 'twenty',  label: '20%', percent: 20 },
 ];
 
 interface TipSelectorProps {
@@ -32,6 +34,17 @@ export default function TipSelector({ onTip }: TipSelectorProps) {
 
   const url = TIP_LINKS[selected as TipKey];
 
+  function handleSelect(key: PresetKey, percent: number) {
+    setSelected(key);
+    const { rideId, guestName } = experienceStore.getState();
+    supabase.from('tips').insert({
+      ride_id:    rideId,
+      guest_name: guestName || null,
+      percent,
+      stripe_key: key,
+    }).then(() => {});
+  }
+
   return (
     <div className="flex flex-col items-center gap-5 w-full">
 
@@ -42,12 +55,12 @@ export default function TipSelector({ onTip }: TipSelectorProps) {
 
       {/* Preset buttons */}
       <div className="flex items-center gap-3">
-        {PRESETS.map(({ key, label }) => (
+        {PRESETS.map(({ key, label, percent }) => (
           <TipButton
             key={key}
             label={label}
             active={selected === key}
-            onClick={() => setSelected(key)}
+            onClick={() => handleSelect(key, percent)}
           />
         ))}
       </div>

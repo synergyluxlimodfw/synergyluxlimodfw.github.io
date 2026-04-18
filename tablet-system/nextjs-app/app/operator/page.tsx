@@ -4,6 +4,7 @@ import { useState, useEffect, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { experienceStore } from '@/lib/experienceStore';
+import { supabase } from '@/lib/supabase';
 
 // ─────────────────────────────────────────────────────────
 // Constants
@@ -103,11 +104,13 @@ export default function OperatorPage() {
     if (!validate() || loading) return;
     setLoading(true);
 
+    const chauffeurName = chauffeur.trim() || DEFAULT_CHAUFFEUR;
+
     experienceStore.setBasicInfo({
       guestName:     name.trim(),
       destination:   destination.trim(),
       occasion,
-      chauffeurName: chauffeur.trim() || DEFAULT_CHAUFFEUR,
+      chauffeurName,
     });
     experienceStore.setPreferences({
       temperature,
@@ -115,6 +118,19 @@ export default function OperatorPage() {
       notes: notes.trim(),
     });
     experienceStore.launchExperience();
+
+    // Write ride to Supabase — fire and forget, non-blocking
+    supabase.from('rides').insert({
+      guest_name:  name.trim(),
+      destination: destination.trim(),
+      occasion:    occasion || null,
+      chauffeur:   chauffeurName,
+      eta_minutes: eta,
+      status:      'preparing',
+      vip_note:    notes.trim() || null,
+    }).select('id').single().then(({ data }) => {
+      if (data?.id) experienceStore.setRideId(data.id);
+    });
 
     await sleep(1200);
     setLoading(false);
