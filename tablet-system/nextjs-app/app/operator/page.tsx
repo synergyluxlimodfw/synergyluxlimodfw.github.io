@@ -73,9 +73,10 @@ export default function OperatorPage() {
   const [eta, setEta] = useState(randomEta);
 
   // UI
-  const [errors,  setErrors]  = useState<{ name?: string; destination?: string }>({});
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [errors,         setErrors]         = useState<{ name?: string; destination?: string }>({});
+  const [loading,        setLoading]        = useState(false);
+  const [success,        setSuccess]        = useState(false);
+  const [launchedRideId, setLaunchedRideId] = useState<string | null>(null);
 
   const canSubmit = name.trim().length > 0 && destination.trim().length > 0;
 
@@ -119,8 +120,8 @@ export default function OperatorPage() {
     });
     experienceStore.launchExperience();
 
-    // Write ride to Supabase — fire and forget, non-blocking
-    supabase.from('rides').insert({
+    // Await insert so we get the ride ID for the tablet URL
+    const { data: ride } = await supabase.from('rides').insert({
       guest_name:  name.trim(),
       destination: destination.trim(),
       occasion:    occasion || null,
@@ -128,19 +129,19 @@ export default function OperatorPage() {
       eta_minutes: eta,
       status:      'preparing',
       vip_note:    notes.trim() || null,
-    }).select('id').single().then(({ data }) => {
-      if (data?.id) experienceStore.setRideId(data.id);
-    });
+    }).select('id').single();
 
-    await sleep(1200);
+    const rideId = ride?.id ?? null;
+    if (rideId) experienceStore.setRideId(rideId);
+
+    setLaunchedRideId(rideId);
     setLoading(false);
     setSuccess(true);
-    await sleep(600);
-    router.push('/experience');
+    // Stay on success screen — operator controls ride from here
   }
 
   return (
-    <div className="min-h-screen bg-lux-black flex items-center justify-center p-8">
+    <div className="min-h-screen bg-lux-black flex items-start sm:items-center justify-center p-4 sm:p-8 overflow-y-auto">
 
       {/* Ambient glow behind card */}
       <div
@@ -162,6 +163,8 @@ export default function OperatorPage() {
             destination={destination}
             chauffeur={chauffeur.trim() || DEFAULT_CHAUFFEUR}
             eta={eta}
+            rideId={launchedRideId}
+            onReset={() => { setSuccess(false); setLaunchedRideId(null); }}
           />
         )}
 
@@ -173,12 +176,12 @@ export default function OperatorPage() {
             initial="hidden"
             animate="show"
             exit="exit"
-            className="relative z-10 w-full max-w-lg rounded-3xl border border-lux-border bg-lux-card shadow-[0_0_120px_rgba(201,168,76,0.06)]"
+            className="relative z-10 w-full max-w-lg rounded-3xl border border-lux-border bg-lux-card shadow-[0_0_120px_rgba(201,168,76,0.06)] my-4 sm:my-0"
           >
             {/* Inset top highlight */}
             <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent rounded-full" />
 
-            <div className="p-10">
+            <div className="p-6 sm:p-10">
 
               {/* Staggered sections */}
               <motion.div variants={sectionVariants} initial="hidden" animate="show">
@@ -647,83 +650,211 @@ function Spinner() {
 }
 
 // ─────────────────────────────────────────────────────────
-// SuccessState
+// SuccessState — Ride Live Control Panel
 // ─────────────────────────────────────────────────────────
+
+type RidePhase = 'preparing' | 'ready' | 'active' | 'complete';
 
 function SuccessState({
   name,
   destination,
   chauffeur,
   eta,
+  rideId,
+  onReset,
 }: {
   name: string;
   destination: string;
   chauffeur: string;
   eta: number;
+  rideId: string | null;
+  onReset: () => void;
 }) {
-  const rows = [
-    ['Guest',       name],
-    ['Chauffeur',   chauffeur],
-    ['ETA',         `${eta} min`],
-    ['Destination', destination],
-  ] as const;
+  const [phase,    setPhase]    = useState<RidePhase>('preparing');
+  const [copying,  setCopying]  = useState(false);
+
+  const origin    = typeof window !== 'undefined' ? window.location.origin : '';
+  const tabletUrl = rideId ? `${origin}/experience?ride=${rideId}` : null;
+
+  async function advanceTo(newPhase: RidePhase) {
+    if (!rideId) return;
+    setPhase(newPhase);
+    await supabase.from('rides').update({ status: newPhase }).eq('id', rideId);
+  }
+
+  async function copyUrl() {
+    if (!tabletUrl) return;
+    await navigator.clipboard.writeText(tabletUrl);
+    setCopying(true);
+    setTimeout(() => setCopying(false), 1800);
+  }
+
+  const PHASES: { key: RidePhase; label: string; sub: string; color: string }[] = [
+    { key: 'ready',    label: 'Ready',    sub: 'Show welcome screen', color: '#C9A84C'  },
+    { key: 'active',   label: 'En Route', sub: 'Ride is underway',    color: '#4ADE80'  },
+    { key: 'complete', label: 'End Ride', sub: 'Show thank-you',      color: '#F97316'  },
+  ];
 
   return (
     <motion.div
       key="success"
-      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      initial={{ opacity: 0, scale: 0.96, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: EASE }}
-      className="w-full max-w-lg rounded-3xl border border-lux-border bg-lux-card p-12 text-center shadow-[0_0_120px_rgba(201,168,76,0.08)]"
+      transition={{ duration: 0.45, ease: EASE }}
+      className="w-full max-w-lg rounded-3xl border border-lux-border bg-lux-card shadow-[0_0_120px_rgba(201,168,76,0.08)] my-4 sm:my-0"
     >
-      {/* Checkmark */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.1, type: 'spring', stiffness: 220, damping: 16 }}
-        className="w-16 h-16 rounded-full bg-gold/10 border border-gold/25 flex items-center justify-center mx-auto mb-8"
-      >
-        <motion.span
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.32, type: 'spring', stiffness: 300 }}
-          className="text-gold text-[22px] leading-none"
+      {/* Top glow line */}
+      <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent rounded-full" />
+
+      <div className="p-6 sm:p-8">
+
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4, ease: EASE }}
+          className="flex items-center justify-between mb-6"
         >
-          ✓
-        </motion.span>
-      </motion.div>
-
-      {/* Text */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.22, duration: 0.4, ease: EASE }}
-      >
-        <p className="text-[9px] tracking-[5px] uppercase text-gold/50 mb-3">
-          Experience Ready
-        </p>
-        <h2 className="font-serif text-[38px] font-light text-lux-white leading-tight mb-2">
-          Journey <em className="text-gold2">Prepared</em>
-        </h2>
-        <p className="text-[13px] text-lux-muted mb-8">
-          Transferring to passenger screen…
-        </p>
-      </motion.div>
-
-      {/* Details */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.38, duration: 0.4, ease: EASE }}
-        className="rounded-2xl border border-lux-border bg-lux-card2 p-5 text-left space-y-3.5"
-      >
-        {rows.map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between">
-            <span className="text-[11px] text-lux-muted/80">{label}</span>
-            <span className="text-[13px] text-lux-white font-medium">{value}</span>
+          <div>
+            <p className="text-[9px] tracking-[5px] uppercase text-gold/50 mb-1">
+              Prestige · Ride Live
+            </p>
+            <h2 className="font-serif text-[32px] sm:text-[38px] font-light text-lux-white leading-none">
+              {name || 'Guest'} <em className="text-gold2">→</em> {destination || '…'}
+            </h2>
           </div>
-        ))}
-      </motion.div>
+          {/* Live pulse */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <motion.div
+              animate={{ scale: [1, 1.5, 1], opacity: [0.8, 0.2, 0.8] }}
+              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+              className="w-2 h-2 rounded-full bg-emerald-400"
+            />
+            <span className="text-[9px] tracking-[3px] uppercase text-emerald-400/70">Live</span>
+          </div>
+        </motion.div>
+
+        {/* Tablet URL — prominent */}
+        {tabletUrl && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.4, ease: EASE }}
+            className="rounded-2xl p-4 mb-5"
+            style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.18)' }}
+          >
+            <p className="text-[9px] tracking-[4px] uppercase text-gold/50 mb-2">
+              Tablet URL — open on mounted iPad
+            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-[12px] text-lux-muted/80 flex-1 break-all leading-relaxed">
+                {tabletUrl}
+              </p>
+              <button
+                onClick={copyUrl}
+                className="flex-shrink-0 rounded-xl px-3 py-2 text-[10px] font-semibold tracking-wide uppercase transition-all active:scale-95"
+                style={{
+                  background: copying ? 'rgba(74,222,128,0.15)' : 'rgba(201,168,76,0.12)',
+                  border:     copying ? '1px solid rgba(74,222,128,0.35)' : '1px solid rgba(201,168,76,0.25)',
+                  color:      copying ? '#4ADE80' : '#C9A84C',
+                  minHeight:  '44px',
+                  minWidth:   '64px',
+                }}
+              >
+                {copying ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Guest summary row */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.24, duration: 0.4 }}
+          className="rounded-2xl border border-lux-border bg-lux-card2 p-4 mb-5"
+        >
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              ['Chauffeur', chauffeur],
+              ['ETA',       `${eta} min`],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-0.5">{label}</p>
+                <p className="text-[13px] text-lux-white font-medium">{value}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Phase controls */}
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4, ease: EASE }}
+        >
+          <p className="text-[9px] tracking-[4px] uppercase text-lux-muted/40 mb-3">
+            Advance Ride Phase
+          </p>
+          <div className="space-y-2.5">
+            {PHASES.map(({ key, label, sub, color }) => {
+              const isActive = phase === key;
+              const isPast   = PHASES.findIndex(p => p.key === key) < PHASES.findIndex(p => p.key === phase);
+              return (
+                <button
+                  key={key}
+                  onClick={() => advanceTo(key)}
+                  disabled={isActive || isPast}
+                  className="w-full flex items-center justify-between rounded-2xl px-4 transition-all duration-200 active:scale-[0.98] disabled:cursor-default"
+                  style={{
+                    minHeight:  '56px',
+                    background: isActive ? `${color}18` : isPast ? 'rgba(255,255,255,0.02)' : '#141419',
+                    border:     `1px solid ${isActive ? `${color}40` : 'rgba(201,168,76,0.10)'}`,
+                    opacity:    isPast ? 0.4 : 1,
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ background: isActive ? color : (isPast ? color : 'rgba(201,168,76,0.3)') }}
+                    />
+                    <div className="text-left">
+                      <p className="text-[12px] font-semibold tracking-wide" style={{ color: isActive ? color : '#EFEFEF' }}>
+                        {label}
+                      </p>
+                      <p className="text-[10px] text-lux-muted/50">{sub}</p>
+                    </div>
+                  </div>
+                  {isActive && (
+                    <span className="text-[9px] tracking-[2px] uppercase font-semibold" style={{ color }}>
+                      Active
+                    </span>
+                  )}
+                  {!isActive && !isPast && (
+                    <span className="text-[11px] text-lux-muted/30">→</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Reset */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.45 }}
+          className="mt-6 text-center"
+        >
+          <button
+            onClick={onReset}
+            className="text-[10px] tracking-[3px] uppercase text-lux-muted/40 hover:text-lux-muted transition-colors"
+          >
+            ← New Ride
+          </button>
+        </motion.div>
+
+      </div>
     </motion.div>
   );
 }

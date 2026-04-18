@@ -122,6 +122,33 @@ export const experienceStore = {
     setTimeout(() => commit({ status: 'ready' }), 1200);
   },
 
+  /**
+   * Populate store from a Supabase `rides` row — called by the realtime
+   * subscription so the UI reflects DB state instantly.
+   * Does NOT overwrite temperature / music (not stored in DB schema).
+   */
+  loadFromRide(row: {
+    id: string;
+    guest_name: string;
+    destination: string;
+    occasion: string | null;
+    chauffeur: string;
+    eta_minutes: number;
+    status: string;
+    vip_note: string | null;
+  }): void {
+    commit({
+      guestName:     row.guest_name,
+      destination:   row.destination,
+      occasion:      row.occasion ?? '',
+      chauffeurName: row.chauffeur,
+      eta:           row.eta_minutes,
+      notes:         row.vip_note ?? '',
+      status:        row.status as ExperienceStatus,
+      rideId:        row.id,
+    });
+  },
+
   /** Ride is actively in progress — chauffeur has picked up the guest. */
   setActive(): void {
     commit({ status: 'active' });

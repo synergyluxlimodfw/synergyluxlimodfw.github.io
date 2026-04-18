@@ -1,12 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
+import { supabase } from '@/lib/supabase';
 import MapEmbed       from '@/components/MapEmbed';
 import ThankYouScreen from '@/components/ThankYouScreen';
+
+// Supabase rides row shape
+type RideRow = {
+  id: string;
+  guest_name: string;
+  destination: string;
+  occasion: string | null;
+  chauffeur: string;
+  eta_minutes: number;
+  status: string;
+  vip_note: string | null;
+};
 
 // ─────────────────────────────────────────────────────────
 // Helpers
@@ -20,14 +33,76 @@ function timeGreeting(): string {
 }
 
 // ─────────────────────────────────────────────────────────
-// Page
+// Page — Suspense wrapper required for useSearchParams
 // ─────────────────────────────────────────────────────────
 
 export default function ExperiencePage() {
-  const state  = useExperienceStore();
-  const router = useRouter();
+  return (
+    <Suspense>
+      <ExperienceInner />
+    </Suspense>
+  );
+}
 
-  useEffect(() => { experienceStore.hydrate(); }, []);
+function ExperienceInner() {
+  const state       = useExperienceStore();
+  const router      = useRouter();
+  const searchParams = useSearchParams();
+  const rideParam   = searchParams.get('ride');
+
+  // ── Supabase Realtime subscription ───────────────────────
+  useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    async function init() {
+      let targetId = rideParam;
+
+      // No URL param — find the latest in-progress ride
+      if (!targetId) {
+        const { data } = await supabase
+          .from('rides')
+          .select('id')
+          .in('status', ['preparing', 'ready', 'active'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        targetId = data?.id ?? null;
+      }
+
+      // No active ride anywhere — fall back to sessionStorage
+      if (!targetId) {
+        experienceStore.hydrate();
+        return;
+      }
+
+      // Fetch the full ride row
+      const { data: ride } = await supabase
+        .from('rides')
+        .select('*')
+        .eq('id', targetId)
+        .single();
+
+      if (ride) experienceStore.loadFromRide(ride as RideRow);
+
+      // Subscribe to realtime UPDATEs for this specific ride
+      channel = supabase
+        .channel(`ride-${targetId}`)
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'rides', filter: `id=eq.${targetId}` },
+          (payload) => {
+            experienceStore.loadFromRide(payload.new as RideRow);
+          }
+        )
+        .subscribe();
+    }
+
+    init();
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [rideParam]);
 
   const showMap   = state.status === 'ready' || state.status === 'active';
 
