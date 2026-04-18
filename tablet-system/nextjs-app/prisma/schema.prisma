@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Enums ──────────────────────────────────────────────────────────────────
+
+enum Role {
+  OPERATOR
+  ADMIN
+}
+
+enum RideStatus {
+  PREPARING
+  READY
+  ACTIVE
+  COMPLETE
+}
+
+// ── Models ─────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(OPERATOR)
+  createdAt DateTime @default(now())
+
+  // Future: rides Ride[] @relation("OperatorRides")
+}
+
+model Ride {
+  id            String     @id @default(cuid())
+  guestName     String
+  destination   String
+  occasion      String?
+  chauffeurName String
+  eta           Int
+  temperature   Int
+  music         Boolean
+  notes         String?
+  status        RideStatus @default(PREPARING)
+  createdAt     DateTime   @default(now())
+
+  // Future relations:
+  // driverId  String?
+  // driver    Driver?  @relation(fields: [driverId], references: [id])
+  // vehicleId String?
+  // vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
+  // scheduledAt DateTime?
+  // gpsLat    Float?
+  // gpsLng    Float?
+}
+
+// Future models (uncomment when needed):
+//
+// model Driver {
+//   id        String  @id @default(cuid())
+//   name      String
+//   phone     String  @unique
+//   vehicleId String?
+//   vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
+//   rides     Ride[]
+// }
+//
+// model Vehicle {
+//   id       String  @id @default(cuid())
+//   plate    String  @unique
+//   model    String
+//   drivers  Driver[]
+//   rides    Ride[]
+// }

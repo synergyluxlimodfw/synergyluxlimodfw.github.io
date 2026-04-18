@@ -131,6 +131,9 @@ export const experienceStore = {
     _subscribers.forEach(fn => fn());
   },
 
+  /** Returns current state snapshot — for debugging only. */
+  getState(): ExperienceState { return _state; },
+
   /** Maps current state to the backend POST /ride/start shape. */
   toRidePayload(): RidePayload {
     return {

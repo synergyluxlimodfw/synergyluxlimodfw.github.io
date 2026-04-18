@@ -1,0 +1,10 @@
+node_modules
+.next
+tsconfig.tsbuildinfo
+
+# Environment variables — never commit secrets
+.env
+.env.local
+.env.*.local
+
+/lib/generated/prisma

@@ -39,16 +39,65 @@
 }
 
 @layer components {
-  /* Luxury input — use className="lux-input" */
+  /* Luxury input */
   .lux-input {
     @apply w-full rounded-xl px-4 py-3 text-sm text-lux-white;
     @apply bg-lux-card2 border border-lux-border;
     @apply outline-none transition-all duration-200;
-    @apply placeholder:text-lux-muted;
+    @apply placeholder:text-lux-muted/70;
+  }
+  .lux-input:hover {
+    border-color: rgba(201,168,76,0.22);
   }
   .lux-input:focus {
-    border-color: rgba(201,168,76,0.45);
+    border-color: rgba(201,168,76,0.5);
     box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  }
+
+  /* Error state */
+  .lux-input-error {
+    border-color: rgba(248,113,113,0.35) !important;
+  }
+  .lux-input-error:focus {
+    border-color: rgba(248,113,113,0.55) !important;
+    box-shadow: 0 0 0 3px rgba(248,113,113,0.07) !important;
+  }
+
+  /* Range slider */
+  .lux-slider {
+    @apply w-full h-0.5 rounded-full appearance-none outline-none cursor-pointer;
+    background: linear-gradient(
+      to right,
+      #C9A84C calc((var(--val, 72) - 65) / 13 * 100%),
+      rgba(201,168,76,0.15) calc((var(--val, 72) - 65) / 13 * 100%)
+    );
+  }
+  .lux-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #C9A84C;
+    border: 2px solid #0F0F14;
+    box-shadow: 0 0 0 1px rgba(201,168,76,0.4), 0 2px 8px rgba(201,168,76,0.3);
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .lux-slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 2px rgba(201,168,76,0.5), 0 4px 12px rgba(201,168,76,0.4);
+    transform: scale(1.12);
+  }
+  .lux-slider::-webkit-slider-thumb:active {
+    transform: scale(0.95);
+  }
+  .lux-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #C9A84C;
+    border: 2px solid #0F0F14;
+    box-shadow: 0 0 0 1px rgba(201,168,76,0.4);
+    cursor: pointer;
   }
 }
 
@@ -61,4 +110,12 @@
   .bg-lux-card2     { background: #141419; }
   .border-lux       { border-color: rgba(201,168,76,0.14); }
   .bg-gold-dim      { background: rgba(201,168,76,0.12); }
+
+  /* Experience page */
+  .text-glow-gold {
+    text-shadow: 0 0 40px rgba(201,168,76,0.25), 0 0 80px rgba(201,168,76,0.10);
+  }
+  .glow-dot-ready {
+    box-shadow: 0 0 8px rgba(74,222,128,0.6), 0 0 16px rgba(74,222,128,0.3);
+  }
 }
