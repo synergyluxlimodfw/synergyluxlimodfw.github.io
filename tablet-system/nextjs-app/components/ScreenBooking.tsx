@@ -63,6 +63,11 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
     setPhoneError('');
     setLoading(true);
 
+    // Open the window NOW — synchronous with the tap event.
+    // Browsers block window.open called after await; this prevents that.
+    const stripeUrl = new URL(primaryLink);
+    const win = window.open('about:blank', '_blank', 'noopener,noreferrer');
+
     try {
       // 1. Save / upsert customer
       const customerRes = await fetch('/api/customer', {
@@ -99,17 +104,19 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
         sessionStorage.removeItem('slux_success_tracked'); // allow re-tracking on new booking
       } catch { /* storage blocked — continue */ }
 
-      // 4. Build Stripe URL — append client_reference_id for reconciliation
-      const url = new URL(primaryLink);
-      url.searchParams.set('client_reference_id', cid);
-      // Note: prefilled_name / metadata_* are not standard on Stripe Payment Links.
-      // Configure the Payment Link in Stripe dashboard to redirect to /success on completion.
-
-      // 5. Open Stripe in a new tab so the tablet experience stays alive
-      window.open(url.toString(), '_blank', 'noopener,noreferrer');
+      // 4. Append client_reference_id for Stripe reconciliation, then navigate
+      stripeUrl.searchParams.set('client_reference_id', cid);
+      if (win) {
+        win.location.href = stripeUrl.toString();
+      } else {
+        // Fallback if pop-up was blocked despite the early open
+        window.open(stripeUrl.toString(), '_blank', 'noopener,noreferrer');
+      }
 
     } catch (err) {
       console.error('[ScreenBooking] handleReserve:', err);
+      // Still navigate even if customer save failed — don't block the booking
+      if (win) win.location.href = stripeUrl.toString();
     } finally {
       setLoading(false);
     }

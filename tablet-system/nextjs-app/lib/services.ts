@@ -26,6 +26,7 @@ export const SERVICES: Service[] = [
     priceNote: '2-hour minimum · $330 for 2 hrs',
     deposit: '$165',
     depositAmount: '$165',
+    fullLink:    'https://buy.stripe.com/00weV72oI3FlevVfH18Vi0m',
     depositLink: 'https://buy.stripe.com/6oU5kxe7q7VB2NdamH8Vi09',
   },
   {
