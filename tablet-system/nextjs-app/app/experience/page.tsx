@@ -14,8 +14,8 @@ import ThankYouScreen from '@/components/ThankYouScreen';
 
 function timeGreeting(): string {
   const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
+  if (h >= 5 && h < 12) return 'Good morning';
+  if (h >= 12 && h < 18) return 'Good afternoon';
   return 'Good evening';
 }
 
@@ -162,6 +162,7 @@ export default function ExperiencePage() {
                     chauffeurName={state.chauffeurName}
                     eta={state.eta}
                     temperature={state.temperature}
+                    music={state.music}
                   />
                 )}
 
@@ -175,6 +176,7 @@ export default function ExperiencePage() {
                     chauffeurName={state.chauffeurName}
                     eta={state.eta}
                     temperature={state.temperature}
+                    music={state.music}
                     activeRide
                   />
                 )}
@@ -359,6 +361,7 @@ function ReadyView({
   chauffeurName,
   eta,
   temperature,
+  music,
   activeRide = false,
 }: {
   guestName: string;
@@ -367,10 +370,12 @@ function ReadyView({
   chauffeurName: string;
   eta: number;
   temperature: number;
+  music: boolean;
   activeRide?: boolean;
 }) {
-  const greeting    = timeGreeting();
-  const firstName   = guestName ? guestName.split(' ')[0] : '';
+  const greeting  = timeGreeting();
+  const firstName = guestName ? guestName.split(' ')[0] : '';
+  const cabinLine = `${temperature}°F · ${music ? 'Ambient Music' : 'Quiet Mode'}`;
 
   return (
     <motion.div
@@ -378,49 +383,88 @@ function ReadyView({
       initial="hidden"
       animate="show"
       exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.4 } }}
-      className="flex flex-col items-center gap-6 w-full max-w-2xl px-4"
+      className="flex flex-col items-center gap-10 w-full"
+      style={{ maxWidth: '800px' }}
     >
-      {/* Serif greeting */}
-      <motion.div variants={fadeUp} className="text-center space-y-2">
-        <h1 className="font-serif text-[42px] sm:text-[52px] font-light leading-none text-lux-white">
-          {greeting}{firstName ? `, ${firstName}` : ''}
+
+      {/* ── Header ──────────────────────────────────────────── */}
+      <motion.div variants={fadeUp} className="flex flex-col items-center gap-5 text-center">
+
+        {/* Logo line */}
+        <p
+          className="uppercase tracking-[6px] text-gold"
+          style={{ fontSize: '11px', opacity: 0.7 }}
+        >
+          Synergy Lux · Dallas–Fort Worth
+        </p>
+
+        {/* Serif greeting */}
+        <h1
+          className="font-serif font-light leading-[1.1] text-lux-white"
+          style={{ fontSize: '68px' }}
+        >
+          {greeting},
+          {firstName && (
+            <>
+              {' '}
+              <br />
+              <em className="text-gold not-italic">{firstName}</em>
+            </>
+          )}
         </h1>
-        <p className="text-[13px] text-lux-muted/70 tracking-wide">
+
+        {/* Subtitle */}
+        <p
+          className="text-lux-muted"
+          style={{ fontSize: '22px', letterSpacing: '1px' }}
+        >
           {activeRide
             ? `Your journey to ${destination || 'your destination'} is underway`
             : `Your journey to ${destination || 'your destination'} is prepared`}
         </p>
+
       </motion.div>
 
-      {/* Two-card grid */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4 w-full">
+      {/* ── Two-card grid ────────────────────────────────────── */}
+      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-5 w-full">
 
         {/* Left card — Chauffeur + ETA */}
         <div
-          className="rounded-2xl border border-lux-border p-6 flex flex-col gap-4"
-          style={{ background: 'rgba(12,12,18,0.75)', backdropFilter: 'blur(14px)' }}
+          className="flex flex-col gap-8"
+          style={{
+            background:   '#111111',
+            border:       '1px solid rgba(201,168,76,0.15)',
+            borderRadius: '24px',
+            padding:      '32px 40px',
+            boxShadow:    '0 0 80px rgba(201,168,76,0.06)',
+          }}
         >
-          <div>
-            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
+          {/* Chauffeur */}
+          <div className="flex flex-col gap-1">
+            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50">
               Chauffeur
             </p>
-            <p className="text-[15px] font-medium text-lux-white tracking-wide">
+            <p className="text-[28px] font-light text-lux-white leading-none">
               {chauffeurName}
             </p>
           </div>
 
-          <div className="mt-auto">
-            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
-              {activeRide ? 'En Route' : 'ETA'}
+          {/* ETA */}
+          <div className="flex flex-col gap-1 mt-auto">
+            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50">
+              Estimated Arrival
             </p>
-            <div className="flex items-end gap-2 leading-none">
+            <div className="flex items-end gap-3 leading-none">
               <span
                 className="font-serif font-light text-gold"
                 style={{ fontSize: '82px', lineHeight: 1 }}
               >
                 {eta}
               </span>
-              <span className="text-[13px] text-lux-muted/60 pb-3 tracking-wide">
+              <span
+                className="text-lux-muted/60 pb-2"
+                style={{ fontSize: '18px' }}
+              >
                 minutes
               </span>
             </div>
@@ -429,37 +473,46 @@ function ReadyView({
 
         {/* Right card — Cabin + Occasion + Route */}
         <div
-          className="rounded-2xl border border-lux-border p-6 flex flex-col gap-5"
-          style={{ background: 'rgba(12,12,18,0.75)', backdropFilter: 'blur(14px)' }}
+          className="flex flex-col gap-7"
+          style={{
+            background:   '#111111',
+            border:       '1px solid rgba(201,168,76,0.15)',
+            borderRadius: '24px',
+            padding:      '32px 40px',
+            boxShadow:    '0 0 80px rgba(201,168,76,0.06)',
+          }}
         >
-          <div>
-            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
-              Cabin Temp
+          {/* Cabin */}
+          <div className="flex flex-col gap-1">
+            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50">
+              Cabin Prepared For You
             </p>
-            <p className="text-[22px] font-light text-lux-white tracking-wide">
-              {temperature}°F
+            <p className="text-[22px] font-light text-lux-white leading-snug">
+              {cabinLine}
             </p>
           </div>
 
+          {/* Occasion */}
           {occasion && (
-            <div>
-              <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
+            <div className="flex flex-col gap-1">
+              <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50">
                 Occasion
               </p>
-              <p className="text-[14px] text-lux-white/80 tracking-wide">
+              <p className="text-[18px] font-light text-lux-white/80">
                 {occasion}
               </p>
             </div>
           )}
 
-          <div className="mt-auto">
-            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
+          {/* Route */}
+          <div className="flex flex-col gap-1 mt-auto">
+            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50">
               Route
             </p>
-            <p className="text-[14px] text-lux-white/80 tracking-wide truncate">
-              {destination || '—'}
+            <p className="text-[18px] font-light text-lux-white/80 truncate">
+              Optimized · Traffic-free
             </p>
-            <p className={`text-[11px] mt-1 tracking-wide ${
+            <p className={`text-[11px] tracking-[2px] uppercase mt-1 ${
               activeRide ? 'text-emerald-400' : 'text-gold/60'
             }`}>
               {activeRide ? 'En Route' : 'Confirmed'}
@@ -468,30 +521,28 @@ function ReadyView({
         </div>
 
       </motion.div>
-    </motion.div>
-  );
-}
 
-function DetailCell({
-  label,
-  value,
-  highlight,
-  accent,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-  accent?: boolean;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-1.5 px-4 py-1">
-      <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/70">{label}</p>
-      <p className={`text-[14px] font-medium tracking-wide ${
-        accent ? 'text-emerald-400' : highlight ? 'text-gold' : 'text-lux-white'
-      }`}>
-        {value}
-      </p>
-    </div>
+      {/* ── Footer text ──────────────────────────────────────── */}
+      <motion.div variants={fadeUp} className="text-center flex flex-col gap-1">
+        <p className="text-[13px] text-lux-muted/40 tracking-wide">
+          Everything has been prepared just for you.
+        </p>
+        <p className="text-[13px] text-lux-muted/40 tracking-wide">
+          Sit back and enjoy the journey.
+        </p>
+      </motion.div>
+
+      {/* ── Bottom glow text (fixed) ─────────────────────────── */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-10">
+        <p
+          className="text-gold text-center whitespace-nowrap"
+          style={{ fontSize: '11px', opacity: 0.4, letterSpacing: '3px' }}
+        >
+          Synergy Lux Private Chauffeur Experience
+        </p>
+      </div>
+
+    </motion.div>
   );
 }
 
