@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
@@ -23,7 +24,8 @@ function timeGreeting(): string {
 // ─────────────────────────────────────────────────────────
 
 export default function ExperiencePage() {
-  const state = useExperienceStore();
+  const state  = useExperienceStore();
+  const router = useRouter();
 
   useEffect(() => { experienceStore.hydrate(); }, []);
 
@@ -47,6 +49,16 @@ export default function ExperiencePage() {
           />
         )}
       </AnimatePresence>
+
+      {/* ── Operator handoff — faint, non-intrusive ─────── */}
+      <button
+        type="button"
+        onClick={() => { experienceStore.reset(); router.push('/?guest=1'); }}
+        aria-label="Return to booking"
+        className="fixed bottom-5 left-5 z-50 w-8 h-8 rounded-full border border-gold/20 bg-transparent flex items-center justify-center opacity-20 hover:opacity-60 active:opacity-80 transition-opacity duration-300"
+      >
+        <span className="w-1 h-1 rounded-full bg-gold/50" />
+      </button>
 
       {/* ── Main experience layout (non-complete states) ─── */}
       <AnimatePresence>
