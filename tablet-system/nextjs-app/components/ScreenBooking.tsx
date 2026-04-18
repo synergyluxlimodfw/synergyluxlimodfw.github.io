@@ -7,6 +7,10 @@ import { ProgressDots } from './ScreenWhy';
 import { track } from '@/lib/events';
 import type { Service } from '@/lib/types';
 
+function openStripe(url: string | undefined) {
+  if (url) window.open(url, '_blank');
+}
+
 interface ScreenBookingProps {
   onPrev: () => void;
   customerId?: string;
@@ -14,10 +18,9 @@ interface ScreenBookingProps {
 }
 
 export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenBookingProps) {
-  const [selected,   setSelected]   = useState<Service | null>(null);
-  const [name,       setName]       = useState(guestName ?? '');
-  const [phone,   setPhone]   = useState('');
-  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<Service | null>(null);
+  const [name,     setName]     = useState(guestName ?? '');
+  const [phone,    setPhone]    = useState('');
 
   const panelRef  = useRef<HTMLDivElement>(null);
   const viewedRef = useRef(false);
@@ -48,73 +51,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
     }
   }, [selected]);
 
-  const primaryLink = selected?.depositLink || selected?.fullLink;
-  const canSubmit   = !!selected && !!primaryLink && !loading;
-
-  async function handleReserve() {
-    if (!selected || !primaryLink) return;
-
-    const trimmedPhone = phone.trim();
-    setLoading(true);
-
-    // Open the window NOW — synchronous with the tap event.
-    // Browsers block window.open called after await; this prevents that.
-    const stripeUrl = new URL(primaryLink);
-    const win = window.open('about:blank', '_blank', 'noopener,noreferrer');
-
-    try {
-      // 1. Save / upsert customer
-      const customerRes = await fetch('/api/customer', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() || guestName || 'Guest', phone: trimmedPhone }),
-      });
-      const { customer } = await customerRes.json();
-      const cid = customer?.id ?? customerId ?? 'anonymous';
-
-      // 2. Track click (localStorage + server)
-      track('clicked_book');
-      track('rebook_clicked', { service: selected.id }); // legacy metric
-      fetch('/api/track', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event:      'clicked_book',
-          customerId: cid,
-          service:    selected.id,
-          timestamp:  new Date().toISOString(),
-        }),
-      }).catch(console.error);
-
-      // 3. Persist pending booking for the /success page
-      try {
-        localStorage.setItem('slux_pending', JSON.stringify({
-          customerId: cid,
-          name:       name.trim() || guestName || 'Guest',
-          phone:      trimmedPhone,
-          service:    selected.name,
-          serviceId:  selected.id,
-        }));
-        sessionStorage.removeItem('slux_success_tracked'); // allow re-tracking on new booking
-      } catch { /* storage blocked — continue */ }
-
-      // 4. Append client_reference_id for Stripe reconciliation, then navigate
-      stripeUrl.searchParams.set('client_reference_id', cid);
-      if (win) {
-        win.location.href = stripeUrl.toString();
-      } else {
-        // Fallback if pop-up was blocked despite the early open
-        window.open(stripeUrl.toString(), '_blank', 'noopener,noreferrer');
-      }
-
-    } catch (err) {
-      console.error('[ScreenBooking] handleReserve:', err);
-      // Still navigate even if customer save failed — don't block the booking
-      if (win) win.location.href = stripeUrl.toString();
-    } finally {
-      setLoading(false);
-    }
-  }
+  const canSubmit = !!selected && !!(selected.depositLink || selected.fullLink);
 
   return (
     <section
@@ -309,9 +246,9 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
           Most clients book their return ride before arrival
         </p>
 
-        {/* Primary CTA */}
+        {/* Primary CTA — deposit */}
         <button
-          onClick={handleReserve}
+          onClick={() => openStripe(selected?.depositLink || selected?.fullLink)}
           disabled={!canSubmit}
           className="w-full text-center py-4 rounded-xl text-sm font-bold uppercase transition-all active:scale-[0.98] disabled:cursor-not-allowed"
           style={{
@@ -321,9 +258,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
             letterSpacing: '0.12em',
           }}
         >
-          {loading
-            ? 'Connecting…'
-            : `Reserve with Deposit${selected?.deposit ? ` — ${selected.deposit}` : ''}`}
+          {`Reserve with Deposit${selected?.deposit ? ` — ${selected.deposit}` : ''}`}
         </button>
 
         <p className="text-center text-xs mt-2 tracking-wide" style={{ color: '#4a4a55' }}>
@@ -334,7 +269,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
         {selected?.fullLink && (
           <button
             type="button"
-            onClick={() => window.open(selected.fullLink, '_blank', 'noopener,noreferrer')}
+            onClick={() => openStripe(selected.fullLink)}
             className="w-full text-center mt-3 py-3 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all active:scale-[0.98] hover:bg-gold/[0.05]"
             style={{ border: '1px solid rgba(201,168,76,0.22)', color: '#C9A84C', letterSpacing: '0.10em' }}
           >
