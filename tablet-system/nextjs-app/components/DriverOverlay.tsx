@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLongPress } from '@/hooks/useLongPress';
 import { track } from '@/lib/events';
+import { experienceStore } from '@/lib/experienceStore';
 import type { RidePhase, ModalType } from '@/lib/types';
 
 interface DriverOverlayProps {
@@ -45,7 +46,7 @@ export default function DriverOverlay({ phase, onPhaseChange, onModalOpen, onRes
     if (newPhase === 'active')      track('ride_started');
     if (newPhase === 'midway')      track('midway_prompt');
     if (newPhase === 'pre_dropoff') track('pre_dropoff_prompt');
-    if (newPhase === 'complete')    track('ride_completed');
+    if (newPhase === 'complete') { track('ride_completed'); experienceStore.completeRide(); }
     setVisible(false);
   }
 
@@ -53,6 +54,7 @@ export default function DriverOverlay({ phase, onPhaseChange, onModalOpen, onRes
     haptic();
     onReset();
     onPhaseChange('active');
+    experienceStore.setActive();
     track('ride_started');
     setVisible(false);
   }
