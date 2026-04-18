@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 import { SERVICES } from '@/lib/services';
 import { ProgressDots } from './ScreenWhy';
 import { track } from '@/lib/events';
@@ -69,8 +70,6 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
       }, 80);
     }
   }, [selected]);
-
-  const canSubmit = !!selected && !!(selected.depositLink || selected.fullLink);
 
   return (
     <section
@@ -165,7 +164,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
           ))}
         </div>
 
-        {/* Selection panel + customer inputs — animate in when service selected */}
+        {/* Selection panel — price breakdown + QR + inputs */}
         <AnimatePresence>
           {selected && (
             <motion.div
@@ -209,10 +208,15 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
                     <span className="text-gold font-medium">{selected.deposit}</span>
                   </div>
                 )}
-                <p className="text-xs mt-3 leading-relaxed" style={{ color: '#666672' }}>
-                  Secure your vehicle now — pay the rest on ride day
-                </p>
               </div>
+
+              {/* QR code payment */}
+              {(selected.depositLink || selected.fullLink) && (
+                <BookingQR
+                  url={(selected.depositLink || selected.fullLink)!}
+                  onTap={() => openStripe(selected, selected.depositLink ? 'deposit' : 'full')}
+                />
+              )}
 
               {/* Customer data inputs */}
               <div
@@ -223,7 +227,6 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
                   Your Details
                 </p>
 
-                {/* Name */}
                 <div>
                   <label className="block text-[10px] tracking-[2px] uppercase mb-1.5" style={{ color: '#4a4a55' }}>
                     Name
@@ -235,15 +238,14 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
                     placeholder={guestName || 'Your name'}
                     className="w-full rounded-xl px-3 py-2.5 text-sm outline-none"
                     style={{ background: '#141419', border: '1px solid rgba(201,168,76,0.15)', color: '#EFEFEF' }}
-                    onFocus={e  => (e.target.style.borderColor = 'rgba(201,168,76,0.40)')}
-                    onBlur={e   => (e.target.style.borderColor = 'rgba(201,168,76,0.15)')}
+                    onFocus={e => (e.target.style.borderColor = 'rgba(201,168,76,0.40)')}
+                    onBlur={e  => (e.target.style.borderColor = 'rgba(201,168,76,0.15)')}
                   />
                 </div>
 
-                {/* Phone */}
                 <div>
                   <label className="block text-[10px] tracking-[2px] uppercase mb-1.5" style={{ color: '#4a4a55' }}>
-                    Phone <span className="text-gold">*</span>
+                    Phone
                   </label>
                   <input
                     type="tel"
@@ -270,41 +272,10 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
           Most clients book their return ride before arrival
         </p>
 
-        {/* Primary CTA — deposit */}
-        <button
-          onClick={() => selected && openStripe(selected, 'deposit')}
-          disabled={!canSubmit}
-          className="w-full text-center py-4 rounded-xl text-sm font-bold uppercase transition-all active:scale-[0.98] disabled:cursor-not-allowed"
-          style={{
-            background:    canSubmit ? 'linear-gradient(135deg, #D4AF5A 0%, #C9A84C 50%, #B8932E 100%)' : 'rgba(201,168,76,0.18)',
-            color:         canSubmit ? '#06060A' : 'rgba(201,168,76,0.45)',
-            boxShadow:     canSubmit ? '0 4px 20px rgba(201,168,76,0.22)' : 'none',
-            letterSpacing: '0.12em',
-          }}
-        >
-          {`Reserve with Deposit${selected?.deposit ? ` — ${selected.deposit}` : ''}`}
-        </button>
-
-        <p className="text-center text-xs mt-2 tracking-wide" style={{ color: '#4a4a55' }}>
-          Takes 10 seconds · Secure checkout
-        </p>
-
-        {/* Pay in Full CTA */}
-        {selected?.fullLink && (
-          <button
-            type="button"
-            onClick={() => openStripe(selected, 'full')}
-            className="w-full text-center mt-3 py-3 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all active:scale-[0.98] hover:bg-gold/[0.05]"
-            style={{ border: '1px solid rgba(201,168,76,0.22)', color: '#C9A84C', letterSpacing: '0.10em' }}
-          >
-            Pay in Full — {selected.price}
-          </button>
-        )}
-
         {/* Call CTA */}
         <a
           href="tel:6468791391"
-          className="block w-full text-center mt-3 py-3 rounded-xl text-xs font-semibold tracking-wide uppercase transition-colors hover:bg-gold/[0.05] active:scale-[0.98]"
+          className="block w-full text-center py-3 rounded-xl text-xs font-semibold tracking-wide uppercase transition-colors hover:bg-gold/[0.05] active:scale-[0.98]"
           style={{ border: '1px solid rgba(201,168,76,0.22)', color: '#C9A84C' }}
         >
           Prefer to call? Tap to speak with your chauffeur
@@ -329,5 +300,64 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
         </div>
       </div>
     </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// BookingQR
+//
+// Gold-on-dark QR for a Stripe payment link.
+// Matches the gratuity QR style. Updates instantly when url changes.
+// ─────────────────────────────────────────────────────────
+
+function BookingQR({ url, onTap }: { url: string; onTap: () => void }) {
+  return (
+    <motion.div
+      key={url}
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      className="flex flex-col items-center gap-3 py-4"
+      style={{
+        background:   'rgba(255,255,255,0.02)',
+        border:       '1px solid rgba(201,168,76,0.18)',
+        borderRadius: '18px',
+      }}
+    >
+      {/* QR */}
+      <div
+        className="rounded-2xl p-4"
+        style={{
+          background: '#0A0A0F',
+          border:     '1px solid rgba(201,168,76,0.20)',
+          boxShadow:  '0 0 32px rgba(201,168,76,0.06)',
+        }}
+      >
+        <QRCodeSVG
+          value={url}
+          size={148}
+          bgColor="transparent"
+          fgColor="#C9A84C"
+          level="M"
+        />
+      </div>
+
+      {/* Scan hint */}
+      <p className="text-[11px] text-lux-muted/50 tracking-wide">
+        Scan with your phone to reserve
+      </p>
+
+      {/* Tap fallback */}
+      <button
+        type="button"
+        onClick={onTap}
+        className="text-[11px] tracking-wide transition-colors duration-200 underline underline-offset-2"
+        style={{ color: 'rgba(201,168,76,0.40)' }}
+        onMouseEnter={e => (e.currentTarget.style.color = 'rgba(201,168,76,0.70)')}
+        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(201,168,76,0.40)')}
+      >
+        Or tap here
+      </button>
+    </motion.div>
   );
 }
