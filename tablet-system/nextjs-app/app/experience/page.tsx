@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
+import { useLongPress } from '@/hooks/useLongPress';
 import MapEmbed       from '@/components/MapEmbed';
 import ThankYouScreen from '@/components/ThankYouScreen';
 
@@ -29,7 +30,8 @@ export default function ExperiencePage() {
 
   useEffect(() => { experienceStore.hydrate(); }, []);
 
-  const showMap = state.status === 'ready' || state.status === 'active';
+  const longPress = useLongPress(() => experienceStore.completeRide(), 3000);
+  const showMap   = state.status === 'ready' || state.status === 'active';
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-lux-black flex flex-col">
@@ -49,6 +51,13 @@ export default function ExperiencePage() {
           />
         )}
       </AnimatePresence>
+
+      {/* ── Chauffeur: long-press bottom-right 3s → complete ─ */}
+      <div
+        {...longPress}
+        className="fixed bottom-0 right-0 w-24 h-24 z-40 select-none"
+        aria-label="End ride (long press)"
+      />
 
       {/* ── Operator handoff — faint, non-intrusive ─────── */}
       <button
