@@ -670,8 +670,9 @@ function SuccessState({
   rideId: string | null;
   onReset: () => void;
 }) {
-  const [phase,    setPhase]    = useState<RidePhase>('preparing');
-  const [copying,  setCopying]  = useState(false);
+  const [phase,        setPhase]        = useState<RidePhase>('preparing');
+  const [copying,      setCopying]      = useState(false);
+  const [bookingSent,  setBookingSent]  = useState(false);
 
   const origin    = typeof window !== 'undefined' ? window.location.origin : '';
   const tabletUrl = rideId ? `${origin}/experience?ride=${rideId}` : null;
@@ -680,6 +681,12 @@ function SuccessState({
     if (!rideId) return;
     setPhase(newPhase);
     await supabase.from('rides').update({ status: newPhase }).eq('id', rideId);
+  }
+
+  async function showBooking() {
+    if (!rideId || bookingSent) return;
+    await supabase.from('rides').update({ show_booking: true }).eq('id', rideId);
+    setBookingSent(true);
   }
 
   async function copyUrl() {
@@ -837,6 +844,44 @@ function SuccessState({
               );
             })}
           </div>
+        </motion.div>
+
+        {/* Show Booking — operator-controlled trigger */}
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.38, duration: 0.4, ease: EASE }}
+          className="mt-3"
+        >
+          <button
+            onClick={showBooking}
+            disabled={bookingSent || !rideId}
+            className="w-full flex items-center justify-between rounded-2xl px-4 transition-all duration-200 active:scale-[0.98] disabled:cursor-default"
+            style={{
+              minHeight:  '56px',
+              background: bookingSent ? 'rgba(201,168,76,0.10)' : '#141419',
+              border:     `1px solid ${bookingSent ? 'rgba(201,168,76,0.35)' : 'rgba(201,168,76,0.18)'}`,
+              opacity:    !rideId ? 0.4 : 1,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: bookingSent ? '#C9A84C' : 'rgba(201,168,76,0.4)' }}
+              />
+              <div className="text-left">
+                <p className="text-[12px] font-semibold tracking-wide" style={{ color: bookingSent ? '#C9A84C' : '#EFEFEF' }}>
+                  Show Booking
+                </p>
+                <p className="text-[10px] text-lux-muted/50">Transition tablet to booking screen</p>
+              </div>
+            </div>
+            {bookingSent ? (
+              <span className="text-[9px] tracking-[2px] uppercase font-semibold text-gold">Sent</span>
+            ) : (
+              <span className="text-[11px] text-lux-muted/30">→</span>
+            )}
+          </button>
         </motion.div>
 
         {/* Reset */}
