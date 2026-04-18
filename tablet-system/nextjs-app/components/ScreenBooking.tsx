@@ -16,9 +16,8 @@ interface ScreenBookingProps {
 export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenBookingProps) {
   const [selected,   setSelected]   = useState<Service | null>(null);
   const [name,       setName]       = useState(guestName ?? '');
-  const [phone,      setPhone]      = useState('');
-  const [phoneError, setPhoneError] = useState('');
-  const [loading,    setLoading]    = useState(false);
+  const [phone,   setPhone]   = useState('');
+  const [loading, setLoading] = useState(false);
 
   const panelRef  = useRef<HTMLDivElement>(null);
   const viewedRef = useRef(false);
@@ -50,17 +49,12 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
   }, [selected]);
 
   const primaryLink = selected?.depositLink || selected?.fullLink;
-  const canSubmit   = !!selected && !!primaryLink && phone.trim().length >= 7 && !loading;
+  const canSubmit   = !!selected && !!primaryLink && !loading;
 
   async function handleReserve() {
     if (!selected || !primaryLink) return;
 
     const trimmedPhone = phone.trim();
-    if (trimmedPhone.length < 7) {
-      setPhoneError('Please enter a valid phone number');
-      return;
-    }
-    setPhoneError('');
     setLoading(true);
 
     // Open the window NOW — synchronous with the tap event.
@@ -293,20 +287,13 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
                   <input
                     type="tel"
                     value={phone}
-                    onChange={e => { setPhone(e.target.value); setPhoneError(''); }}
+                    onChange={e => setPhone(e.target.value)}
                     placeholder="(555) 000-0000"
                     className="w-full rounded-xl px-3 py-2.5 text-sm outline-none"
-                    style={{
-                      background:   '#141419',
-                      border:       phoneError ? '1px solid rgba(239,68,68,0.55)' : '1px solid rgba(201,168,76,0.15)',
-                      color:        '#EFEFEF',
-                    }}
-                    onFocus={e => { if (!phoneError) e.target.style.borderColor = 'rgba(201,168,76,0.40)'; }}
-                    onBlur={e  => { if (!phoneError) e.target.style.borderColor = 'rgba(201,168,76,0.15)'; }}
+                    style={{ background: '#141419', border: '1px solid rgba(201,168,76,0.15)', color: '#EFEFEF' }}
+                    onFocus={e => (e.target.style.borderColor = 'rgba(201,168,76,0.40)')}
+                    onBlur={e  => (e.target.style.borderColor = 'rgba(201,168,76,0.15)')}
                   />
-                  {phoneError && (
-                    <p className="text-[11px] mt-1.5" style={{ color: '#F87171' }}>{phoneError}</p>
-                  )}
                 </div>
               </div>
             </motion.div>
@@ -343,7 +330,19 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
           Takes 10 seconds · Secure checkout
         </p>
 
-        {/* Secondary CTA */}
+        {/* Pay in Full CTA */}
+        {selected?.fullLink && (
+          <button
+            type="button"
+            onClick={() => window.open(selected.fullLink, '_blank', 'noopener,noreferrer')}
+            className="w-full text-center mt-3 py-3 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all active:scale-[0.98] hover:bg-gold/[0.05]"
+            style={{ border: '1px solid rgba(201,168,76,0.22)', color: '#C9A84C', letterSpacing: '0.10em' }}
+          >
+            Pay in Full — {selected.price}
+          </button>
+        )}
+
+        {/* Call CTA */}
         <a
           href="tel:6468791391"
           className="block w-full text-center mt-3 py-3 rounded-xl text-xs font-semibold tracking-wide uppercase transition-colors hover:bg-gold/[0.05] active:scale-[0.98]"
