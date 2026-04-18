@@ -55,7 +55,7 @@ export default function ExperiencePage() {
       {/* ── Chauffeur: long-press bottom-right 3s → complete ─ */}
       <div
         {...longPress}
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 z-40 select-none"
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-24 h-24 z-40 select-none"
         aria-label="End ride (long press)"
       />
 
