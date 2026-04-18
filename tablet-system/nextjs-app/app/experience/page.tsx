@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
@@ -91,7 +91,16 @@ function ExperienceInner() {
           'postgres_changes',
           { event: 'UPDATE', schema: 'public', table: 'rides', filter: `id=eq.${targetId}` },
           (payload) => {
-            experienceStore.loadFromRide(payload.new as RideRow);
+            const row = payload.new as RideRow;
+            if (row.status === 'complete') {
+              // Call completeRide() only if not already complete — prevents
+              // an update loop since completeRide() also writes back to Supabase
+              if (experienceStore.getState().status !== 'complete') {
+                experienceStore.completeRide();
+              }
+            } else {
+              experienceStore.loadFromRide(row);
+            }
           }
         )
         .subscribe();
@@ -103,6 +112,16 @@ function ExperienceInner() {
       if (channel) supabase.removeChannel(channel);
     };
   }, [rideParam]);
+
+  // ── Booking auto-prompt — fires 30 s after ride goes active ─
+  const [showBookingPrompt, setShowBookingPrompt] = useState(false);
+  const [promptDismissed,   setPromptDismissed]   = useState(false);
+
+  useEffect(() => {
+    if (state.status !== 'active' || promptDismissed) return;
+    const t = setTimeout(() => setShowBookingPrompt(true), 30_000);
+    return () => clearTimeout(t);
+  }, [state.status, promptDismissed]);
 
   const showMap   = state.status === 'ready' || state.status === 'active';
 
@@ -285,6 +304,66 @@ function ExperienceInner() {
               )}
             </AnimatePresence>
 
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Booking auto-prompt banner ──────────────────────── */}
+      <AnimatePresence>
+        {showBookingPrompt && !promptDismissed && (
+          <motion.div
+            key="booking-prompt"
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed bottom-0 left-0 right-0 z-40 px-5 pb-5"
+          >
+            <div
+              className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4"
+              style={{
+                background:    'rgba(8,8,13,0.96)',
+                border:        '1px solid rgba(201,168,76,0.22)',
+                boxShadow:     '0 -4px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.04)',
+                backdropFilter: 'blur(16px)',
+              }}
+            >
+              {/* Text */}
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <p className="text-[9px] tracking-[4px] uppercase text-gold/55">
+                  Before you step out
+                </p>
+                <p className="text-[15px] font-light text-lux-white leading-snug">
+                  Secure your next ride
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => { setShowBookingPrompt(false); router.push('/?guest=1'); }}
+                  className="rounded-xl px-5 py-3 text-[11px] font-bold tracking-[0.14em] uppercase transition-all active:scale-[0.97]"
+                  style={{
+                    background: 'linear-gradient(135deg, #D4AF5A 0%, #C9A84C 60%, #B8932E 100%)',
+                    color:      '#06060A',
+                    boxShadow:  '0 2px 16px rgba(201,168,76,0.25)',
+                    minHeight:  '44px',
+                  }}
+                >
+                  Book Now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowBookingPrompt(false); setPromptDismissed(true); }}
+                  aria-label="Dismiss"
+                  className="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+                  style={{ color: '#666672' }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
