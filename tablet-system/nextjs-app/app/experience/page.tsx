@@ -444,33 +444,20 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
 // StarlightEffect
 // ─────────────────────────────────────────────────────────
 
-const STARS = [
-  { x: '7%',  y: '11%', delay: 0,    dur: 3.2, size: 1.5 },
-  { x: '15%', y: '28%', delay: 0.8,  dur: 3.8, size: 1   },
-  { x: '23%', y: '8%',  delay: 1.5,  dur: 4.1, size: 2   },
-  { x: '31%', y: '45%', delay: 0.3,  dur: 3.5, size: 1   },
-  { x: '38%', y: '18%', delay: 2.1,  dur: 3.9, size: 1.5 },
-  { x: '45%', y: '65%', delay: 1.1,  dur: 3.3, size: 1   },
-  { x: '52%', y: '32%', delay: 0.6,  dur: 4.2, size: 2   },
-  { x: '61%', y: '12%', delay: 1.8,  dur: 3.7, size: 1   },
-  { x: '67%', y: '50%', delay: 0.4,  dur: 3.4, size: 1.5 },
-  { x: '74%', y: '22%', delay: 2.3,  dur: 4.0, size: 1   },
-  { x: '82%', y: '38%', delay: 0.9,  dur: 3.6, size: 2   },
-  { x: '88%', y: '15%', delay: 1.4,  dur: 3.2, size: 1   },
-  { x: '93%', y: '60%', delay: 0.2,  dur: 4.3, size: 1.5 },
-  { x: '12%', y: '72%', delay: 1.7,  dur: 3.8, size: 1   },
-  { x: '28%', y: '85%', delay: 0.5,  dur: 3.5, size: 1.5 },
-  { x: '44%', y: '78%', delay: 2.0,  dur: 4.1, size: 1   },
-  { x: '58%', y: '88%', delay: 1.2,  dur: 3.3, size: 2   },
-  { x: '72%', y: '75%', delay: 0.7,  dur: 3.9, size: 1   },
-  { x: '85%', y: '82%', delay: 1.6,  dur: 4.0, size: 1.5 },
-  { x: '96%', y: '42%', delay: 2.4,  dur: 3.6, size: 1   },
-  { x: '4%',  y: '55%', delay: 1.0,  dur: 3.7, size: 1.5 },
-  { x: '19%', y: '93%', delay: 0.1,  dur: 3.4, size: 1   },
-  { x: '35%', y: '62%', delay: 1.9,  dur: 4.2, size: 2   },
-  { x: '50%', y: '92%', delay: 0.8,  dur: 3.5, size: 1   },
-  { x: '77%', y: '5%',  delay: 1.3,  dur: 3.8, size: 1.5 },
-];
+// 60 cinematic starlight dots — golden-angle x distribution, varied sizes/speeds/opacity
+// All values are deterministic (no Math.random) to avoid SSR hydration mismatches.
+const SIZES  = [1, 1.5, 2, 2.5, 3] as const;
+const SPEEDS = [4, 2.5, 1.5]       as const; // slow, medium, fast
+const STARS  = Array.from({ length: 60 }, (_, i) => {
+  const x     = ((i * 137.508) % 100).toFixed(1);       // golden-angle spread avoids clustering
+  const y     = ((i * 97.319 + 31) % 100).toFixed(1);   // offset so y ≠ x distribution
+  const size  = SIZES[i % 5];
+  const dur   = SPEEDS[i % 3];
+  const delay = parseFloat(((i * 0.371) % 3.5).toFixed(2));
+  const opMin = 0.08 + (i % 5) * 0.04;                  // 0.08 → 0.24
+  const opMax = opMin + 0.10 + (i % 3) * 0.04;          // opMin + 0.10–0.18 → max 0.35
+  return { x: `${x}%`, y: `${y}%`, size, dur, delay, opMin, opMax };
+});
 
 function StarlightEffect() {
   return (
@@ -484,7 +471,7 @@ function StarlightEffect() {
       {STARS.map((s, i) => (
         <motion.div
           key={i}
-          animate={{ opacity: [0.15, 0.25, 0.15] }}
+          animate={{ opacity: [s.opMin, s.opMax, s.opMin] }}
           transition={{
             delay:    s.delay,
             duration: s.dur,
@@ -516,13 +503,14 @@ function BrandMark() {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.6 }}
-      className="relative z-10 px-8 pt-8 flex flex-col gap-0.5"
+      className="relative z-10 px-8 pt-8"
     >
-      <p className="text-[12px] tracking-[5px] uppercase text-gold/70 font-light">
-        Prestige
-      </p>
-      <p className="text-[8px] tracking-[3px] uppercase text-lux-muted/40 font-light">
-        by Synergy Lux
+      <p className="font-light whitespace-nowrap">
+        <span className="text-[12px] tracking-[5px] uppercase text-gold/70">PRESTIGE</span>
+        {' '}
+        <span className="text-[10px] text-gold/40">✦</span>
+        {' '}
+        <span className="text-[8px] tracking-[3px] uppercase text-lux-muted/35">by Synergy Lux</span>
       </p>
     </motion.div>
   );
@@ -575,11 +563,13 @@ function StatusIndicator({ status }: { status: ExperienceStatus }) {
 
 // Function variant — each child supplies its own delay via custom prop
 const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 18, scale: 0.96, filter: 'blur(8px)' },
   show: (delay: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] as const },
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { duration: 0.9, delay, ease: [0.23, 1, 0.32, 1] as const },
   }),
 };
 
@@ -636,8 +626,24 @@ function ReadyView({
           </p>
         </div>
 
+        {/* Welcome line */}
+        <div className="flex flex-col items-center gap-1.5">
+          <p
+            className="font-serif font-light text-gold"
+            style={{ fontSize: '18px', letterSpacing: '2px' }}
+          >
+            Welcome to Prestige
+          </p>
+          <p
+            className="text-lux-muted/50 italic font-light"
+            style={{ fontSize: '13px' }}
+          >
+            Your journey is prepared just for you
+          </p>
+        </div>
+
         {/* Prestige label */}
-        <p className="text-[9px] tracking-[5px] uppercase text-gold/50 font-light">
+        <p className="text-[9px] tracking-[5px] uppercase text-gold/40 font-light">
           Prestige Experience
         </p>
 
@@ -676,10 +682,11 @@ function ReadyView({
           className="flex flex-col gap-8"
           style={{
             background:   '#111111',
-            border:       '1px solid rgba(201,168,76,0.15)',
+            border:       '1px solid rgba(201,168,76,0.2)',
+            borderTop:    '2px solid rgba(201,168,76,0.2)',
             borderRadius: '24px',
             padding:      '40px',
-            boxShadow:    '0 0 80px rgba(201,168,76,0.06), inset 0 0 20px rgba(201,168,76,0.06)',
+            boxShadow:    '0 0 40px rgba(201,168,76,0.04), inset 0 1px 0 rgba(201,168,76,0.08)',
           }}
         >
           {/* Chauffeur */}
@@ -719,10 +726,11 @@ function ReadyView({
           className="flex flex-col gap-7"
           style={{
             background:   '#111111',
-            border:       '1px solid rgba(201,168,76,0.15)',
+            border:       '1px solid rgba(201,168,76,0.2)',
+            borderTop:    '2px solid rgba(201,168,76,0.2)',
             borderRadius: '24px',
             padding:      '40px',
-            boxShadow:    '0 0 80px rgba(201,168,76,0.06), inset 0 0 20px rgba(201,168,76,0.06)',
+            boxShadow:    '0 0 40px rgba(201,168,76,0.04), inset 0 1px 0 rgba(201,168,76,0.08)',
           }}
         >
           {/* Cabin */}
@@ -772,6 +780,9 @@ function ReadyView({
         </p>
         <p className="text-[16px] text-lux-muted/40 tracking-wide">
           Sit back and enjoy the journey.
+        </p>
+        <p className="text-[10px] tracking-[4px] uppercase text-gold/25 mt-2">
+          Prestige — by Synergy Lux
         </p>
       </motion.div>
 
