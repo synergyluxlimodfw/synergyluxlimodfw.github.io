@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 // ─────────────────────────────────────────────────────────
 // MapEmbed
 //
@@ -30,7 +32,13 @@ export default function MapEmbed({
   lat  = DEFAULT_LAT,
   zoom = DEFAULT_ZOOM,
 }: MapEmbedProps) {
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  // NEXT_PUBLIC_ vars are inlined at build time — safe to read on client.
+  // Suppress hydration mismatch: server always renders placeholder,
+  // client swaps in the real map after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const token = mounted ? process.env.NEXT_PUBLIC_MAPBOX_TOKEN : undefined;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-lux-border/50 shadow-[0_12px_40px_rgba(0,0,0,0.55)]">
