@@ -374,7 +374,9 @@ function ReadyView({
   activeRide?: boolean;
 }) {
   const greeting  = timeGreeting();
-  const firstName = guestName ? guestName.split(' ')[0] : '';
+  const firstName = guestName
+    ? guestName.match(/^(Mr|Mrs|Ms|Dr)\.?\s/i) ? guestName : guestName.split(' ')[0]
+    : '';
   const cabinLine = `${temperature}°F · ${music ? 'Ambient Music' : 'Quiet Mode'}`;
 
   return (
