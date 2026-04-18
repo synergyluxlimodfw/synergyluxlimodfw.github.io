@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
-import { useLongPress } from '@/hooks/useLongPress';
 import MapEmbed       from '@/components/MapEmbed';
 import ThankYouScreen from '@/components/ThankYouScreen';
 
@@ -30,7 +29,6 @@ export default function ExperiencePage() {
 
   useEffect(() => { experienceStore.hydrate(); }, []);
 
-  const longPress = useLongPress(() => experienceStore.completeRide(), 3000);
   const showMap   = state.status === 'ready' || state.status === 'active';
 
   return (
@@ -52,12 +50,15 @@ export default function ExperiencePage() {
         )}
       </AnimatePresence>
 
-      {/* ── Chauffeur: long-press bottom-right 3s → complete ─ */}
-      <div
-        {...longPress}
-        className="fixed top-0 left-1/2 -translate-x-1/2 w-24 h-24 z-40 select-none"
-        aria-label="End ride (long press)"
-      />
+      {/* ── Chauffeur: tap top-center → complete ───────────── */}
+      <button
+        type="button"
+        onClick={() => experienceStore.completeRide()}
+        aria-label="End ride"
+        className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-8 h-8 rounded-full border border-gold/20 bg-transparent flex items-center justify-center opacity-20 hover:opacity-60 active:opacity-80 transition-opacity duration-300"
+      >
+        <span className="w-1 h-1 rounded-full bg-gold/50" />
+      </button>
 
       {/* ── Operator handoff — faint, non-intrusive ─────── */}
       <button
