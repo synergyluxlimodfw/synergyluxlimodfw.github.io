@@ -243,7 +243,7 @@ export default function OperatorPanel({ onStart }: OperatorPanelProps) {
 
             {/* ── Footer ──────────────────────────────────── */}
             <p className="text-center text-[11px] text-lux-muted mt-6 tracking-wide">
-              Synergy Lux · Dallas–Fort Worth ·{' '}
+              Prestige by Synergy Lux · Dallas–Fort Worth ·{' '}
               <a href="tel:6468791391" className="text-gold hover:text-gold2 transition-colors">
                 (646) 879-1391
               </a>
@@ -268,7 +268,7 @@ function Header() {
       transition={{ delay: 0.08, duration: 0.45 }}
     >
       <p className="text-[9px] tracking-[5px] uppercase text-gold/50 mb-4">
-        Operator Console
+        Prestige · Operator Console
       </p>
       <h1 className="font-serif text-[44px] font-light text-lux-white leading-[1.0] mb-3">
         Prepare

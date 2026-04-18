@@ -186,7 +186,7 @@ export default function OperatorPage() {
                 {/* ── Header ─────────────────────────────── */}
                 <motion.div variants={itemVariants}>
                   <p className="text-[9px] tracking-[5px] uppercase text-gold/50 mb-4">
-                    Operator Console
+                    Prestige · Operator Console
                   </p>
                   <h1 className="font-serif text-[44px] font-light text-lux-white leading-none mb-3">
                     Prepare
@@ -403,7 +403,7 @@ export default function OperatorPage() {
 
               {/* Footer */}
               <p className="text-center text-[11px] text-lux-muted/60 mt-7 tracking-wide">
-                Synergy Lux · Dallas–Fort Worth ·{' '}
+                Prestige by Synergy Lux · Dallas–Fort Worth ·{' '}
                 <a
                   href="tel:6468791391"
                   className="text-gold/80 hover:text-gold transition-colors duration-200"

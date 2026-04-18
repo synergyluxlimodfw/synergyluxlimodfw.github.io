@@ -120,9 +120,11 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
               key={svc.id}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               transition={{ delay: i * 0.04 + 0.16, duration: 0.3 }}
               onClick={() => setSelected(svc.id === selected?.id ? null : svc)}
-              className="border p-4 rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.99]"
+              className="border p-4 rounded-xl cursor-pointer transition-colors duration-200"
               style={{
                 borderColor: selected?.id === svc.id
                   ? 'rgba(201,168,76,0.55)'
@@ -130,6 +132,9 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
                 background: selected?.id === svc.id
                   ? 'rgba(201,168,76,0.07)'
                   : 'transparent',
+                boxShadow: selected?.id === svc.id
+                  ? '0 0 24px rgba(201,168,76,0.10), inset 0 0 12px rgba(201,168,76,0.05)'
+                  : 'none',
               }}
             >
               <div className="flex justify-between items-center gap-3">

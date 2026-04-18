@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Synergy Lux — In-Car Experience',
+  title: 'Prestige by Synergy Lux',
   description: 'Private chauffeur service. Dallas–Fort Worth.',
 };
 

@@ -103,7 +103,7 @@ export default function ExperiencePage() {
                     className="flex flex-col items-center gap-4"
                   >
                     <p className="text-[10px] tracking-[6px] uppercase text-gold/30">
-                      Synergy Lux
+                      Prestige
                     </p>
                     <div
                       className="w-px h-16 mx-auto"
@@ -227,6 +227,7 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
   const isReady    = status === 'ready';
   const isPreparing = status === 'preparing';
   const isComplete = status === 'complete';
+  const showStars  = isReady || isActive;
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -276,7 +277,78 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
           background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.2), transparent)',
         }}
       />
+
+      {/* Starlight — ready + active only */}
+      <AnimatePresence>
+        {showStars && <StarlightEffect key="stars" />}
+      </AnimatePresence>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// StarlightEffect
+// ─────────────────────────────────────────────────────────
+
+const STARS = [
+  { x: '7%',  y: '11%', delay: 0,    dur: 3.2, size: 1.5 },
+  { x: '15%', y: '28%', delay: 0.8,  dur: 3.8, size: 1   },
+  { x: '23%', y: '8%',  delay: 1.5,  dur: 4.1, size: 2   },
+  { x: '31%', y: '45%', delay: 0.3,  dur: 3.5, size: 1   },
+  { x: '38%', y: '18%', delay: 2.1,  dur: 3.9, size: 1.5 },
+  { x: '45%', y: '65%', delay: 1.1,  dur: 3.3, size: 1   },
+  { x: '52%', y: '32%', delay: 0.6,  dur: 4.2, size: 2   },
+  { x: '61%', y: '12%', delay: 1.8,  dur: 3.7, size: 1   },
+  { x: '67%', y: '50%', delay: 0.4,  dur: 3.4, size: 1.5 },
+  { x: '74%', y: '22%', delay: 2.3,  dur: 4.0, size: 1   },
+  { x: '82%', y: '38%', delay: 0.9,  dur: 3.6, size: 2   },
+  { x: '88%', y: '15%', delay: 1.4,  dur: 3.2, size: 1   },
+  { x: '93%', y: '60%', delay: 0.2,  dur: 4.3, size: 1.5 },
+  { x: '12%', y: '72%', delay: 1.7,  dur: 3.8, size: 1   },
+  { x: '28%', y: '85%', delay: 0.5,  dur: 3.5, size: 1.5 },
+  { x: '44%', y: '78%', delay: 2.0,  dur: 4.1, size: 1   },
+  { x: '58%', y: '88%', delay: 1.2,  dur: 3.3, size: 2   },
+  { x: '72%', y: '75%', delay: 0.7,  dur: 3.9, size: 1   },
+  { x: '85%', y: '82%', delay: 1.6,  dur: 4.0, size: 1.5 },
+  { x: '96%', y: '42%', delay: 2.4,  dur: 3.6, size: 1   },
+  { x: '4%',  y: '55%', delay: 1.0,  dur: 3.7, size: 1.5 },
+  { x: '19%', y: '93%', delay: 0.1,  dur: 3.4, size: 1   },
+  { x: '35%', y: '62%', delay: 1.9,  dur: 4.2, size: 2   },
+  { x: '50%', y: '92%', delay: 0.8,  dur: 3.5, size: 1   },
+  { x: '77%', y: '5%',  delay: 1.3,  dur: 3.8, size: 1.5 },
+];
+
+function StarlightEffect() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.5 }}
+      className="absolute inset-0"
+    >
+      {STARS.map((s, i) => (
+        <motion.div
+          key={i}
+          animate={{ opacity: [0.15, 0.25, 0.15] }}
+          transition={{
+            delay:    s.delay,
+            duration: s.dur,
+            repeat:   Infinity,
+            ease:     'easeInOut',
+          }}
+          style={{
+            position:     'absolute',
+            left:         s.x,
+            top:          s.y,
+            width:        s.size,
+            height:       s.size,
+            borderRadius: '50%',
+            background:   '#C9A84C',
+          }}
+        />
+      ))}
+    </motion.div>
   );
 }
 
@@ -290,10 +362,13 @@ function BrandMark() {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.6 }}
-      className="relative z-10 px-8 pt-8"
+      className="relative z-10 px-8 pt-8 flex flex-col gap-0.5"
     >
-      <p className="text-[10px] tracking-[6px] uppercase text-gold/50 font-light">
-        Synergy Lux
+      <p className="text-[12px] tracking-[5px] uppercase text-gold/70 font-light">
+        Prestige
+      </p>
+      <p className="text-[8px] tracking-[3px] uppercase text-lux-muted/40 font-light">
+        by Synergy Lux
       </p>
     </motion.div>
   );
@@ -344,14 +419,14 @@ function StatusIndicator({ status }: { status: ExperienceStatus }) {
 // ReadyView
 // ─────────────────────────────────────────────────────────
 
-const stagger = {
-  hidden: {},
-  show:   { transition: { staggerChildren: 0.12 } },
-};
-
+// Function variant — each child supplies its own delay via custom prop
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  show: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] as const },
+  }),
 };
 
 function ReadyView({
@@ -381,7 +456,6 @@ function ReadyView({
 
   return (
     <motion.div
-      variants={stagger}
       initial="hidden"
       animate="show"
       exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.4 } }}
@@ -390,20 +464,33 @@ function ReadyView({
     >
 
       {/* ── Header ──────────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="flex flex-col items-center gap-5 text-center">
+      <motion.div variants={fadeUp} custom={0} className="flex flex-col items-center gap-5 text-center">
 
-        {/* Logo line */}
-        <p
-          className="uppercase tracking-[6px] text-gold"
-          style={{ fontSize: '11px', opacity: 0.7 }}
-        >
-          Synergy Lux · Dallas–Fort Worth
+        {/* Brand line */}
+        <div className="flex flex-col items-center gap-0.5">
+          <p
+            className="uppercase tracking-[6px] text-gold"
+            style={{ fontSize: '13px', opacity: 0.8 }}
+          >
+            Prestige
+          </p>
+          <p
+            className="uppercase tracking-[4px] text-lux-muted/50"
+            style={{ fontSize: '9px' }}
+          >
+            by Synergy Lux · Dallas–Fort Worth
+          </p>
+        </div>
+
+        {/* Prestige label */}
+        <p className="text-[9px] tracking-[5px] uppercase text-gold/50 font-light">
+          Prestige Experience
         </p>
 
         {/* Serif greeting */}
         <h1
           className="font-serif font-light leading-[1.1] text-lux-white"
-          style={{ fontSize: '68px' }}
+          style={{ fontSize: '86px' }}
         >
           {greeting},
           {firstName && (
@@ -428,7 +515,7 @@ function ReadyView({
       </motion.div>
 
       {/* ── Two-card grid ────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-5 w-full">
+      <motion.div variants={fadeUp} custom={0.2} className="grid grid-cols-2 gap-5 w-full">
 
         {/* Left card — Chauffeur + ETA */}
         <div
@@ -437,8 +524,8 @@ function ReadyView({
             background:   '#111111',
             border:       '1px solid rgba(201,168,76,0.15)',
             borderRadius: '24px',
-            padding:      '32px 40px',
-            boxShadow:    '0 0 80px rgba(201,168,76,0.06)',
+            padding:      '40px',
+            boxShadow:    '0 0 80px rgba(201,168,76,0.06), inset 0 0 20px rgba(201,168,76,0.06)',
           }}
         >
           {/* Chauffeur */}
@@ -480,8 +567,8 @@ function ReadyView({
             background:   '#111111',
             border:       '1px solid rgba(201,168,76,0.15)',
             borderRadius: '24px',
-            padding:      '32px 40px',
-            boxShadow:    '0 0 80px rgba(201,168,76,0.06)',
+            padding:      '40px',
+            boxShadow:    '0 0 80px rgba(201,168,76,0.06), inset 0 0 20px rgba(201,168,76,0.06)',
           }}
         >
           {/* Cabin */}
@@ -525,11 +612,11 @@ function ReadyView({
       </motion.div>
 
       {/* ── Footer text ──────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="text-center flex flex-col gap-1">
-        <p className="text-[13px] text-lux-muted/40 tracking-wide">
+      <motion.div variants={fadeUp} custom={0.4} className="text-center flex flex-col gap-1">
+        <p className="text-[16px] text-lux-muted/40 tracking-wide">
           Everything has been prepared just for you.
         </p>
-        <p className="text-[13px] text-lux-muted/40 tracking-wide">
+        <p className="text-[16px] text-lux-muted/40 tracking-wide">
           Sit back and enjoy the journey.
         </p>
       </motion.div>
@@ -540,7 +627,7 @@ function ReadyView({
           className="text-gold text-center whitespace-nowrap"
           style={{ fontSize: '11px', opacity: 0.4, letterSpacing: '3px' }}
         >
-          Synergy Lux Private Chauffeur Experience
+          Prestige by Synergy Lux · Private Chauffeur
         </p>
       </div>
 

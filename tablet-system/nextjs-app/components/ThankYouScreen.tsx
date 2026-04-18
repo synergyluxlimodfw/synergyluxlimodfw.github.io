@@ -14,7 +14,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 const stagger = {
   hidden: {},
-  show:   { transition: { staggerChildren: 0.14 } },
+  show:   { transition: { staggerChildren: 0.18 } },
 };
 
 const fadeUp = {
@@ -37,7 +37,7 @@ export default function ThankYouScreen({ guestName, rideId, onTip }: ThankYouScr
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.7, ease: EASE }}
+      transition={{ duration: 1.2, ease: EASE }}
       className="absolute inset-0 z-30 flex flex-col items-center justify-center px-8 text-center bg-lux-black overflow-y-auto"
     >
       {/* Ambient glow */}
@@ -54,12 +54,14 @@ export default function ThankYouScreen({ guestName, rideId, onTip }: ThankYouScr
       >
 
         {/* Brand */}
-        <motion.p
-          variants={fadeUp}
-          className="text-[9px] tracking-[6px] uppercase text-gold/35 font-light"
-        >
-          Synergy Lux
-        </motion.p>
+        <motion.div variants={fadeUp} className="flex flex-col items-center gap-0.5">
+          <p className="text-[11px] tracking-[6px] uppercase text-gold/50 font-light">
+            Prestige
+          </p>
+          <p className="text-[8px] tracking-[3px] uppercase text-lux-muted/35 font-light">
+            by Synergy Lux
+          </p>
+        </motion.div>
 
         {/* Divider */}
         <motion.div
@@ -78,13 +80,13 @@ export default function ThankYouScreen({ guestName, rideId, onTip }: ThankYouScr
         )}
 
         {/* Main title */}
-        <motion.div variants={fadeUp} className="space-y-3">
-          <h1 className="font-serif text-[48px] sm:text-[56px] font-light text-lux-white leading-none">
+        <motion.div variants={fadeUp} className="space-y-4">
+          <h1 className="font-serif text-[60px] sm:text-[72px] font-light text-lux-white leading-none">
             Thank you for
             <br />
-            <em className="text-gold2">traveling</em>
+            experiencing <em className="text-gold2">Prestige</em>
           </h1>
-          <p className="text-[14px] text-lux-muted leading-relaxed">
+          <p className="text-[16px] text-lux-muted leading-relaxed">
             We hope your journey was exceptional
           </p>
         </motion.div>

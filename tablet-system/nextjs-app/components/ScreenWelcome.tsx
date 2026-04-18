@@ -33,9 +33,9 @@ export default function ScreenWelcome({ session, onNext }: ScreenWelcomeProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-[10px] tracking-[4px] uppercase text-gold/55 mb-4"
+          className="text-[10px] tracking-[5px] uppercase text-gold/55 mb-4"
         >
-          {session.occasion || 'In-Car Experience'}
+          Prestige Experience{session.occasion ? ` · ${session.occasion}` : ''}
         </motion.p>
 
         <motion.h1
@@ -73,7 +73,7 @@ export default function ScreenWelcome({ session, onNext }: ScreenWelcomeProps) {
         className="flex items-center justify-between"
       >
         <p className="text-[11px] text-lux-muted tracking-[2px] uppercase">
-          Synergy Lux · Dallas–Fort Worth
+          Prestige by Synergy Lux · Dallas–Fort Worth
         </p>
         <button onClick={onNext} className="btn-outline-gold text-[10px] tracking-[2.5px] uppercase px-6 py-3 rounded-xl border border-gold/30 text-gold hover:bg-gold/[0.06] transition-colors">
           Explore →
@@ -86,9 +86,14 @@ export default function ScreenWelcome({ session, onNext }: ScreenWelcomeProps) {
 
 function Logo() {
   return (
-    <p className="text-[12px] font-semibold tracking-[4px] uppercase text-lux-white">
-      SYNERGY <span className="text-gold">LUX</span>
-    </p>
+    <div className="flex flex-col gap-0.5">
+      <p className="text-[13px] font-light tracking-[5px] uppercase text-gold">
+        Prestige
+      </p>
+      <p className="text-[8px] tracking-[3px] uppercase text-lux-muted/50">
+        by Synergy Lux
+      </p>
+    </div>
   );
 }
 
