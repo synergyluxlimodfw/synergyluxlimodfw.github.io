@@ -121,7 +121,10 @@ function ExperienceInner() {
     };
   }, [rideParam]);
 
-  const showMap = state.status === 'ready' || state.status === 'active';
+  const [showGratuity, setShowGratuity] = useState(false);
+
+  const showMap      = state.status === 'ready' || state.status === 'active';
+  const rideIsLive   = state.status === 'ready' || state.status === 'active';
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-lux-black flex flex-col">
@@ -129,15 +132,18 @@ function ExperienceInner() {
       {/* Ambient background — always present */}
       <AmbientBackground status={state.status} />
 
-      {/* ── Thank you overlay — complete state ───────────── */}
+      {/* ── Thank you overlay — complete state or gratuity peek ── */}
       <AnimatePresence>
-        {state.status === 'complete' && (
+        {(state.status === 'complete' || showGratuity) && (
           <ThankYouScreen
             guestName={state.guestName}
             onTip={(percent, dollar) => {
-              // Future: POST to /api/tip or log for driver
               console.log('[tip]', { percent, dollar });
             }}
+            onBack={showGratuity && state.status !== 'complete'
+              ? () => setShowGratuity(false)
+              : undefined
+            }
           />
         )}
       </AnimatePresence>
@@ -161,6 +167,36 @@ function ExperienceInner() {
       >
         <span className="w-1 h-1 rounded-full bg-gold/50" />
       </button>
+
+      {/* ── Gratuity pill — bottom-left, visible during ready/active ── */}
+      <AnimatePresence>
+        {rideIsLive && !showGratuity && (
+          <motion.button
+            key="gratuity-pill"
+            type="button"
+            onClick={() => setShowGratuity(true)}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.4, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed bottom-6 left-6 z-30 transition-colors duration-200"
+            style={{
+              fontSize:     '9px',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              color:         'rgba(201,168,76,0.50)',
+              background:    'transparent',
+              border:        '1px solid rgba(201,168,76,0.25)',
+              borderRadius:  '100px',
+              padding:       '6px 12px',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'rgba(201,168,76,0.80)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(201,168,76,0.50)')}
+          >
+            ✦ Gratuity
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* ── Main experience layout (non-complete states) ─── */}
       <AnimatePresence>

@@ -26,9 +26,11 @@ interface ThankYouScreenProps {
   guestName?: string;
   rideId?: string;
   onTip?: (percent: number | null, dollar: number | null) => void;
+  /** When provided, shows a back button — used for mid-ride gratuity peek */
+  onBack?: () => void;
 }
 
-export default function ThankYouScreen({ guestName, rideId, onTip }: ThankYouScreenProps) {
+export default function ThankYouScreen({ guestName, rideId, onTip, onBack }: ThankYouScreenProps) {
   const greeting  = timeGreeting();
   const firstName = guestName ? guestName.trim().split(' ')[0] : null;
 
@@ -45,6 +47,20 @@ export default function ThankYouScreen({ guestName, rideId, onTip }: ThankYouScr
 
       {/* Top accent */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold/15 to-transparent" />
+
+      {/* Back button — mid-ride gratuity peek only */}
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute top-6 left-6 z-10 text-[10px] tracking-[3px] uppercase transition-colors duration-200"
+          style={{ color: 'rgba(201,168,76,0.40)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'rgba(201,168,76,0.70)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(201,168,76,0.40)')}
+        >
+          ← Back
+        </button>
+      )}
 
       <motion.div
         variants={stagger}
