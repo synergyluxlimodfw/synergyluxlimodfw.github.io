@@ -161,6 +161,7 @@ export default function ExperiencePage() {
                     occasion={state.occasion}
                     chauffeurName={state.chauffeurName}
                     eta={state.eta}
+                    temperature={state.temperature}
                   />
                 )}
 
@@ -173,6 +174,7 @@ export default function ExperiencePage() {
                     occasion={state.occasion}
                     chauffeurName={state.chauffeurName}
                     eta={state.eta}
+                    temperature={state.temperature}
                     activeRide
                   />
                 )}
@@ -356,6 +358,7 @@ function ReadyView({
   occasion,
   chauffeurName,
   eta,
+  temperature,
   activeRide = false,
 }: {
   guestName: string;
@@ -363,18 +366,11 @@ function ReadyView({
   occasion: string;
   chauffeurName: string;
   eta: number;
+  temperature: number;
   activeRide?: boolean;
 }) {
-  const floatVariant = {
-    initial: { y: 0 },
-    float: {
-      y: [-6, 6, -6],
-      transition: { repeat: Infinity, duration: 5, ease: 'easeInOut' },
-    },
-  };
-
   const greeting    = timeGreeting();
-  const displayName = guestName ? `, ${guestName.split(' ')[0]}` : '';
+  const firstName   = guestName ? guestName.split(' ')[0] : '';
 
   return (
     <motion.div
@@ -382,56 +378,95 @@ function ReadyView({
       initial="hidden"
       animate="show"
       exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.4 } }}
-      className="flex flex-col items-center gap-8 w-full max-w-xl"
+      className="flex flex-col items-center gap-6 w-full max-w-2xl px-4"
     >
-      {/* Greeting */}
-      <motion.div variants={fadeUp} className="space-y-1">
-        <p className="text-[10px] tracking-[5px] uppercase text-gold/50">
-          {greeting}{displayName}
-        </p>
-        <p className="text-[13px] text-lux-muted tracking-wide">
-          {activeRide ? 'Your journey is underway' : 'Your journey is ready'}
+      {/* Serif greeting */}
+      <motion.div variants={fadeUp} className="text-center space-y-2">
+        <h1 className="font-serif text-[42px] sm:text-[52px] font-light leading-none text-lux-white">
+          {greeting}{firstName ? `, ${firstName}` : ''}
+        </h1>
+        <p className="text-[13px] text-lux-muted/70 tracking-wide">
+          {activeRide
+            ? `Your journey to ${destination || 'your destination'} is underway`
+            : `Your journey to ${destination || 'your destination'} is prepared`}
         </p>
       </motion.div>
 
-      {/* Destination centerpiece — floating */}
-      <motion.div variants={fadeUp} className="flex flex-col items-center gap-3">
-        <motion.div
-          variants={floatVariant}
-          initial="initial"
-          animate="float"
-          className="text-center"
-        >
-          <h1
-            className="font-serif text-[52px] sm:text-[64px] font-light leading-none text-lux-white"
-            style={{ textShadow: '0 0 60px rgba(201,168,76,0.15)' }}
-          >
-            {destination || 'Your Destination'}
-          </h1>
-          {occasion && (
-            <p className="text-[11px] tracking-[4px] uppercase text-gold/50 mt-3">
-              {occasion}
-            </p>
-          )}
-        </motion.div>
-      </motion.div>
+      {/* Two-card grid */}
+      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4 w-full">
 
-      {/* Journey details strip */}
-      <motion.div variants={fadeUp} className="w-full">
+        {/* Left card — Chauffeur + ETA */}
         <div
-          className="rounded-2xl border border-lux-border p-5"
-          style={{ background: 'rgba(15,15,20,0.7)', backdropFilter: 'blur(12px)' }}
+          className="rounded-2xl border border-lux-border p-6 flex flex-col gap-4"
+          style={{ background: 'rgba(12,12,18,0.75)', backdropFilter: 'blur(14px)' }}
         >
-          <div className="grid grid-cols-3 divide-x divide-lux-border">
-            <DetailCell label="Chauffeur" value={chauffeurName} />
-            <DetailCell label="ETA"       value={`~${eta} min`} highlight />
-            <DetailCell
-              label="Status"
-              value={activeRide ? 'En Route' : 'Confirmed'}
-              accent
-            />
+          <div>
+            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
+              Chauffeur
+            </p>
+            <p className="text-[15px] font-medium text-lux-white tracking-wide">
+              {chauffeurName}
+            </p>
+          </div>
+
+          <div className="mt-auto">
+            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
+              {activeRide ? 'En Route' : 'ETA'}
+            </p>
+            <div className="flex items-end gap-2 leading-none">
+              <span
+                className="font-serif font-light text-gold"
+                style={{ fontSize: '82px', lineHeight: 1 }}
+              >
+                {eta}
+              </span>
+              <span className="text-[13px] text-lux-muted/60 pb-3 tracking-wide">
+                minutes
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Right card — Cabin + Occasion + Route */}
+        <div
+          className="rounded-2xl border border-lux-border p-6 flex flex-col gap-5"
+          style={{ background: 'rgba(12,12,18,0.75)', backdropFilter: 'blur(14px)' }}
+        >
+          <div>
+            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
+              Cabin Temp
+            </p>
+            <p className="text-[22px] font-light text-lux-white tracking-wide">
+              {temperature}°F
+            </p>
+          </div>
+
+          {occasion && (
+            <div>
+              <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
+                Occasion
+              </p>
+              <p className="text-[14px] text-lux-white/80 tracking-wide">
+                {occasion}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-auto">
+            <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50 mb-1">
+              Route
+            </p>
+            <p className="text-[14px] text-lux-white/80 tracking-wide truncate">
+              {destination || '—'}
+            </p>
+            <p className={`text-[11px] mt-1 tracking-wide ${
+              activeRide ? 'text-emerald-400' : 'text-gold/60'
+            }`}>
+              {activeRide ? 'En Route' : 'Confirmed'}
+            </p>
+          </div>
+        </div>
+
       </motion.div>
     </motion.div>
   );

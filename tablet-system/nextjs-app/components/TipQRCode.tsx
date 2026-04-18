@@ -23,7 +23,6 @@ export default function TipQRCode({ url }: TipQRCodeProps) {
           size={160}
           bgColor="transparent"
           fgColor="#C9A84C"
-          quietZone={8}
           level="M"
         />
       </div>
