@@ -29,6 +29,8 @@ interface ChatMessage {
 }
 
 export async function POST(req: NextRequest) {
+  console.log('API KEY present:', !!process.env.ANTHROPIC_API_KEY);
+
   let body: { messages?: unknown };
 
   try {
