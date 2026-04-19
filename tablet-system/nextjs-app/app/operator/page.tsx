@@ -697,9 +697,9 @@ function SuccessState({
   }
 
   const PHASES: { key: RidePhase; label: string; sub: string; color: string }[] = [
-    { key: 'ready',    label: 'Ready',    sub: 'Show welcome screen', color: '#C9A84C'  },
-    { key: 'active',   label: 'En Route', sub: 'Ride is underway',    color: '#4ADE80'  },
-    { key: 'complete', label: 'End Ride', sub: 'Show thank-you',      color: '#F97316'  },
+    { key: 'ready',    label: 'Ready — Client Boarding',  sub: 'Show welcome screen', color: '#C9A84C'  },
+    { key: 'active',   label: 'En Route — Ride Active',   sub: 'Ride is underway',    color: '#4ADE80'  },
+    { key: 'complete', label: 'End Ride — Show Gratuity', sub: 'Show thank-you',      color: '#F97316'  },
   ];
 
   return (
@@ -871,7 +871,7 @@ function SuccessState({
               />
               <div className="text-left">
                 <p className="text-[12px] font-semibold tracking-wide" style={{ color: bookingSent ? '#C9A84C' : '#EFEFEF' }}>
-                  Show Booking
+                  Show Booking — 5 Min to Arrival
                 </p>
                 <p className="text-[10px] text-lux-muted/50">Transition tablet to booking screen</p>
               </div>

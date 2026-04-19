@@ -3,37 +3,38 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ScreenWelcome from './ScreenWelcome';
-import ScreenWhy from './ScreenWhy';
+import ScreenWhy     from './ScreenWhy';
 import ScreenGallery from './ScreenGallery';
 import ScreenBooking from './ScreenBooking';
 import DriverOverlay from './DriverOverlay';
-import Modal from './Modal';
-import { track } from '@/lib/events';
+import Modal         from './Modal';
+import { track }     from '@/lib/events';
 import type { Session, Screen, RidePhase, ModalType } from '@/lib/types';
 
 interface ExperienceProps {
-  session: Session;
+  session:   Session;
+  isGuest?:  boolean;  // true → skip Why + Gallery screens
+  isReturn?: boolean;  // true → highlight Schedule Return in booking
 }
 
-const SCREENS: Screen[] = ['welcome', 'why', 'gallery', 'booking'];
+// Website visitors see the full 4-screen flow.
+// In-car guests (?guest=1) jump straight to booking — no pitch needed.
+const FULL_SCREENS:  Screen[] = ['welcome', 'why', 'gallery', 'booking'];
+const GUEST_SCREENS: Screen[] = ['welcome', 'booking'];
 
 const slideVariants = {
-  enter: (dir: number) => ({
-    x: dir > 0 ? 40 : -40,
-    opacity: 0,
-  }),
+  enter:  (dir: number) => ({ x: dir > 0 ?  40 : -40, opacity: 0 }),
   center: { x: 0, opacity: 1 },
-  exit:   (dir: number) => ({
-    x: dir > 0 ? -40 : 40,
-    opacity: 0,
-  }),
+  exit:   (dir: number) => ({ x: dir > 0 ? -40 :  40, opacity: 0 }),
 };
 
-export default function Experience({ session }: ExperienceProps) {
+export default function Experience({ session, isGuest = false, isReturn = false }: ExperienceProps) {
+  const SCREENS = isGuest ? GUEST_SCREENS : FULL_SCREENS;
+
   const [screenIdx, setScreenIdx] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [phase, setPhase]         = useState<RidePhase>('active');
-  const [modal, setModal]         = useState<ModalType>(null);
+  const [phase,     setPhase]     = useState<RidePhase>('active');
+  const [modal,     setModal]     = useState<ModalType>(null);
 
   function navigate(delta: number) {
     const next = screenIdx + delta;
@@ -55,7 +56,7 @@ export default function Experience({ session }: ExperienceProps) {
   }
 
   const currentScreen = SCREENS[screenIdx];
-  const customerId = session.rideId ?? 'demo';
+  const customerId    = session.rideId ?? 'demo';
 
   return (
     <div
@@ -84,7 +85,16 @@ export default function Experience({ session }: ExperienceProps) {
             <ScreenGallery onNext={() => navigate(1)} onPrev={() => navigate(-1)} />
           )}
           {currentScreen === 'booking' && (
-            <ScreenBooking onPrev={() => navigate(-1)} customerId={customerId} guestName={session.name} />
+            <ScreenBooking
+              onPrev={() => navigate(-1)}
+              customerId={customerId}
+              guestName={session.name}
+              occasion={session.occasion}
+              destination={session.destination}
+              pickup={session.vipNote}
+              isGuest={isGuest}
+              isReturn={isReturn}
+            />
           )}
         </motion.div>
       </AnimatePresence>

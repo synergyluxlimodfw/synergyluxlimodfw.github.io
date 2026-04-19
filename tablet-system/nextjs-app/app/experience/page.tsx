@@ -96,7 +96,10 @@ function ExperienceInner() {
 
             // Operator triggered booking screen — navigate immediately
             if (row.show_booking === true) {
-              router.push('/?guest=1');
+              const p = new URLSearchParams({ guest: '1' });
+              if (row.destination) p.set('destination', row.destination);
+              if (row.occasion)    p.set('occasion', row.occasion);
+              router.push(`/?${p.toString()}`);
               return;
             }
 
@@ -121,7 +124,18 @@ function ExperienceInner() {
     };
   }, [rideParam]);
 
-  const [showGratuity, setShowGratuity] = useState(false);
+  const [showGratuity,       setShowGratuity]       = useState(false);
+  const [showReturnHook,     setShowReturnHook]     = useState(false);
+  const [returnHookDismissed, setReturnHookDismissed] = useState(false);
+
+  // Mid-ride soft hook — show after 10 min of active ride
+  useEffect(() => {
+    if (state.status !== 'active') return;
+    const timer = setTimeout(() => {
+      if (!returnHookDismissed) setShowReturnHook(true);
+    }, 600000);
+    return () => clearTimeout(timer);
+  }, [state.status, returnHookDismissed]);
 
   const showMap      = state.status === 'ready' || state.status === 'active';
   const rideIsLive   = state.status === 'ready' || state.status === 'active';
@@ -161,7 +175,15 @@ function ExperienceInner() {
       {/* ── Operator handoff — faint, non-intrusive ─────── */}
       <button
         type="button"
-        onClick={() => { experienceStore.reset(); router.push('/?guest=1'); }}
+        onClick={() => {
+          const dest = state.destination;
+          const occ  = state.occasion;
+          experienceStore.reset();
+          const p = new URLSearchParams({ guest: '1' });
+          if (dest) p.set('destination', dest);
+          if (occ)  p.set('occasion', occ);
+          router.push(`/?${p.toString()}`);
+        }}
         aria-label="Return to booking"
         className="fixed bottom-5 left-5 z-50 w-8 h-8 rounded-full border border-gold/20 bg-transparent flex items-center justify-center opacity-20 hover:opacity-60 active:opacity-80 transition-opacity duration-300"
       >
@@ -195,6 +217,71 @@ function ExperienceInner() {
           >
             ✦ Gratuity
           </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* ── Mid-ride return hook ── */}
+      <AnimatePresence>
+        {showReturnHook && (
+          <motion.div
+            key="return-hook"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-sm px-4"
+          >
+            <div
+              className="rounded-2xl p-5"
+              style={{
+                background:     '#111111',
+                border:         '1px solid rgba(201,168,76,0.20)',
+                borderTop:      '2px solid rgba(201,168,76,0.20)',
+                boxShadow:      '0 0 40px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.05)',
+                backdropFilter: 'blur(12px)',
+              }}
+            >
+              <p className="text-[10px] tracking-[4px] uppercase text-gold/50 mb-2">Prestige</p>
+              <p className="text-[17px] font-light text-lux-white mb-4">
+                Need a ride back later?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowReturnHook(false);
+                    setReturnHookDismissed(true);
+                    const p = new URLSearchParams({ guest: '1', return: '1' });
+                    if (state.destination) p.set('destination', state.destination);
+                    if (state.occasion)    p.set('occasion', state.occasion);
+                    router.push(`/?${p.toString()}`);
+                  }}
+                  className="flex-1 py-3 rounded-xl text-[11px] font-semibold tracking-[1px] uppercase transition-all active:scale-[0.97]"
+                  style={{
+                    background: 'linear-gradient(135deg, #D4AF5A, #C9A84C, #B8932E)',
+                    color:      '#06060A',
+                  }}
+                >
+                  Book Return
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowReturnHook(false);
+                    setReturnHookDismissed(true);
+                  }}
+                  className="px-4 py-3 rounded-xl text-[11px] tracking-[1px] uppercase transition-all active:scale-[0.97]"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border:     '1px solid rgba(255,255,255,0.08)',
+                    color:      'rgba(239,239,239,0.45)',
+                  }}
+                >
+                  Not now
+                </button>
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

@@ -10,6 +10,10 @@ import { supabase } from '@/lib/supabase';
 import { experienceStore } from '@/lib/experienceStore';
 import type { Service } from '@/lib/types';
 
+// ─────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────
+
 function parseDollar(s?: string): number | null {
   if (!s) return null;
   const n = parseFloat(s.replace(/[^0-9.]/g, ''));
@@ -31,21 +35,86 @@ function openStripe(svc: Service, type: 'deposit' | 'full') {
   window.open(url, '_blank');
 }
 
-interface ScreenBookingProps {
-  onPrev: () => void;
-  customerId?: string;
-  guestName?: string;
+/** Pick the best-match service for this occasion (for Repeat card). */
+function getRepeatService(occasion: string): Service {
+  const occ = occasion.toLowerCase();
+  if (occ.includes('airport'))                      return SERVICES.find(s => s.id === 'airport_dfw')!;
+  if (occ.includes('wedding'))                      return SERVICES.find(s => s.id === 'wedding')!;
+  if (occ.includes('corporate') || occ.includes('business') || occ.includes('hourly'))
+                                                    return SERVICES.find(s => s.id === 'hourly')!;
+  if (occ.includes('prom') || occ.includes('event')) return SERVICES.find(s => s.id === 'prom')!;
+  if (occ.includes('night'))                        return SERVICES.find(s => s.id === 'night_out')!;
+  if (occ.includes('sport'))                        return SERVICES.find(s => s.id === 'sporting')!;
+  return SERVICES.find(s => s.id === 'airport_dfw')!;
 }
 
-export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenBookingProps) {
-  const [selected, setSelected] = useState<Service | null>(null);
-  const [name,     setName]     = useState(guestName ?? '');
-  const [phone,    setPhone]    = useState('');
+/** Return the 2 contextual services to show below the Repeat card. */
+function getContextualServices(occasion: string): Service[] {
+  const occ    = occasion.toLowerCase();
+  const repeat = getRepeatService(occasion);
+  const pool   = SERVICES.filter(s => s.id !== repeat.id);
+
+  if (occ.includes('airport'))  return [pool.find(s => s.id === 'hourly')!,    pool.find(s => s.id === 'night_out')!];
+  if (occ.includes('wedding'))  return [pool.find(s => s.id === 'airport_dfw')!, pool.find(s => s.id === 'hourly')!];
+  if (occ.includes('corporate')) return [pool.find(s => s.id === 'airport_dfw')!, pool.find(s => s.id === 'night_out')!];
+  // default
+  return [pool.find(s => s.id === 'airport_dfw')!, pool.find(s => s.id === 'night_out')!];
+}
+
+/** "Tomorrow, same time" suggestion string. */
+function suggestedTime(): string {
+  const t = new Date();
+  t.setDate(t.getDate() + 1);
+  const h    = t.getHours();
+  const m    = t.getMinutes();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12  = h % 12 || 12;
+  return `${t.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+// ─────────────────────────────────────────────────────────
+// Props
+// ─────────────────────────────────────────────────────────
+
+interface ScreenBookingProps {
+  onPrev:       () => void;
+  customerId?:  string;
+  guestName?:   string;
+  occasion?:    string;
+  destination?: string;
+  pickup?:      string;
+  isGuest?:     boolean;
+  isReturn?:    boolean;
+}
+
+// ─────────────────────────────────────────────────────────
+// ScreenBooking
+// ─────────────────────────────────────────────────────────
+
+export default function ScreenBooking({
+  onPrev,
+  customerId,
+  guestName,
+  occasion   = '',
+  destination = '',
+  pickup     = '',
+  isGuest    = false,
+  isReturn   = false,
+}: ScreenBookingProps) {
+  const [selected,     setSelected]     = useState<Service | null>(null);
+  const [showAll,      setShowAll]      = useState(false);
+  const [name,         setName]         = useState(guestName ?? '');
+  const [phone,        setPhone]        = useState('');
 
   const panelRef  = useRef<HTMLDivElement>(null);
   const viewedRef = useRef(false);
 
-  // Track viewed_offer exactly once per mount — no duplicates
+  const repeatSvc       = getRepeatService(occasion);
+  const contextualSvcs  = getContextualServices(occasion);
+  const displayedSvcs   = showAll ? SERVICES : contextualSvcs;
+  const suggestedLabel  = suggestedTime();
+
+  // Track viewed_offer exactly once per mount
   useEffect(() => {
     if (viewedRef.current) return;
     viewedRef.current = true;
@@ -62,7 +131,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
     }).catch(console.error);
   }, [customerId]);
 
-  // Auto-scroll selection panel into view on service pick
+  // Auto-scroll selection panel into view
   useEffect(() => {
     if (selected) {
       setTimeout(() => {
@@ -79,7 +148,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
       {/* ── Scrollable top ─────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto pr-0.5" style={{ scrollbarWidth: 'none' }}>
 
-        {/* Urgency header */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -87,11 +156,13 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
           className="mb-4"
         >
           <p className="text-xs tracking-widest text-gold mb-2 uppercase">
-            Before you step out…
+            {isReturn ? 'Schedule Your Return' : 'Before you step out…'}
           </p>
           <h1 className="font-serif-lux text-3xl font-light leading-tight mb-3">
-            Secure your next ride{' '}
-            <span className="italic text-gold">now.</span>
+            {isReturn
+              ? <>Book your <span className="italic text-gold">return ride.</span></>
+              : <>Secure your next ride{' '}<span className="italic text-gold">now.</span></>
+            }
           </h1>
           <p className="text-sm mb-3 leading-snug" style={{ color: '#666672' }}>
             Lock in exclusive in-ride pricing — not available after drop-off.
@@ -112,9 +183,97 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
           ✦ Trusted by executives · Airport clients · VIP repeat riders
         </motion.p>
 
-        {/* Service cards */}
-        <div className="space-y-3 mb-5">
-          {SERVICES.map((svc, i) => (
+        {/* ── 1-TAP REBOOK CARD ────────────────────────────── */}
+        {(destination || occasion) && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08, duration: 0.35 }}
+            className="mb-4"
+          >
+            <p className="text-[9px] tracking-[3px] uppercase mb-2" style={{ color: '#C9A84C' }}>
+              Repeat This Journey
+            </p>
+
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              onClick={() => openStripe(repeatSvc, 'deposit')}
+              className="w-full text-left rounded-2xl p-5 relative overflow-hidden"
+              style={{
+                background:   'linear-gradient(135deg, rgba(201,168,76,0.13) 0%, rgba(201,168,76,0.06) 100%)',
+                border:       '1px solid rgba(201,168,76,0.40)',
+                borderTop:    '2px solid rgba(201,168,76,0.55)',
+                boxShadow:    '0 0 32px rgba(201,168,76,0.10), inset 0 0 20px rgba(201,168,76,0.04)',
+              }}
+            >
+              {/* Glow shimmer */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(105deg, transparent 40%, rgba(201,168,76,0.06) 50%, transparent 60%)',
+                }}
+              />
+
+              <div className="flex items-start justify-between gap-3 relative z-10">
+                <div className="flex-1 min-w-0">
+                  {/* Route */}
+                  <div className="flex items-center gap-2 mb-2">
+                    {pickup && (
+                      <>
+                        <span className="text-xs font-medium" style={{ color: '#EFEFEF' }}>
+                          {pickup}
+                        </span>
+                        <span style={{ color: '#C9A84C', fontSize: '10px' }}>→</span>
+                      </>
+                    )}
+                    {destination && (
+                      <span className="text-xs font-medium text-gold truncate">
+                        {destination}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Meta */}
+                  <p className="text-[11px] mb-1" style={{ color: '#666672' }}>
+                    {repeatSvc.name}
+                  </p>
+                  <p className="text-[11px]" style={{ color: '#4a4a55' }}>
+                    Suggested · {suggestedLabel}
+                  </p>
+                </div>
+
+                <div className="text-right flex-shrink-0">
+                  <p className="text-gold text-lg font-bold leading-tight">
+                    {repeatSvc.deposit}
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: '#4a4a55' }}>
+                    deposit
+                  </p>
+                  <div
+                    className="mt-2 rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wide uppercase"
+                    style={{
+                      background: '#C9A84C',
+                      color:      '#06060A',
+                    }}
+                  >
+                    Book Now
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+          </motion.div>
+        )}
+
+        {/* ── Service cards ─────────────────────────────────── */}
+        <div className="mb-1">
+          <p className="text-[9px] tracking-[3px] uppercase mb-3" style={{ color: '#4a4a55' }}>
+            {destination || occasion ? 'Other Services' : 'Choose a Service'}
+          </p>
+        </div>
+
+        <div className="space-y-3 mb-4">
+          {displayedSvcs.map((svc, i) => (
             <motion.div
               key={svc.id}
               initial={{ opacity: 0, y: 8 }}
@@ -163,6 +322,25 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
             </motion.div>
           ))}
         </div>
+
+        {/* See All / Collapse toggle */}
+        {!showAll && (
+          <motion.button
+            type="button"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            onClick={() => setShowAll(true)}
+            className="w-full py-2.5 text-[11px] tracking-[2px] uppercase transition-colors mb-4"
+            style={{
+              color:        'rgba(201,168,76,0.50)',
+              border:       '1px solid rgba(201,168,76,0.14)',
+              borderRadius: '12px',
+            }}
+          >
+            See All Services ↓
+          </motion.button>
+        )}
 
         {/* Selection panel — price breakdown + QR + inputs */}
         <AnimatePresence>
@@ -266,13 +444,10 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
 
       {/* ── Sticky bottom ──────────────────────────────────── */}
       <div className="flex-shrink-0 pt-3">
-
-        {/* Psychological trigger */}
         <p className="text-center text-[10px] mb-3 tracking-wide" style={{ color: '#3a3a44' }}>
           Most clients book their return ride before arrival
         </p>
 
-        {/* Call CTA */}
         <a
           href="tel:6468791391"
           className="block w-full text-center py-3 rounded-xl text-xs font-semibold tracking-wide uppercase transition-colors hover:bg-gold/[0.05] active:scale-[0.98]"
@@ -281,12 +456,10 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
           Prefer to call? Tap to speak with your chauffeur
         </a>
 
-        {/* Risk reversal */}
         <p className="text-center mt-3 mb-3" style={{ fontSize: '10px', color: '#3a3a44', letterSpacing: '0.08em' }}>
           No surge pricing · On-time guarantee · Secure booking
         </p>
 
-        {/* Nav */}
         <div className="flex items-center justify-between">
           <button
             onClick={onPrev}
@@ -295,7 +468,7 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
           >
             ← Back
           </button>
-          <ProgressDots active={3} total={4} />
+          {!isGuest && <ProgressDots active={3} total={4} />}
           <div className="w-[60px]" />
         </div>
       </div>
@@ -305,9 +478,6 @@ export default function ScreenBooking({ onPrev, customerId, guestName }: ScreenB
 
 // ─────────────────────────────────────────────────────────
 // BookingQR
-//
-// Gold-on-dark QR for a Stripe payment link.
-// Matches the gratuity QR style. Updates instantly when url changes.
 // ─────────────────────────────────────────────────────────
 
 function BookingQR({ url, onTap }: { url: string; onTap: () => void }) {
@@ -324,7 +494,6 @@ function BookingQR({ url, onTap }: { url: string; onTap: () => void }) {
         borderRadius: '18px',
       }}
     >
-      {/* QR */}
       <div
         className="rounded-2xl p-4"
         style={{
@@ -342,12 +511,10 @@ function BookingQR({ url, onTap }: { url: string; onTap: () => void }) {
         />
       </div>
 
-      {/* Scan hint */}
       <p className="text-[11px] text-lux-muted/50 tracking-wide">
         Scan with your phone to reserve
       </p>
 
-      {/* Tap fallback */}
       <button
         type="button"
         onClick={onTap}
