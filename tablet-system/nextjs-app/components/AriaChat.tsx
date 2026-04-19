@@ -25,6 +25,8 @@ export default function AriaChat() {
   const [isLoading,      setIsLoading]      = useState(false);
   const [bookingCreated, setBookingCreated] = useState(false);
 
+  console.log('messages:', messages);
+
   const bottomRef   = useRef<HTMLDivElement>(null);
   const inputRef    = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -375,13 +377,6 @@ export default function AriaChat() {
         </button>
       </div>
 
-      {/* Keyframe injection */}
-      <style>{`
-        @keyframes aria-dot {
-          0%,60%,100% { opacity: 0.25; transform: scale(0.85); }
-          30%          { opacity: 1;    transform: scale(1.15); }
-        }
-      `}</style>
     </div>
   );
 }

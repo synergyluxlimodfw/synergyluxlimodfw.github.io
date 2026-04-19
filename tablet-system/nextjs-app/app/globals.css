@@ -101,6 +101,12 @@
   }
 }
 
+/* ── Aria chat typing animation ── */
+@keyframes aria-dot {
+  0%,60%,100% { opacity: 0.25; transform: scale(0.85); }
+  30%          { opacity: 1;    transform: scale(1.15); }
+}
+
 @layer utilities {
   .font-serif-lux   { font-family: 'Cormorant Garamond', Georgia, serif; }
   .text-gold        { color: #C9A84C; }
