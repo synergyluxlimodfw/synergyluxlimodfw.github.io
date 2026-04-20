@@ -248,6 +248,9 @@ export default function OperatorPanel({ onStart }: OperatorPanelProps) {
                 (646) 879-1391
               </a>
             </p>
+            <p className="text-xs text-gray-400 text-center py-2">
+              © 2026 Synergy Lux Limo DFW LLC. All rights reserved.
+            </p>
           </motion.div>
         )}
 

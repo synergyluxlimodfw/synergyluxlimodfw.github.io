@@ -319,6 +319,10 @@ export default function AriaPage() {
         </div>
       </footer>
 
+      <p className="text-xs text-gray-400 text-center py-2">
+        © 2026 Synergy Lux Limo DFW LLC · Powered by Amirah AI
+      </p>
+
     </div>
   );
 }

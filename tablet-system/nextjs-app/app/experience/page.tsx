@@ -890,6 +890,9 @@ function ExperienceFooter({
         />
         {notes && <FooterPill icon="✎" label={notes} maxWidth />}
       </div>
+      <p className="text-xs text-gray-400 text-center py-2">
+        © 2026 Prestige by Synergy Lux · All rights reserved.
+      </p>
     </motion.div>
   );
 }
