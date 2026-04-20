@@ -275,6 +275,68 @@ export default function AriaPage() {
         </div>
       </section>
 
+      {/* ── Bio divider ────────────────────────────────────── */}
+      <div style={{
+        position: 'relative',
+        zIndex:   1,
+        height:   '1px',
+        background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.18), transparent)',
+        margin:   '0 clamp(24px, 6vw, 80px)',
+      }} />
+
+      {/* ── About Mr. Rodriguez ────────────────────────────── */}
+      <section style={{
+        position:       'relative',
+        zIndex:         1,
+        padding:        'clamp(60px, 8vw, 100px) clamp(24px, 6vw, 80px)',
+        display:        'flex',
+        alignItems:     'center',
+        gap:            'clamp(40px, 6vw, 80px)',
+        flexWrap:       'wrap' as const,
+      }}>
+        {/* Gold accent line */}
+        <div style={{
+          width:      '2px',
+          alignSelf:  'stretch',
+          minHeight:  '80px',
+          background: 'linear-gradient(to bottom, rgba(201,168,76,0.60), rgba(201,168,76,0.08))',
+          flexShrink: 0,
+        }} />
+
+        <div style={{ flex: '1 1 280px' }}>
+          <p style={{
+            fontSize:      '10px',
+            letterSpacing: '5px',
+            textTransform: 'uppercase' as const,
+            color:         'rgba(201,168,76,0.50)',
+            margin:        '0 0 20px',
+          }}>
+            Your Chauffeur
+          </p>
+          <h2 style={{
+            fontFamily:  '"Cormorant Garamond", Georgia, serif',
+            fontSize:    'clamp(32px, 4vw, 48px)',
+            fontWeight:  300,
+            color:       '#EFEFEF',
+            margin:      '0 0 20px',
+            lineHeight:  1.15,
+          }}>
+            Mr. Rodriguez
+          </h2>
+          <p style={{
+            fontSize:   '16px',
+            lineHeight: 1.75,
+            color:      '#888892',
+            margin:     0,
+            maxWidth:   '560px',
+          }}>
+            Mr. Rodriguez brings 14 years of experience as an educator to every
+            ride — where precision, punctuality, and earning trust were never
+            optional. That same dedication now drives every Synergy Lux experience.
+          </p>
+        </div>
+      </section>
+
       {/* ── Footer ─────────────────────────────────────────── */}
       <footer style={{
         position:     'relative',
