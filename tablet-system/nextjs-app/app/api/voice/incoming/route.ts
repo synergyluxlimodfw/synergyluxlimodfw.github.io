@@ -30,7 +30,7 @@ const supabaseAdmin = createClient(
 const OPENING_MESSAGE =
   "Hi, this is Amirah with Synergy Lux Limo DFW. Will Rodriguez is currently " +
   "with a client — but I can help you book right now. " +
-  "What's the occasion for your ride? (Reply here to chat)";
+  "What's the occasion for your ride? (Reply here to chat. Reply STOP to opt out.)";
 
 export async function POST(req: NextRequest) {
   try {

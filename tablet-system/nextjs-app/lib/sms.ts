@@ -68,6 +68,7 @@ function bookingConfirmed(ride: Ride): string {
     'Vehicle: Cadillac Escalade',
     '',
     'Reply here if you need anything.',
+    'Reply STOP to opt out.',
   ].join('\n');
 }
 
@@ -79,6 +80,7 @@ function preRideReminder(): string {
     'Reply here if anything changes.',
     '',
     'See you soon.',
+    'Reply STOP to opt out.',
   ].join('\n');
 }
 
@@ -87,6 +89,8 @@ function postRide(): string {
     'Thank you for riding with Synergy Lux today.',
     '',
     `Reserve your next ride here:\n${process.env.BOOKING_URL}`,
+    '',
+    'Reply STOP to opt out.',
   ].join('\n');
 }
 
@@ -96,6 +100,7 @@ function reviewRequest(): string {
     process.env.GOOGLE_REVIEW_URL,
     '',
     'Thank you — it means a lot.',
+    'Reply STOP to opt out.',
   ].join('\n');
 }
 
@@ -105,6 +110,8 @@ function rebookNudge(name: string): string {
     `Hi ${firstName}, if you need another ride this week, I'd be happy to take care of it.`,
     '',
     `Reserve anytime:\n${process.env.BOOKING_URL}`,
+    '',
+    'Reply STOP to opt out.',
   ].join('\n');
 }
 
@@ -114,6 +121,8 @@ function airportReturn(name: string): string {
     `Hi ${firstName}, if you'll need a return ride from the airport, I can have that ready for you.`,
     '',
     `Schedule here:\n${process.env.BOOKING_URL}`,
+    '',
+    'Reply STOP to opt out.',
   ].join('\n');
 }
 
