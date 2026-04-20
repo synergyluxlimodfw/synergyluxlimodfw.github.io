@@ -1,6 +1,7 @@
 /**
  * app/api/sms/confirm/route.ts
  * POST { rideId } — fetches ride and sends booking confirmation SMS immediately.
+ * Triggered by operator panel after launching a ride.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
