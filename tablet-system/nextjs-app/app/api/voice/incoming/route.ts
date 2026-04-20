@@ -28,7 +28,7 @@ const supabaseAdmin = createClient(
 );
 
 const OPENING_MESSAGE =
-  "Hi, this is Aria with Synergy Lux Limo DFW. W. Rodriguez is currently " +
+  "Hi, this is Amirah with Synergy Lux Limo DFW. W. Rodriguez is currently " +
   "with a client — but I can help you book right now. " +
   "What's the occasion for your ride? (Reply here to chat)";
 

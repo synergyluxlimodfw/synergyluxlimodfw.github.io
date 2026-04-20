@@ -11,7 +11,7 @@ interface Message {
   content: string;
 }
 
-const OPENING = 'Welcome to Prestige by Synergy Lux. What is the occasion for your ride?';
+const OPENING = 'Welcome to Prestige by Synergy Lux. I am Amirah, your personal concierge. What is the occasion for your ride?';
 
 // ─────────────────────────────────────────────────────────
 // AriaChat
@@ -156,7 +156,7 @@ export default function AriaChat() {
             lineHeight:    1,
             letterSpacing: '0.01em',
             margin:        0,
-          }}>Aria</p>
+          }}>Amirah</p>
           <p style={{
             fontSize:      '9px',
             letterSpacing: '2.5px',
@@ -244,7 +244,7 @@ export default function AriaChat() {
                 : 'rgba(201,168,76,0.60)',
               fontWeight:    600,
             }}>
-              {msg.role === 'user' ? 'You' : 'Aria'}
+              {msg.role === 'user' ? 'You' : 'Amirah'}
             </span>
 
             {/* Bubble */}
@@ -281,7 +281,7 @@ export default function AriaChat() {
               fontSize: '9px', letterSpacing: '2.5px',
               textTransform: 'uppercase' as const,
               color: 'rgba(201,168,76,0.60)', fontWeight: 600,
-            }}>Aria</span>
+            }}>Amirah</span>
             <div style={{
               padding:      '12px 16px',
               borderRadius: '4px 16px 16px 16px',
@@ -328,7 +328,7 @@ export default function AriaChat() {
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={isLoading}
-          placeholder="Message Aria…"
+          placeholder="Message Amirah…"
           rows={1}
           style={{
             flex:        1,

@@ -3,7 +3,7 @@ import AriaChat from '@/components/AriaChat';
 
 export const metadata: Metadata = {
   title:       'Book Your Ride — Prestige by Synergy Lux',
-  description: 'Tell Aria your occasion and we handle everything. Private chauffeur service in Dallas–Fort Worth.',
+  description: 'Tell Amirah your occasion and we handle everything. Private chauffeur service in Dallas–Fort Worth.',
 };
 
 // ─────────────────────────────────────────────────────────
@@ -83,7 +83,7 @@ export default function AriaPage() {
             margin:     0,
             maxWidth:   '420px',
           }}>
-            Personalized journeys designed around you. Tell Aria your occasion
+            Personalized journeys designed around you. Tell Amirah your occasion
             and we handle everything.
           </p>
 
@@ -230,7 +230,7 @@ export default function AriaPage() {
           flexWrap: 'wrap' as const,
         }}>
           {[
-            { n: '01', step: 'Tell Aria your occasion',  detail: 'Share where you\'re going, when, and what the moment calls for. Aria handles the rest.' },
+            { n: '01', step: 'Tell Amirah your occasion',  detail: 'Share where you\'re going, when, and what the moment calls for. Amirah handles the rest.' },
             { n: '02', step: 'We prepare your ride',      detail: 'Your chauffeur, cabin preferences, and route are confirmed before you\'re even ready.' },
             { n: '03', step: 'Experience Prestige',       detail: 'Step in. Everything is exactly as you requested. That\'s the Prestige standard.' },
           ].map(({ n, step, detail }) => (
