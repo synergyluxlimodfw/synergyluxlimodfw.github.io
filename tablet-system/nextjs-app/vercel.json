@@ -2,11 +2,5 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
-  "installCommand": "npm install",
-  "crons": [
-    {
-      "path": "/api/sms/cron",
-      "schedule": "* * * * *"
-    }
-  ]
+  "installCommand": "npm install"
 }
