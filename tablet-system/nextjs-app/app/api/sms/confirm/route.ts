@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { handleBookingConfirmed } from '@/lib/sms';
 
+console.log('SMS confirm route loaded - version 2');
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
