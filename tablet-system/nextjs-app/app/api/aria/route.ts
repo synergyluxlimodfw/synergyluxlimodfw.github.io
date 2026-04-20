@@ -7,7 +7,7 @@
  * Returns:  { response: string, bookingCreated: boolean, booking?: object }
  *
  * When Aria outputs BOOKING_READY:{json}, the JSON is extracted, saved to
- * bookings_calendar, and returned alongside the cleaned response text.
+ * the rides table, and returned alongside the cleaned response text.
  *
  * Required env var: ANTHROPIC_API_KEY
  * ─────────────────────────────────────────────────────────────────────────
@@ -15,13 +15,19 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import {
   ARIA_SYSTEM_PROMPT,
   extractBookingReady,
   stripBookingReady,
 } from '@/lib/aria';
 import { handleBookingConfirmed } from '@/lib/sms';
+
+// Admin client — bypasses RLS, required for server-side inserts
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 interface ChatMessage {
   role:    'user' | 'assistant';
@@ -98,6 +104,7 @@ export async function POST(req: NextRequest) {
     const booking = extractBookingReady(rawResponse);
 
     if (booking) {
+      // Build occasion string — combine occasion + pickup location
       const occasionValue = [
         booking.occasion?.trim(),
         booking.pickup_location?.trim()
@@ -107,18 +114,26 @@ export async function POST(req: NextRequest) {
         .filter(Boolean)
         .join(' · ') || null;
 
-      const { data, error } = await supabase
-        .from('bookings_calendar')
+      // Build start_time ISO string from date + time fields
+      // Falls back to noon on the given date if time is missing
+      let startTime: string | null = null;
+      if (booking.date?.trim()) {
+        const timeStr = booking.time?.trim() ?? '12:00';
+        const parsed  = new Date(`${booking.date.trim()}T${timeStr}`);
+        startTime      = isNaN(parsed.getTime()) ? null : parsed.toISOString();
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from('rides')
         .insert({
-          client_name:  booking.name?.trim()        || null,
+          guest_name:   booking.name?.trim()        || null,
           client_phone: booking.phone?.trim()       || null,
-          client_email: booking.email?.trim()       || null,
-          service:      booking.service?.trim()     || null,
-          date:         booking.date?.trim()        || null,
-          time_slot:    booking.time?.trim()        || null,
           destination:  booking.destination?.trim() || null,
           occasion:     occasionValue,
+          chauffeur:    'W. Rodriguez',
           status:       'scheduled',
+          start_time:   startTime,
+          eta_minutes:  0,
         })
         .select()
         .single();
@@ -136,7 +151,7 @@ export async function POST(req: NextRequest) {
             guest_name:   booking.name?.trim()        ?? '',
             client_phone: booking.phone.trim(),
             destination:  booking.destination?.trim() ?? '',
-            occasion:     booking.occasion?.trim()    ?? null,
+            occasion:     occasionValue,
             chauffeur:    'W. Rodriguez',
             status:       'scheduled',
             date:         booking.date?.trim()        ?? null,
