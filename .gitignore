@@ -2,3 +2,12 @@
 *.mov
 *.MOV
 Thumbs.db
+*.png
+*.jpg
+*.jpeg
+*.webp
+node_modules/
+tablet-app/node_modules/
+tablet-app/dist/
+*.jsx
+synergy-tablet-app.jsx
