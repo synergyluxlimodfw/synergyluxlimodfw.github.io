@@ -21,6 +21,7 @@ import {
   extractBookingReady,
   stripBookingReady,
 } from '@/lib/aria';
+import { handleBookingConfirmed } from '@/lib/sms';
 
 interface ChatMessage {
   role:    'user' | 'assistant';
@@ -127,6 +128,21 @@ export async function POST(req: NextRequest) {
       } else {
         bookingCreated = true;
         savedBooking   = data;
+
+        // Fire booking confirmation SMS (non-blocking — don't await)
+        if (booking.phone?.trim()) {
+          handleBookingConfirmed({
+            id:           data.id,
+            guest_name:   booking.name?.trim()        ?? '',
+            client_phone: booking.phone.trim(),
+            destination:  booking.destination?.trim() ?? '',
+            occasion:     booking.occasion?.trim()    ?? null,
+            chauffeur:    'W. Rodriguez',
+            status:       'scheduled',
+            date:         booking.date?.trim()        ?? null,
+            time:         booking.time?.trim()        ?? null,
+          }).catch(err => console.error('[SMS] Aria confirm error:', err));
+        }
       }
     }
 

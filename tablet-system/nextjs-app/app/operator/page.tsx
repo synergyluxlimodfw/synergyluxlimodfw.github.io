@@ -161,6 +161,7 @@ export default function OperatorPage() {
             key="success"
             name={name}
             destination={destination}
+            occasion={occasion}
             chauffeur={chauffeur.trim() || DEFAULT_CHAUFFEUR}
             eta={eta}
             rideId={launchedRideId}
@@ -658,6 +659,7 @@ type RidePhase = 'preparing' | 'ready' | 'active' | 'complete';
 function SuccessState({
   name,
   destination,
+  occasion,
   chauffeur,
   eta,
   rideId,
@@ -665,14 +667,16 @@ function SuccessState({
 }: {
   name: string;
   destination: string;
+  occasion: string;
   chauffeur: string;
   eta: number;
   rideId: string | null;
   onReset: () => void;
 }) {
-  const [phase,        setPhase]        = useState<RidePhase>('preparing');
-  const [copying,      setCopying]      = useState(false);
-  const [bookingSent,  setBookingSent]  = useState(false);
+  const [phase,           setPhase]           = useState<RidePhase>('preparing');
+  const [copying,         setCopying]         = useState(false);
+  const [bookingSent,     setBookingSent]      = useState(false);
+  const [airportSmsSent,  setAirportSmsSent]  = useState(false);
 
   const origin    = typeof window !== 'undefined' ? window.location.origin : '';
   const tabletUrl = rideId ? `${origin}/experience?ride=${rideId}` : null;
@@ -680,7 +684,31 @@ function SuccessState({
   async function advanceTo(newPhase: RidePhase) {
     if (!rideId) return;
     setPhase(newPhase);
-    await supabase.from('rides').update({ status: newPhase }).eq('id', rideId);
+
+    const update: Record<string, unknown> = { status: newPhase };
+    if (newPhase === 'active')   update.start_time = new Date().toISOString();
+    if (newPhase === 'complete') update.end_time   = new Date().toISOString();
+
+    await supabase.from('rides').update(update).eq('id', rideId);
+
+    // When ride ends, fire post-ride SMS
+    if (newPhase === 'complete') {
+      fetch('/api/sms/post-ride', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ rideId }),
+      }).catch(err => console.error('[SMS] post-ride fire error:', err));
+    }
+  }
+
+  async function sendAirportSms() {
+    if (!rideId || airportSmsSent) return;
+    setAirportSmsSent(true);
+    await fetch('/api/sms/airport-return', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ rideId }),
+    });
   }
 
   async function showBooking() {
@@ -883,6 +911,47 @@ function SuccessState({
             )}
           </button>
         </motion.div>
+
+        {/* Airport return SMS — only when occasion contains "airport" */}
+        {destination?.toLowerCase().includes('airport') ||
+         (occasion ?? '').toLowerCase().includes('airport') ? (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.43, duration: 0.4, ease: EASE }}
+            className="mt-3"
+          >
+            <button
+              onClick={sendAirportSms}
+              disabled={airportSmsSent || !rideId}
+              className="w-full flex items-center justify-between rounded-2xl px-4 transition-all duration-200 active:scale-[0.98] disabled:cursor-default"
+              style={{
+                minHeight:  '56px',
+                background: airportSmsSent ? 'rgba(201,168,76,0.10)' : '#141419',
+                border:     `1px solid ${airportSmsSent ? 'rgba(201,168,76,0.35)' : 'rgba(201,168,76,0.18)'}`,
+                opacity:    !rideId ? 0.4 : 1,
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ background: airportSmsSent ? '#C9A84C' : 'rgba(201,168,76,0.4)' }}
+                />
+                <div className="text-left">
+                  <p className="text-[12px] font-semibold tracking-wide" style={{ color: airportSmsSent ? '#C9A84C' : '#EFEFEF' }}>
+                    ✈ Send Return Ride Link
+                  </p>
+                  <p className="text-[10px] text-lux-muted/50">SMS client the airport return booking link</p>
+                </div>
+              </div>
+              {airportSmsSent ? (
+                <span className="text-[9px] tracking-[2px] uppercase font-semibold text-gold">Sent ✓</span>
+              ) : (
+                <span className="text-[11px] text-lux-muted/30">→</span>
+              )}
+            </button>
+          </motion.div>
+        ) : null}
 
         {/* Reset */}
         <motion.div
