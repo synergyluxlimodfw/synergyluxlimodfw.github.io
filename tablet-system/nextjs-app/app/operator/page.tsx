@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase';
 // Constants
 // ─────────────────────────────────────────────────────────
 
-const DEFAULT_CHAUFFEUR = 'W. Rodriguez';
+const DEFAULT_CHAUFFEUR = 'Will Rodriguez';
 const OCCASIONS = [
   'Airport Transfer',
   'Business Travel',
@@ -243,7 +243,7 @@ export default function OperatorPage() {
                       type="text"
                       value={chauffeur}
                       onChange={e => setChauffeur(e.target.value)}
-                      placeholder="W. Rodriguez"
+                      placeholder="Will Rodriguez"
                       className="lux-input"
                     />
                   </LuxInput>

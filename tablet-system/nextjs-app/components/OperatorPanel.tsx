@@ -8,7 +8,7 @@ import type { Session } from '@/lib/types';
 // Constants
 // ─────────────────────────────────────────────────────────
 
-const DEFAULT_CHAUFFEUR = 'W. Rodriguez';
+const DEFAULT_CHAUFFEUR = 'Will Rodriguez';
 const BASE_ETA   = 24;
 const OCCASIONS  = [
   'Airport Transfer',
@@ -144,7 +144,7 @@ export default function OperatorPanel({ onStart }: OperatorPanelProps) {
                   type="text"
                   value={chauffeur}
                   onChange={e => setChauffeur(e.target.value)}
-                  placeholder="W. Rodriguez"
+                  placeholder="Will Rodriguez"
                   className="lux-input"
                 />
               </InputGroup>

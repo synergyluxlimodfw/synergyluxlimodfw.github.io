@@ -55,7 +55,7 @@ const DEFAULTS: ExperienceState = {
   guestName:    '',
   destination:  '',
   occasion:     '',
-  chauffeurName: 'W. Rodriguez',
+  chauffeurName: 'Will Rodriguez',
   eta:          24,
   temperature:  72,
   music:        false,

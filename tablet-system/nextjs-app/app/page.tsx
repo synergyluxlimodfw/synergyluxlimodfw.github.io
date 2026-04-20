@@ -21,7 +21,7 @@ function TabletPageInner() {
     occasion,
     destination,
     vipNote:    pickup,   // repurposed as pickup location for display
-    chauffeur:  'W. Rodriguez',
+    chauffeur:  'Will Rodriguez',
     etaMinutes: 0,
   };
 
