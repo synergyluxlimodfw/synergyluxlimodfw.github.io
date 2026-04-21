@@ -328,6 +328,11 @@ function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideD
   const [glowing, setGlowing] = useState(false);
   const [sending, setSending] = useState(false);
   async function handleBook() {
+    if (!rideData.phone) {
+      console.warn('No phone number available for rebook');
+      setTimeout(() => { onConfirmed(); }, 600);
+      return;
+    }
     setGlowing(true);
     setSending(true);
     try {
@@ -374,7 +379,29 @@ function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideD
 }
 
 // ── Root Component ────────────────────────────────────────────────────────────
-export default function PrestigeTabletFull({ forceShowDevControls = false }: { forceShowDevControls?: boolean }) {
+export default function PrestigeTabletFull({
+  forceShowDevControls = false,
+  externalRideState,
+  externalClientName,
+  externalDestination,
+  externalRideId,
+  externalPhone,
+  externalPickup,
+  externalOccasion,
+  hideStartScreen = false,
+  hideDevControls = false,
+}: {
+  forceShowDevControls?: boolean;
+  externalRideState?: "arrival" | "cruise" | "mid-ride" | "pre-dropoff";
+  externalClientName?: string;
+  externalDestination?: string;
+  externalRideId?: string;
+  externalPhone?: string;
+  externalPickup?: string;
+  externalOccasion?: string;
+  hideStartScreen?: boolean;
+  hideDevControls?: boolean;
+}) {
   const [rideState, setRideState] = useState<RideState>("start");
   const [dataStatus, setDataStatus] = useState<DataStatus>("live");
   const [clientName, setClientName] = useState("");
@@ -392,7 +419,20 @@ export default function PrestigeTabletFull({ forceShowDevControls = false }: { f
   const [vipRides] = useState(6);
   const liveRideState = useRef<RideState>(rideState);
 
+  const clientNameFinal  = externalClientName  ?? clientName;
+  const destinationFinal = externalDestination ?? destination;
+  const phoneFinal       = externalPhone       ?? passengerPhone;
+  const pickupFinal      = externalPickup      ?? pickupLocation;
+  const rideIdFinal      = externalRideId      ?? rideId;
+  const occasionFinal    = externalOccasion    ?? occasion;
+
   useEffect(() => { liveRideState.current = rideState; }, [rideState]);
+
+  useEffect(() => {
+    if (externalRideState && !hideStartScreen) {
+      setRideState(externalRideState);
+    }
+  }, [externalRideState, hideStartScreen]);
 
   useEffect(() => {
     if (rideState === "mid-ride" && !promptDismissed && !bookedFromPrompt) {
@@ -414,7 +454,7 @@ export default function PrestigeTabletFull({ forceShowDevControls = false }: { f
   function handleBookFromPrompt() { setShowPrompt(false); setBookedFromPrompt(true); setRideState("pre-dropoff"); }
 
   const showFallback = dataStatus === "error";
-  const isStartScreen = rideState === "start";
+  const isStartScreen = rideState === "start" && !hideStartScreen;
   const isBookingView = rideState === "pre-dropoff" && !showFallback && !confirming;
   const isConfirming = rideState === "pre-dropoff" && confirming && !showFallback;
 
@@ -437,15 +477,15 @@ export default function PrestigeTabletFull({ forceShowDevControls = false }: { f
           </motion.div>
         ) : isConfirming ? (
           <motion.div key="confirmation" initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 1.0, ease: EASE } }} exit={{ opacity: 0, transition: { duration: 0.7, ease: EASE } }}>
-            <ConfirmationView clientName={clientName} destination={destination} returnState={liveRideState.current} onComplete={(returnTo) => { setConfirming(false); setRideState(returnTo); }} />
+            <ConfirmationView clientName={clientNameFinal} destination={destinationFinal} returnState={liveRideState.current} onComplete={(returnTo) => { setConfirming(false); setRideState(returnTo); }} />
           </motion.div>
         ) : isBookingView ? (
           <motion.div key="booking" initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 1.0, ease: EASE } }} exit={{ opacity: 0, transition: { duration: 0.7, ease: EASE } }}>
-            <BookingView onConfirmed={() => setConfirming(true)} rideData={{ rideId, phone: passengerPhone, pickup: pickupLocation, guestName: clientName, destination, occasion }} />
+            <BookingView onConfirmed={() => setConfirming(true)} rideData={{ rideId: rideIdFinal, phone: phoneFinal, pickup: pickupFinal, guestName: clientNameFinal, destination: destinationFinal, occasion: occasionFinal }} />
           </motion.div>
         ) : (
           <motion.div key={`passive-${rideState}`} initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 0.9, ease: EASE } }} exit={{ opacity: 0, transition: { duration: 0.6, ease: EASE } }}>
-            <PassiveView rideState={rideState} dataStatus={dataStatus} clientName={clientName} destination={destination} comfortLevel={comfortLevel} onActionTap={setActiveModal} vipRides={vipRides} />
+            <PassiveView rideState={rideState} dataStatus={dataStatus} clientName={clientNameFinal} destination={destinationFinal} comfortLevel={comfortLevel} onActionTap={setActiveModal} vipRides={vipRides} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -458,10 +498,10 @@ export default function PrestigeTabletFull({ forceShowDevControls = false }: { f
         {activeModal && <ActionModal key="modal" type={activeModal} onClose={() => setActiveModal(null)} onComfortChange={setComfortLevel} comfortLevel={comfortLevel} />}
       </AnimatePresence>
 
-      {(process.env.NODE_ENV === "development" || forceShowDevControls) && (
+      {!hideDevControls && (process.env.NODE_ENV === "development" || forceShowDevControls) && (
         <div style={{ position: "absolute", top: 14, right: 16, display: "flex", gap: 6, zIndex: 20 }}>
           {(["start", "arrival", "cruise", "mid-ride", "pre-dropoff"] as RideState[]).map((s) => (
-            <button key={s} onClick={() => { setRideState(s); if (s !== "mid-ride") { setShowPrompt(false); setPromptDismissed(false); } if (s === "start") { setClientName(""); setDestination(""); setPassengerPhone(""); setPickupLocation(""); setOccasion(""); setRideId(null); } }} style={{ padding: "4px 10px", background: rideState === s ? `${GOLD}0.15)` : "rgba(255,255,255,0.05)", border: `0.5px solid ${rideState === s ? `${GOLD}0.4)` : "rgba(255,255,255,0.1)"}`, borderRadius: 20, color: rideState === s ? `${GOLD}0.8)` : "rgba(255,255,255,0.3)", fontSize: 10, cursor: "pointer", fontFamily: SANS }}>{s}</button>
+            <button key={s} onClick={() => { setRideState(s); if (s !== "mid-ride") { setShowPrompt(false); setPromptDismissed(false); } if (s === "start" && !hideStartScreen) { setClientName(""); setDestination(""); setPassengerPhone(""); setPickupLocation(""); setOccasion(""); setRideId(null); } }} style={{ padding: "4px 10px", background: rideState === s ? `${GOLD}0.15)` : "rgba(255,255,255,0.05)", border: `0.5px solid ${rideState === s ? `${GOLD}0.4)` : "rgba(255,255,255,0.1)"}`, borderRadius: 20, color: rideState === s ? `${GOLD}0.8)` : "rgba(255,255,255,0.3)", fontSize: 10, cursor: "pointer", fontFamily: SANS }}>{s}</button>
           ))}
           {(["live", "stale", "error"] as DataStatus[]).map((s) => (
             <button key={s} onClick={() => setDataStatus(s)} style={{ padding: "4px 10px", background: dataStatus === s ? "rgba(200,80,80,0.15)" : "rgba(255,255,255,0.05)", border: `0.5px solid ${dataStatus === s ? "rgba(200,80,80,0.4)" : "rgba(255,255,255,0.1)"}`, borderRadius: 20, color: dataStatus === s ? "rgba(200,80,80,0.8)" : "rgba(255,255,255,0.3)", fontSize: 10, cursor: "pointer", fontFamily: SANS }}>{s}</button>
