@@ -60,6 +60,7 @@ export default function OperatorPage() {
 
   // Core inputs
   const [name,        setName]        = useState('');
+  const [phone,       setPhone]       = useState('');
   const [destination, setDestination] = useState('');
   const [occasion,    setOccasion]    = useState('');
   const [chauffeur,   setChauffeur]   = useState(DEFAULT_CHAUFFEUR);
@@ -137,6 +138,7 @@ export default function OperatorPage() {
       eta_minutes: eta,
       status:      'preparing',
       vip_note:    notes.trim() || null,
+      phone:       phone.trim() || null,
     }).select('id').single();
 
     const rideId = ride?.id ?? null;
@@ -224,6 +226,16 @@ export default function OperatorPage() {
                       }}
                       placeholder="e.g. Marcus or Mr. Smith"
                       className={`lux-input ${errors.name ? 'lux-input-error' : ''}`}
+                    />
+                  </LuxInput>
+
+                  <LuxInput label="Passenger Phone">
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                      placeholder="e.g. +12145550000"
+                      className="lux-input"
                     />
                   </LuxInput>
 

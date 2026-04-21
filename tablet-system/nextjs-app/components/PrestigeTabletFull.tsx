@@ -15,14 +15,16 @@ const SERIF = "'Cormorant Garamond', Georgia, serif";
 const SANS = "'DM Sans', system-ui, sans-serif";
 
 // ── Ride Start Screen ─────────────────────────────────────────────────────────
-function RideStartScreen({ onStart }: { onStart: (name: string, destination: string) => void }) {
+function RideStartScreen({ onStart }: { onStart: (name: string, destination: string, pickup: string, phone: string) => void }) {
   const [name, setName] = useState("");
   const [destination, setDestination] = useState("");
+  const [pickup, setPickup] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState(false);
 
   function handleStart() {
     if (!name.trim() || !destination.trim()) { setError(true); return; }
-    onStart(name.trim(), destination.trim());
+    onStart(name.trim(), destination.trim(), pickup.trim(), phone.trim());
   }
 
   return (
@@ -50,7 +52,26 @@ function RideStartScreen({ onStart }: { onStart: (name: string, destination: str
             style={{ background: `${GOLD}0.06)`, border: `0.5px solid ${error && !destination.trim() ? "rgba(200,80,80,0.5)" : `${GOLD}0.25)`}`, borderRadius: 8, padding: "14px 16px", color: "#f0ece4", fontSize: 15, fontFamily: SANS, fontWeight: 300, outline: "none", width: "100%" }}
           />
         </div>
-        {error && <p style={{ fontSize: 12, color: "rgba(200,80,80,0.7)", fontFamily: SANS, fontWeight: 300 }}>Please fill in both fields to begin.</p>}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <label style={{ fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", color: `${CREAM}0.35)`, fontFamily: SANS, fontWeight: 300 }}>Pickup Location <span style={{ opacity: 0.4 }}>(optional)</span></label>
+          <input
+            value={pickup}
+            onChange={(e) => setPickup(e.target.value)}
+            placeholder="e.g. Marriott Dallas Downtown"
+            style={{ background: `${GOLD}0.06)`, border: `0.5px solid ${GOLD}0.25)`, borderRadius: 8, padding: "14px 16px", color: "#f0ece4", fontSize: 15, fontFamily: SANS, fontWeight: 300, outline: "none", width: "100%" }}
+          />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <label style={{ fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", color: `${CREAM}0.35)`, fontFamily: SANS, fontWeight: 300 }}>Passenger Phone <span style={{ opacity: 0.4 }}>(optional)</span></label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="e.g. +12145550000"
+            style={{ background: `${GOLD}0.06)`, border: `0.5px solid ${GOLD}0.25)`, borderRadius: 8, padding: "14px 16px", color: "#f0ece4", fontSize: 15, fontFamily: SANS, fontWeight: 300, outline: "none", width: "100%" }}
+          />
+        </div>
+        {error && <p style={{ fontSize: 12, color: "rgba(200,80,80,0.7)", fontFamily: SANS, fontWeight: 300 }}>Please fill in name and destination to begin.</p>}
       </motion.div>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 0.9, ease: EASE, delay: 0.3 } }}>
         <button onClick={handleStart} style={{ width: "100%", padding: 18, background: `${GOLD}0.15)`, border: `0.5px solid ${GOLD}0.5)`, borderRadius: 10, color: "#d4b896", fontSize: 15, fontFamily: SANS, fontWeight: 400, letterSpacing: "1px", cursor: "pointer", textTransform: "uppercase" }}>
@@ -302,9 +323,32 @@ function ConfirmationView({ clientName, destination, onComplete, returnState }: 
 }
 
 // ── Booking View ──────────────────────────────────────────────────────────────
-function BookingView({ onConfirmed }: { onConfirmed: () => void }) {
+type RideData = { rideId: string | null; phone: string; pickup: string; guestName: string; destination: string; occasion: string };
+function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideData: RideData }) {
   const [glowing, setGlowing] = useState(false);
-  function handleBook() { setGlowing(true); setTimeout(() => { setGlowing(false); onConfirmed(); }, 600); }
+  const [sending, setSending] = useState(false);
+  async function handleBook() {
+    setGlowing(true);
+    setSending(true);
+    try {
+      await fetch("/api/rebook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rideId:    rideData.rideId,
+          phone:     rideData.phone,
+          pickup:    rideData.pickup,
+          occasion:  rideData.occasion,
+          guestName: rideData.guestName,
+        }),
+      });
+    } catch {
+      // non-blocking — confirm UI regardless
+    }
+    setSending(false);
+    setGlowing(false);
+    onConfirmed();
+  }
   return (
     <div style={{ position: "relative", zIndex: 1, padding: "44px 48px 44px", minHeight: 560, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
       <div>
@@ -314,7 +358,7 @@ function BookingView({ onConfirmed }: { onConfirmed: () => void }) {
         </motion.div>
       </div>
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1, transition: { duration: 1.0, ease: EASE } }}>
-        <button onClick={handleBook} style={{ width: "100%", padding: 18, background: `${GOLD}0.15)`, border: `0.5px solid ${GOLD}0.5)`, borderRadius: 10, color: "#d4b896", fontSize: 15, fontFamily: SANS, fontWeight: 400, letterSpacing: "1px", cursor: "pointer", textTransform: "uppercase", marginBottom: 12, boxShadow: glowing ? `0 0 0 1px ${GOLD}0.3)` : "none", transition: "box-shadow 0.3s ease" }}>Book this ride again</button>
+        <button onClick={handleBook} disabled={sending} style={{ width: "100%", padding: 18, background: `${GOLD}0.15)`, border: `0.5px solid ${GOLD}0.5)`, borderRadius: 10, color: "#d4b896", fontSize: 15, fontFamily: SANS, fontWeight: 400, letterSpacing: "1px", cursor: sending ? "default" : "pointer", textTransform: "uppercase", marginBottom: 12, boxShadow: glowing ? `0 0 0 1px ${GOLD}0.3)` : "none", transition: "box-shadow 0.3s ease", opacity: sending ? 0.6 : 1 }}>{sending ? "Sending…" : "Book this ride again"}</button>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           {["Schedule return", "Plan a new trip"].map((label) => (
             <button key={label} style={{ padding: 15, background: "transparent", border: `0.5px solid ${CREAM}0.1)`, borderRadius: 10, color: `${CREAM}0.55)`, fontSize: 13, fontFamily: SANS, fontWeight: 300, cursor: "pointer" }}>{label}</button>
@@ -335,6 +379,10 @@ export default function PrestigeTabletFull({ forceShowDevControls = false }: { f
   const [dataStatus, setDataStatus] = useState<DataStatus>("live");
   const [clientName, setClientName] = useState("");
   const [destination, setDestination] = useState("");
+  const [rideId, setRideId] = useState<string | null>(null);
+  const [passengerPhone, setPassengerPhone] = useState("");
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [occasion, setOccasion] = useState("");
   const [comfortLevel, setComfortLevel] = useState<ComfortLevel>("normal");
   const [activeModal, setActiveModal] = useState<"request" | "comfort" | "receipt" | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -354,9 +402,11 @@ export default function PrestigeTabletFull({ forceShowDevControls = false }: { f
     if (rideState !== "mid-ride") setShowPrompt(false);
   }, [rideState, promptDismissed, bookedFromPrompt]);
 
-  function handleStart(name: string, dest: string) {
+  function handleStart(name: string, dest: string, pickup: string, phone: string) {
     setClientName(name);
     setDestination(dest);
+    setPickupLocation(pickup);
+    setPassengerPhone(phone);
     setRideState("arrival");
   }
 
@@ -391,7 +441,7 @@ export default function PrestigeTabletFull({ forceShowDevControls = false }: { f
           </motion.div>
         ) : isBookingView ? (
           <motion.div key="booking" initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 1.0, ease: EASE } }} exit={{ opacity: 0, transition: { duration: 0.7, ease: EASE } }}>
-            <BookingView onConfirmed={() => setConfirming(true)} />
+            <BookingView onConfirmed={() => setConfirming(true)} rideData={{ rideId, phone: passengerPhone, pickup: pickupLocation, guestName: clientName, destination, occasion }} />
           </motion.div>
         ) : (
           <motion.div key={`passive-${rideState}`} initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 0.9, ease: EASE } }} exit={{ opacity: 0, transition: { duration: 0.6, ease: EASE } }}>
@@ -411,7 +461,7 @@ export default function PrestigeTabletFull({ forceShowDevControls = false }: { f
       {(process.env.NODE_ENV === "development" || forceShowDevControls) && (
         <div style={{ position: "absolute", top: 14, right: 16, display: "flex", gap: 6, zIndex: 20 }}>
           {(["start", "arrival", "cruise", "mid-ride", "pre-dropoff"] as RideState[]).map((s) => (
-            <button key={s} onClick={() => { setRideState(s); if (s !== "mid-ride") { setShowPrompt(false); setPromptDismissed(false); } if (s === "start") { setClientName(""); setDestination(""); } }} style={{ padding: "4px 10px", background: rideState === s ? `${GOLD}0.15)` : "rgba(255,255,255,0.05)", border: `0.5px solid ${rideState === s ? `${GOLD}0.4)` : "rgba(255,255,255,0.1)"}`, borderRadius: 20, color: rideState === s ? `${GOLD}0.8)` : "rgba(255,255,255,0.3)", fontSize: 10, cursor: "pointer", fontFamily: SANS }}>{s}</button>
+            <button key={s} onClick={() => { setRideState(s); if (s !== "mid-ride") { setShowPrompt(false); setPromptDismissed(false); } if (s === "start") { setClientName(""); setDestination(""); setPassengerPhone(""); setPickupLocation(""); setOccasion(""); setRideId(null); } }} style={{ padding: "4px 10px", background: rideState === s ? `${GOLD}0.15)` : "rgba(255,255,255,0.05)", border: `0.5px solid ${rideState === s ? `${GOLD}0.4)` : "rgba(255,255,255,0.1)"}`, borderRadius: 20, color: rideState === s ? `${GOLD}0.8)` : "rgba(255,255,255,0.3)", fontSize: 10, cursor: "pointer", fontFamily: SANS }}>{s}</button>
           ))}
           {(["live", "stale", "error"] as DataStatus[]).map((s) => (
             <button key={s} onClick={() => setDataStatus(s)} style={{ padding: "4px 10px", background: dataStatus === s ? "rgba(200,80,80,0.15)" : "rgba(255,255,255,0.05)", border: `0.5px solid ${dataStatus === s ? "rgba(200,80,80,0.4)" : "rgba(255,255,255,0.1)"}`, borderRadius: 20, color: dataStatus === s ? "rgba(200,80,80,0.8)" : "rgba(255,255,255,0.3)", fontSize: 10, cursor: "pointer", fontFamily: SANS }}>{s}</button>
