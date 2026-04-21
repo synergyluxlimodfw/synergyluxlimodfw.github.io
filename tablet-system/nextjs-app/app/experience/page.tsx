@@ -594,13 +594,42 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
         }}
       />
 
-      {/* Canvas particle drift — ready + active only */}
-      {showStars && <CanvasStarfield />}
-
-      {/* Starlight — ready + active only */}
-      <AnimatePresence>
-        {showStars && <StarlightEffect key="stars" />}
-      </AnimatePresence>
+      {/* Ambient glow — CSS-only, replaces canvas starfield */}
+      {showStars && (
+        <>
+          {/* Primary glow — top-center, slow 8s pulse */}
+          <div
+            style={{
+              position:    'fixed',
+              top:         '-100px',
+              left:        '50%',
+              transform:   'translateX(-50%)',
+              width:       '600px',
+              height:      '600px',
+              borderRadius: '50%',
+              background:  'radial-gradient(circle, rgba(212,175,90,0.04) 0%, transparent 70%)',
+              animation:   'ambientPulse 8s ease-in-out infinite',
+              pointerEvents: 'none',
+              zIndex:      0,
+            }}
+          />
+          {/* Secondary glow — bottom-right, offset phase */}
+          <div
+            style={{
+              position:    'fixed',
+              bottom:      0,
+              right:       0,
+              width:       '400px',
+              height:      '400px',
+              borderRadius: '50%',
+              background:  'radial-gradient(circle, rgba(212,175,90,0.03) 0%, transparent 70%)',
+              animation:   'ambientPulse 8s ease-in-out 4s infinite',
+              pointerEvents: 'none',
+              zIndex:      0,
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -852,79 +881,72 @@ function ReadyView({
       initial="hidden"
       animate="show"
       exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.4 } }}
-      className="flex flex-col items-center gap-10 w-full"
-      style={{ maxWidth: '800px' }}
+      className="flex flex-col items-center gap-16 w-full"
+      style={{ maxWidth: '860px' }}
     >
 
       {/* ── Header ──────────────────────────────────────────── */}
-      <motion.div variants={fadeUp} custom={0} className="flex flex-col items-center gap-5 text-center">
+      <motion.div variants={fadeUp} custom={0} className="flex flex-col items-center gap-8 text-center">
 
         {/* Brand line */}
         <div className="flex flex-col items-center gap-0.5">
-          <p
-            className="uppercase tracking-[6px] text-gold"
-            style={{ fontSize: '13px', opacity: 0.8 }}
-          >
+          <p className="uppercase tracking-[6px] text-gold" style={{ fontSize: '13px', opacity: 0.8 }}>
             Prestige
           </p>
-          <p
-            className="uppercase tracking-[4px] text-lux-muted/50"
-            style={{ fontSize: '9px' }}
-          >
+          <p className="uppercase tracking-[4px] text-lux-muted/50" style={{ fontSize: '9px' }}>
             by Synergy Lux · Dallas–Fort Worth
           </p>
         </div>
 
-        {/* Welcome line */}
-        <div className="flex flex-col items-center gap-1.5">
-          <p
-            className="font-[family-name:var(--font-cormorant)] font-light text-gold"
-            style={{ fontSize: '18px', letterSpacing: '2px' }}
+        {/* DOMINANT GREETING — staggered two-line entrance */}
+        <div className="flex flex-col items-center" style={{ gap: '4px' }}>
+          {/* "Good evening," — white/70, enters with parent */}
+          <motion.p
+            initial={{ opacity: 0, y: 16, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 1.0, delay: 0.15, ease: [0.23, 1, 0.32, 1] }}
+            className="font-[family-name:var(--font-cormorant)] font-light tracking-wide leading-none"
+            style={{
+              fontSize:   'clamp(52px, 8vw, 96px)',
+              color:      'rgba(239,239,239,0.70)',
+              textShadow: '0 0 80px rgba(212,175,90,0.15)',
+            }}
           >
-            Welcome to Prestige
-          </p>
-          <p
-            className="text-lux-muted/50 italic font-light"
-            style={{ fontSize: '13px' }}
-          >
-            Your journey is prepared just for you
-          </p>
+            {greeting},
+          </motion.p>
+
+          {/* Name in gold — floats in 0.3s after greeting */}
+          {firstName && (
+            <motion.p
+              initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 1.0, delay: 0.45, ease: [0.23, 1, 0.32, 1] }}
+              className="font-[family-name:var(--font-cormorant)] font-light tracking-wide leading-none"
+              style={{
+                fontSize:   'clamp(52px, 8vw, 96px)',
+                color:      '#E8C670',
+                textShadow: '0 0 80px rgba(212,175,90,0.15)',
+              }}
+            >
+              {firstName}
+            </motion.p>
+          )}
         </div>
 
-        {/* Prestige label */}
-        <p className="text-[9px] tracking-[5px] uppercase text-gold/40 font-light">
-          Prestige Experience
-        </p>
-
-        {/* Serif greeting */}
-        <h1
-          className="font-[family-name:var(--font-cormorant)] font-light leading-[1.1] text-lux-white"
-          style={{ fontSize: '86px' }}
-        >
-          {greeting},
-          {firstName && (
-            <>
-              {' '}
-              <br />
-              <em className="text-gold not-italic">{firstName}</em>
-            </>
-          )}
-        </h1>
-
         {/* Subtitle */}
-        <p
-          className="text-lux-muted"
-          style={{ fontSize: '22px', letterSpacing: '1px' }}
-        >
+        <p className="text-lux-muted" style={{ fontSize: '20px', letterSpacing: '1px' }}>
           {activeRide
             ? `Your journey to ${destination || 'your destination'} is underway`
             : `Your journey to ${destination || 'your destination'} is prepared`}
         </p>
 
-        {/* Cabin status line */}
-        <p style={{ fontSize: '12px', letterSpacing: '2.5px', color: 'rgba(201,168,76,0.55)', textTransform: 'uppercase' }}>
-          {temperature}°F · {music ? 'Ambient Music' : 'Quiet Mode'} · Complimentary Wi-Fi
-        </p>
+        {/* Cabin status line — with thin gold rule above */}
+        <div className="flex flex-col items-center gap-3">
+          <div style={{ width: '120px', borderTop: '1px solid rgba(212,175,90,0.20)' }} />
+          <p className="text-xs tracking-widest uppercase" style={{ color: 'rgba(212,175,90,0.50)' }}>
+            {temperature}°F · {music ? 'Ambient Music' : 'Quiet Mode'} · Complimentary Wi-Fi
+          </p>
+        </div>
 
       </motion.div>
 
@@ -933,14 +955,14 @@ function ReadyView({
 
         {/* Left card — Chauffeur + ETA */}
         <div
-          className="flex flex-col gap-8"
+          className="flex flex-col gap-8 backdrop-blur-sm"
           style={{
-            background:   '#111111',
-            border:       '1px solid rgba(201,168,76,0.2)',
-            borderTop:    '2px solid rgba(201,168,76,0.2)',
-            borderRadius: '24px',
-            padding:      '40px',
-            boxShadow:    '0 0 40px rgba(201,168,76,0.04), inset 0 1px 0 rgba(201,168,76,0.08)',
+            background:     'rgba(17,17,17,0.85)',
+            border:         '1px solid rgba(255,255,255,0.05)',
+            borderTop:      '2px solid rgba(201,168,76,0.25)',
+            borderRadius:   '24px',
+            padding:        '48px',
+            boxShadow:      '0 0 120px rgba(0,0,0,0.8), inset 0 1px 0 rgba(201,168,76,0.08)',
           }}
         >
           {/* Chauffeur */}
@@ -948,7 +970,10 @@ function ReadyView({
             <p className="text-[9px] tracking-[3px] uppercase text-lux-muted/50">
               Chauffeur
             </p>
-            <p className="text-[28px] font-light text-lux-white leading-none">
+            <p
+              className="font-light leading-none"
+              style={{ fontSize: '30px', color: '#D4AF5A' }}
+            >
               {chauffeurName}
             </p>
           </div>
@@ -961,14 +986,15 @@ function ReadyView({
             <div className="flex items-end gap-3 leading-none">
               <span
                 className="font-[family-name:var(--font-cormorant)] font-light text-gold"
-                style={{ fontSize: '82px', lineHeight: 1 }}
+                style={{
+                  fontSize:   'clamp(72px, 10vw, 96px)',
+                  lineHeight: 1,
+                  textShadow: '0 0 40px rgba(212,175,90,0.30)',
+                }}
               >
                 {eta}
               </span>
-              <span
-                className="text-lux-muted/60 pb-2"
-                style={{ fontSize: '18px' }}
-              >
+              <span className="text-lux-muted/60 pb-2" style={{ fontSize: '18px' }}>
                 minutes
               </span>
             </div>
@@ -977,14 +1003,14 @@ function ReadyView({
 
         {/* Right card — Cabin + Occasion + Route */}
         <div
-          className="flex flex-col gap-7"
+          className="flex flex-col gap-7 backdrop-blur-sm"
           style={{
-            background:   '#111111',
-            border:       '1px solid rgba(201,168,76,0.2)',
-            borderTop:    '2px solid rgba(201,168,76,0.2)',
-            borderRadius: '24px',
-            padding:      '40px',
-            boxShadow:    '0 0 40px rgba(201,168,76,0.04), inset 0 1px 0 rgba(201,168,76,0.08)',
+            background:     'rgba(17,17,17,0.85)',
+            border:         '1px solid rgba(255,255,255,0.05)',
+            borderTop:      '2px solid rgba(201,168,76,0.25)',
+            borderRadius:   '24px',
+            padding:        '48px',
+            boxShadow:      '0 0 120px rgba(0,0,0,0.8), inset 0 1px 0 rgba(201,168,76,0.08)',
           }}
         >
           {/* Cabin */}
