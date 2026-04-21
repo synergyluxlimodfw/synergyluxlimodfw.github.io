@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
@@ -94,12 +94,11 @@ function ExperienceInner() {
           (payload) => {
             const row = payload.new as RideRow;
 
-            // Operator triggered booking screen — navigate immediately
+            // Operator triggered booking screen — show pre-dropoff conversion screen
             if (row.show_booking === true) {
-              const p = new URLSearchParams({ guest: '1' });
-              if (row.destination) p.set('destination', row.destination);
-              if (row.occasion)    p.set('occasion', row.occasion);
-              router.push(`/?${p.toString()}`);
+              setPreDropoffDest(row.destination || '');
+              setPreDropoffOcc(row.occasion || null);
+              setShowPreDropoff(true);
               return;
             }
 
@@ -124,9 +123,12 @@ function ExperienceInner() {
     };
   }, [rideParam]);
 
-  const [showGratuity,       setShowGratuity]       = useState(false);
-  const [showReturnHook,     setShowReturnHook]     = useState(false);
+  const [showGratuity,        setShowGratuity]        = useState(false);
+  const [showReturnHook,      setShowReturnHook]      = useState(false);
   const [returnHookDismissed, setReturnHookDismissed] = useState(false);
+  const [showPreDropoff,      setShowPreDropoff]      = useState(false);
+  const [preDropoffDest,      setPreDropoffDest]      = useState('');
+  const [preDropoffOcc,       setPreDropoffOcc]       = useState<string | null>(null);
 
   // Mid-ride soft hook — show after 10 min of active ride
   useEffect(() => {
@@ -136,6 +138,16 @@ function ExperienceInner() {
     }, 600000);
     return () => clearTimeout(timer);
   }, [state.status, returnHookDismissed]);
+
+  // 8-second auto-dismiss for the mid-ride return hook
+  useEffect(() => {
+    if (!showReturnHook) return;
+    const timer = setTimeout(() => {
+      setShowReturnHook(false);
+      setReturnHookDismissed(true);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [showReturnHook]);
 
   const showMap      = state.status === 'ready' || state.status === 'active';
   const rideIsLive   = state.status === 'ready' || state.status === 'active';
@@ -159,6 +171,98 @@ function ExperienceInner() {
               : undefined
             }
           />
+        )}
+      </AnimatePresence>
+
+      {/* ── Pre-dropoff conversion screen ─────────────────── */}
+      <AnimatePresence>
+        {showPreDropoff && (
+          <motion.div
+            key="pre-dropoff"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ background: 'rgba(6,6,10,0.92)', backdropFilter: 'blur(16px)' }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 32, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 32, scale: 0.96 }}
+              transition={{ duration: 0.55, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+              className="w-full max-w-md mx-4"
+              style={{
+                background:     '#0F0F14',
+                border:         '1px solid rgba(201,168,76,0.22)',
+                borderTop:      '2px solid rgba(201,168,76,0.45)',
+                borderRadius:   '28px',
+                padding:        '44px 40px',
+                boxShadow:      '0 0 80px rgba(0,0,0,0.8), 0 0 40px rgba(201,168,76,0.06)',
+              }}
+            >
+              <p className="text-[9px] tracking-[5px] uppercase text-gold/50 mb-6">
+                Almost There
+              </p>
+              <h2
+                className="font-serif font-light text-lux-white mb-3"
+                style={{ fontSize: '34px', lineHeight: 1.15 }}
+              >
+                Arriving{preDropoffDest ? ` at ${preDropoffDest}` : ' soon'}
+              </h2>
+              <p
+                className="text-gold mb-8"
+                style={{ fontSize: '13px', letterSpacing: '0.5px', opacity: 0.75 }}
+              >
+                ✦ 10% preferred rate when reserved before arrival
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPreDropoff(false);
+                    const p = new URLSearchParams();
+                    if (preDropoffDest) p.set('destination', preDropoffDest);
+                    if (preDropoffOcc)  p.set('occasion', preDropoffOcc);
+                    router.push(`/aria${p.toString() ? `?${p.toString()}` : ''}`);
+                  }}
+                  className="w-full py-4 rounded-2xl text-[11px] font-semibold tracking-[1.5px] uppercase transition-all active:scale-[0.97]"
+                  style={{
+                    background: 'linear-gradient(135deg, #D4AF5A, #C9A84C, #B8932E)',
+                    color:      '#06060A',
+                  }}
+                >
+                  Book This Same Route
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPreDropoff(false);
+                    const p = new URLSearchParams({ guest: '1' });
+                    if (preDropoffDest) p.set('destination', preDropoffDest);
+                    if (preDropoffOcc)  p.set('occasion', preDropoffOcc);
+                    router.push(`/?${p.toString()}`);
+                  }}
+                  className="w-full py-3 rounded-2xl text-[11px] tracking-[1px] uppercase transition-all active:scale-[0.97]"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border:     '1px solid rgba(255,255,255,0.08)',
+                    color:      'rgba(239,239,239,0.45)',
+                  }}
+                >
+                  Book via Booking Form
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPreDropoff(false)}
+                  className="w-full py-2 text-[10px] tracking-[1px] uppercase transition-opacity active:opacity-60"
+                  style={{ color: 'rgba(201,168,76,0.30)', background: 'transparent', border: 'none' }}
+                >
+                  Not Now
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -243,7 +347,7 @@ function ExperienceInner() {
             >
               <p className="text-[10px] tracking-[4px] uppercase text-gold/50 mb-2">Prestige</p>
               <p className="text-[17px] font-light text-lux-white mb-4">
-                Need a ride back later?
+                Need a ride later today?
               </p>
               <div className="flex gap-3">
                 <button
@@ -251,10 +355,7 @@ function ExperienceInner() {
                   onClick={() => {
                     setShowReturnHook(false);
                     setReturnHookDismissed(true);
-                    const p = new URLSearchParams({ guest: '1', return: '1' });
-                    if (state.destination) p.set('destination', state.destination);
-                    if (state.occasion)    p.set('occasion', state.occasion);
-                    router.push(`/?${p.toString()}`);
+                    router.push('/aria');
                   }}
                   className="flex-1 py-3 rounded-xl text-[11px] font-semibold tracking-[1px] uppercase transition-all active:scale-[0.97]"
                   style={{
@@ -262,7 +363,7 @@ function ExperienceInner() {
                     color:      '#06060A',
                   }}
                 >
-                  Book Return
+                  Book a Ride
                 </button>
                 <button
                   type="button"
@@ -493,11 +594,98 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
         }}
       />
 
+      {/* Canvas particle drift — ready + active only */}
+      {showStars && <CanvasStarfield />}
+
       {/* Starlight — ready + active only */}
       <AnimatePresence>
         {showStars && <StarlightEffect key="stars" />}
       </AnimatePresence>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// CanvasStarfield — 100 drifting particles via requestAnimationFrame
+// ─────────────────────────────────────────────────────────
+
+function CanvasStarfield() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+
+    const resize = () => {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Seeded deterministic random using index so SSR/client match
+    const rng = (seed: number) => {
+      const x = Math.sin(seed + 1) * 43758.5453123;
+      return x - Math.floor(x);
+    };
+
+    const particles = Array.from({ length: 100 }, (_, i) => ({
+      x:            rng(i * 3)     * window.innerWidth,
+      y:            rng(i * 3 + 1) * window.innerHeight,
+      size:         rng(i * 3 + 2) * 1.5 + 0.4,
+      speedX:       (rng(i * 7)     - 0.5) * 0.12,
+      speedY:       (rng(i * 7 + 1) - 0.5) * 0.12,
+      baseOpacity:  rng(i * 11)    * 0.22 + 0.04,
+      twinkle:      rng(i * 13)    * Math.PI * 2,
+      twinkleSpeed: rng(i * 17)    * 0.018 + 0.004,
+    }));
+
+    function draw() {
+      ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
+
+      for (const p of particles) {
+        p.twinkle += p.twinkleSpeed;
+        const alpha = p.baseOpacity * (0.55 + 0.45 * Math.sin(p.twinkle));
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(201,168,76,${alpha.toFixed(3)})`;
+        ctx!.fill();
+
+        p.x += p.speedX;
+        p.y += p.speedY;
+
+        if (p.x < 0)              p.x = canvas!.width;
+        if (p.x > canvas!.width)  p.x = 0;
+        if (p.y < 0)              p.y = canvas!.height;
+        if (p.y > canvas!.height) p.y = 0;
+      }
+
+      animId = requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position:      'fixed',
+        inset:         0,
+        zIndex:        0,
+        pointerEvents: 'none',
+        opacity:       0.8,
+      }}
+    />
   );
 }
 
@@ -731,6 +919,11 @@ function ReadyView({
           {activeRide
             ? `Your journey to ${destination || 'your destination'} is underway`
             : `Your journey to ${destination || 'your destination'} is prepared`}
+        </p>
+
+        {/* Cabin status line */}
+        <p style={{ fontSize: '12px', letterSpacing: '2.5px', color: 'rgba(201,168,76,0.55)', textTransform: 'uppercase' }}>
+          {temperature}°F · {music ? 'Ambient Music' : 'Quiet Mode'} · Complimentary Wi-Fi
         </p>
 
       </motion.div>

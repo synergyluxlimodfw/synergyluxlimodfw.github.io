@@ -1,6 +1,30 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+// Web Speech API — minimal types for graceful degradation
+interface SpeechRecognitionEvent extends Event {
+  results: { [i: number]: { [j: number]: { transcript: string } } };
+}
+interface ISpeechRecognition extends EventTarget {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  start(): void;
+  stop(): void;
+  onstart:  ((e: Event) => void) | null;
+  onend:    ((e: Event) => void) | null;
+  onerror:  ((e: Event) => void) | null;
+  onresult: ((e: SpeechRecognitionEvent) => void) | null;
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SpeechRecognitionCtor = new () => ISpeechRecognition;
+declare global {
+  interface Window {
+    SpeechRecognition?:       SpeechRecognitionCtor;
+    webkitSpeechRecognition?: SpeechRecognitionCtor;
+  }
+}
 
 // ─────────────────────────────────────────────────────────
 // Types
@@ -24,12 +48,52 @@ export default function AriaChat() {
   const [input,          setInput]          = useState('');
   const [isLoading,      setIsLoading]      = useState(false);
   const [bookingCreated, setBookingCreated] = useState(false);
+  const [isListening,    setIsListening]    = useState(false);
+  const [micSupported,   setMicSupported]   = useState(false);
 
-  console.log('messages:', messages);
-
-  const bottomRef   = useRef<HTMLDivElement>(null);
-  const inputRef    = useRef<HTMLTextAreaElement>(null);
+  const bottomRef    = useRef<HTMLDivElement>(null);
+  const inputRef     = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<ISpeechRecognition | null>(null);
+
+  // Check Web Speech API support on mount
+  useEffect(() => {
+    const SR = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    setMicSupported(!!SR);
+  }, []);
+
+  const startListening = useCallback(() => {
+    const SR = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    if (!SR) return;
+
+    const recognition = new SR();
+    recognition.lang             = 'en-US';
+    recognition.interimResults   = false;
+    recognition.maxAlternatives  = 1;
+
+    recognition.onstart = () => setIsListening(true);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(prev => prev ? `${prev} ${transcript}` : transcript);
+      // Resize textarea
+      if (inputRef.current) {
+        inputRef.current.style.height = 'auto';
+        inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 120) + 'px';
+      }
+    };
+
+    recognition.onerror  = () => setIsListening(false);
+    recognition.onend    = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  }, []);
+
+  const stopListening = useCallback(() => {
+    recognitionRef.current?.stop();
+    setIsListening(false);
+  }, []);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -349,6 +413,39 @@ export default function AriaChat() {
             opacity:     isLoading ? 0.6 : 1,
           }}
         />
+        {/* Mic button — only rendered when Web Speech API is supported */}
+        {micSupported && (
+          <button
+            type="button"
+            onClick={isListening ? stopListening : startListening}
+            disabled={isLoading}
+            title={isListening ? 'Stop listening' : 'Speak to Amirah'}
+            style={{
+              width:          '42px',
+              height:         '42px',
+              borderRadius:   '13px',
+              border:         isListening
+                ? '1px solid rgba(201,168,76,0.60)'
+                : '1px solid rgba(201,168,76,0.22)',
+              background:     isListening
+                ? 'rgba(201,168,76,0.12)'
+                : 'rgba(201,168,76,0.06)',
+              color:          isListening ? '#C9A84C' : 'rgba(201,168,76,0.55)',
+              fontSize:       '16px',
+              cursor:         isLoading ? 'not-allowed' : 'pointer',
+              flexShrink:     0,
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: 'center',
+              transition:     'all 0.2s',
+              opacity:        isLoading ? 0.4 : 1,
+              animation:      isListening ? 'mic-pulse 1.4s ease-in-out infinite' : 'none',
+            }}
+          >
+            🎙
+          </button>
+        )}
+
         <button
           onClick={handleSend}
           disabled={isLoading || !input.trim()}
