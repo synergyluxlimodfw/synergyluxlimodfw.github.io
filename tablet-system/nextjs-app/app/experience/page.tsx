@@ -38,28 +38,70 @@ function timeGreeting(): string {
 async function playArrivalChime(audioCtxRef: React.MutableRefObject<AudioContext | null>) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     const ctx: AudioContext = audioCtxRef.current ?? new AudioCtx();
     if (ctx.state === 'suspended') await ctx.resume();
     audioCtxRef.current = ctx;
-    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
-    notes.forEach((freq, i) => {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      const start    = ctx.currentTime + i * 0.18;
-      const duration = 1.2;
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(0.12, start + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-      osc.start(start);
-      osc.stop(start + duration);
-    });
-  } catch { /* silent — audio blocked or unsupported */ }
+    const now = ctx.currentTime;
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = 0.08;
+    masterGain.connect(ctx.destination);
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain  = ctx.createGain();
+
+    osc1.frequency.setValueAtTime(370, now);
+    osc1.frequency.linearRampToValueAtTime(392, now + 0.2);
+    osc2.frequency.setValueAtTime(740, now);
+    osc2.frequency.linearRampToValueAtTime(784, now + 0.2);
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(1, now + 0.08);
+    gain.gain.setValueAtTime(1, now + 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+
+    osc1.connect(gain); osc2.connect(gain);
+    gain.connect(masterGain);
+
+    osc1.start(now); osc2.start(now);
+    osc1.stop(now + 0.6); osc2.stop(now + 0.6);
+  } catch { /* silent */ }
+}
+
+async function playExitTone(audioCtxRef: React.MutableRefObject<AudioContext | null>) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const ctx: AudioContext = audioCtxRef.current ?? new AudioCtx();
+    if (ctx.state === 'suspended') await ctx.resume();
+    audioCtxRef.current = ctx;
+    const now = ctx.currentTime;
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = 0.08;
+    masterGain.connect(ctx.destination);
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain  = ctx.createGain();
+
+    osc1.frequency.setValueAtTime(235, now);
+    osc1.frequency.linearRampToValueAtTime(220, now + 0.2);
+    osc2.frequency.value = 440;
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(1, now + 0.12);
+    gain.gain.setValueAtTime(1, now + 0.42);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+    osc1.connect(gain); osc2.connect(gain);
+    gain.connect(masterGain);
+
+    osc1.start(now); osc2.start(now);
+    osc1.stop(now + 0.8); osc2.stop(now + 0.8);
+  } catch { /* silent */ }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -242,6 +284,7 @@ function ExperienceInner() {
           <ExitMoment
             key="exit-moment"
             chauffeurName={state.chauffeurName || 'Mr. Rodriguez'}
+            audioCtxRef={audioCtxRef}
             onDimStarlight={() => setDimmingStarlight(true)}
             onComplete={() => setExitComplete(true)}
           />
@@ -722,17 +765,22 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
 
 function ExitMoment({
   chauffeurName,
+  audioCtxRef,
   onDimStarlight,
   onComplete,
 }: {
   chauffeurName: string;
+  audioCtxRef: React.MutableRefObject<AudioContext | null>;
   onDimStarlight: () => void;
   onComplete: () => void;
 }) {
   const [textVisible, setTextVisible] = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setTextVisible(true), 1500);
+    const t1 = setTimeout(() => {
+      setTextVisible(true);
+      playExitTone(audioCtxRef); // fires when text fades in (~1.5s into exit)
+    }, 1500);
     const t2 = setTimeout(() => onDimStarlight(), 8000);
     const t3 = setTimeout(() => onComplete(), 11000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
