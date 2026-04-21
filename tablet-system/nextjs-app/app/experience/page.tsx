@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
 import { supabase } from '@/lib/supabase';
-import { playArrivalChime, playExitTone } from '@/lib/audio';
+import { preloadAudio, playArrivalChime, playExitTone } from '@/lib/audio';
 import MapEmbed            from '@/components/MapEmbed';
 import ThankYouScreen      from '@/components/ThankYouScreen';
 import PrestigeBackground  from '@/components/PrestigeBackground';
@@ -133,17 +133,20 @@ function ExperienceInner() {
   const [preDropoffOcc,       setPreDropoffOcc]       = useState<string | null>(null);
   const [exitComplete,        setExitComplete]        = useState(false);
   const [dimmingStarlight,    setDimmingStarlight]    = useState(false);
-  const chimeFiredRef = useRef(false);
+  const chimePlayed = useRef(false);
 
-  // Fires on the guest's first natural tap — plays chime synchronously
-  // inside the gesture so Safari's autoplay policy is satisfied.
-  function handlePageTap() {
-    if (!chimeFiredRef.current &&
-        (state.status === 'ready' || state.status === 'active')) {
-      chimeFiredRef.current = true;
+  // Pre-unlock audio on mount by playing a silent file
+  useEffect(() => {
+    preloadAudio();
+  }, []);
+
+  // Arrival chime — fires once when status reaches 'ready'
+  useEffect(() => {
+    if (state.status === 'ready' && !chimePlayed.current) {
+      chimePlayed.current = true;
       playArrivalChime();
     }
-  }
+  }, [state.status]);
 
   // Mid-ride soft hook — show after 10 min of active ride
   useEffect(() => {
@@ -169,27 +172,6 @@ function ExperienceInner() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-lux-black flex flex-col">
-
-      {/* ── Invisible tap zone — catches first natural guest interaction ──
-          Fires arrival chime synchronously inside the gesture so Safari's
-          autoplay policy is satisfied. Sits at z-0 so it never blocks UI. */}
-      <div
-        className="fixed inset-0 z-0"
-        onClick={handlePageTap}
-        onTouchStart={handlePageTap}
-      />
-
-      {/* ── "Tap anywhere" hint — visible briefly, then fades away ── */}
-      {(state.status === 'ready' || state.status === 'active') && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 1, 1, 0] }}
-          transition={{ delay: 1, duration: 4, times: [0, 0.15, 0.7, 1] }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-10 pointer-events-none text-[10px] tracking-widest uppercase text-amber-400/30 whitespace-nowrap"
-        >
-          Tap anywhere to begin your experience
-        </motion.p>
-      )}
 
       {/* Ambient background — status-reactive elements */}
       <AmbientBackground status={state.status} />

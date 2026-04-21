@@ -1,53 +1,75 @@
 /**
- * audio.ts — Safari-compatible Web Audio helpers.
+ * audio.ts — preload-based audio unlock strategy.
  *
- * Safari requires AudioContext to be created synchronously inside a direct
- * user gesture handler (onClick / onTouchStart). No async/await, no
- * setTimeout, no Promise chains around context creation or osc.start().
- *
- * All tones are scheduled via ctx.currentTime offsets so multiple notes
- * can be queued in a single context without any JS-level delays.
+ * On mount, preloadAudio() plays a silent WAV to unlock the browser's
+ * autoplay policy. Subsequent AudioContext calls then work without
+ * requiring a user gesture.
  */
 
-export function createAndPlayTone(
-  frequencies: number[],
-  delays: number[],
-  duration: number,
-  volume: number = 0.08,
-): void {
-  // Must be called synchronously from a user gesture
+// Silent 0.1s WAV — used to pre-unlock audio on mount
+export const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+
+export function preloadAudio(): void {
+  try {
+    const audio = new Audio(SILENT_WAV);
+    audio.volume = 0;
+    audio.play().catch(() => {
+      // Will unlock on first interaction instead
+    });
+  } catch { /* silent */ }
+}
+
+export function playArrivalChime(): void {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     const ctx = new AudioCtx();
 
-    frequencies.forEach((freq, i) => {
+    ([
+      [392, 0],
+      [523, 0.18],
+      [659, 0.36],
+    ] as [number, number][]).forEach(([freq, delay]) => {
       const osc  = ctx.createOscillator();
       const gain = ctx.createGain();
-
       osc.connect(gain);
       gain.connect(ctx.destination);
-
-      osc.type            = 'sine';
       osc.frequency.value = freq;
-
-      const start = ctx.currentTime + (delays[i] ?? 0);
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(volume, start + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-
-      osc.start(start);
-      osc.stop(start + duration + 0.1);
+      const t = ctx.currentTime + delay;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.08, t + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+      osc.start(t);
+      osc.stop(t + 0.7);
     });
-  } catch { /* silent — unsupported or policy blocked */ }
+
+    setTimeout(() => ctx.close(), 2000);
+  } catch { /* silent */ }
 }
 
-/** G4 → C5 → E5 ascending chime (scheduled in one context, no JS delays) */
-export function playArrivalChime(): void {
-  createAndPlayTone([392, 523, 659], [0, 0.18, 0.36], 0.6, 0.08);
-}
-
-/** Soft two-note exit tone */
 export function playExitTone(): void {
-  createAndPlayTone([220, 440], [0, 0], 0.8, 0.06);
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const ctx = new AudioCtx();
+
+    ([
+      [220, 0],
+      [440, 0],
+    ] as [number, number][]).forEach(([freq, delay]) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + delay;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.06, t + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+      osc.start(t);
+      osc.stop(t + 0.9);
+    });
+
+    setTimeout(() => ctx.close(), 2000);
+  } catch { /* silent */ }
 }
