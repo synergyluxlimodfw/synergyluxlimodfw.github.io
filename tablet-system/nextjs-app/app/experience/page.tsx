@@ -6,6 +6,7 @@ import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
 import { supabase } from '@/lib/supabase';
+import { playArrivalChime, playExitTone } from '@/lib/audio';
 import MapEmbed            from '@/components/MapEmbed';
 import ThankYouScreen      from '@/components/ThankYouScreen';
 import PrestigeBackground  from '@/components/PrestigeBackground';
@@ -32,76 +33,6 @@ function timeGreeting(): string {
   if (h >= 5 && h < 12) return 'Good morning';
   if (h >= 12 && h < 18) return 'Good afternoon';
   return 'Good evening';
-}
-
-// ── Arrival chime — three-note ascending sine via Web Audio API ──────────────
-async function playArrivalChime(audioCtxRef: React.MutableRefObject<AudioContext | null>) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx: AudioContext = audioCtxRef.current ?? new AudioCtx();
-    if (ctx.state === 'suspended') await ctx.resume();
-    audioCtxRef.current = ctx;
-    const now = ctx.currentTime;
-
-    const masterGain = ctx.createGain();
-    masterGain.gain.value = 0.08;
-    masterGain.connect(ctx.destination);
-
-    const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
-    const gain  = ctx.createGain();
-
-    osc1.frequency.setValueAtTime(370, now);
-    osc1.frequency.linearRampToValueAtTime(392, now + 0.2);
-    osc2.frequency.setValueAtTime(740, now);
-    osc2.frequency.linearRampToValueAtTime(784, now + 0.2);
-
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(1, now + 0.08);
-    gain.gain.setValueAtTime(1, now + 0.3);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-
-    osc1.connect(gain); osc2.connect(gain);
-    gain.connect(masterGain);
-
-    osc1.start(now); osc2.start(now);
-    osc1.stop(now + 0.6); osc2.stop(now + 0.6);
-  } catch { /* silent */ }
-}
-
-async function playExitTone(audioCtxRef: React.MutableRefObject<AudioContext | null>) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx: AudioContext = audioCtxRef.current ?? new AudioCtx();
-    if (ctx.state === 'suspended') await ctx.resume();
-    audioCtxRef.current = ctx;
-    const now = ctx.currentTime;
-
-    const masterGain = ctx.createGain();
-    masterGain.gain.value = 0.08;
-    masterGain.connect(ctx.destination);
-
-    const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
-    const gain  = ctx.createGain();
-
-    osc1.frequency.setValueAtTime(235, now);
-    osc1.frequency.linearRampToValueAtTime(220, now + 0.2);
-    osc2.frequency.value = 440;
-
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(1, now + 0.12);
-    gain.gain.setValueAtTime(1, now + 0.42);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-
-    osc1.connect(gain); osc2.connect(gain);
-    gain.connect(masterGain);
-
-    osc1.start(now); osc2.start(now);
-    osc1.stop(now + 0.8); osc2.stop(now + 0.8);
-  } catch { /* silent */ }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -202,9 +133,17 @@ function ExperienceInner() {
   const [preDropoffOcc,       setPreDropoffOcc]       = useState<string | null>(null);
   const [exitComplete,        setExitComplete]        = useState(false);
   const [dimmingStarlight,    setDimmingStarlight]    = useState(false);
-  const [hasInteracted,       setHasInteracted]       = useState(false);
-  const chimePlayed  = useRef(false);
-  const audioCtxRef  = useRef<AudioContext | null>(null);
+  const chimeFiredRef = useRef(false);
+
+  // Fires on the guest's first natural tap — plays chime synchronously
+  // inside the gesture so Safari's autoplay policy is satisfied.
+  function handlePageTap() {
+    if (!chimeFiredRef.current &&
+        (state.status === 'ready' || state.status === 'active')) {
+      chimeFiredRef.current = true;
+      playArrivalChime();
+    }
+  }
 
   // Mid-ride soft hook — show after 10 min of active ride
   useEffect(() => {
@@ -225,43 +164,32 @@ function ExperienceInner() {
     return () => clearTimeout(timer);
   }, [showReturnHook]);
 
-  // Unlock AudioContext on first gesture (browser autoplay policy)
-  useEffect(() => {
-    function unlock() {
-      setHasInteracted(true);
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
-        if (!AudioCtx) return;
-        if (!audioCtxRef.current) {
-          audioCtxRef.current = new AudioCtx();
-        }
-        audioCtxRef.current?.resume().catch(() => {});
-      } catch { /* silent */ }
-    }
-    document.addEventListener('touchstart', unlock, { once: true });
-    document.addEventListener('click',      unlock, { once: true });
-    document.addEventListener('keydown',    unlock, { once: true });
-    return () => {
-      document.removeEventListener('touchstart', unlock);
-      document.removeEventListener('click',      unlock);
-      document.removeEventListener('keydown',    unlock);
-    };
-  }, []);
-
-  // Arrival chime — plays once when status first reaches 'ready'
-  useEffect(() => {
-    if ((state.status === 'ready') && !chimePlayed.current) {
-      chimePlayed.current = true;
-      playArrivalChime(audioCtxRef);
-    }
-  }, [state.status]);
-
   const showMap      = state.status === 'ready' || state.status === 'active';
   const rideIsLive   = state.status === 'ready' || state.status === 'active';
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-lux-black flex flex-col">
+
+      {/* ── Invisible tap zone — catches first natural guest interaction ──
+          Fires arrival chime synchronously inside the gesture so Safari's
+          autoplay policy is satisfied. Sits at z-0 so it never blocks UI. */}
+      <div
+        className="fixed inset-0 z-0"
+        onClick={handlePageTap}
+        onTouchStart={handlePageTap}
+      />
+
+      {/* ── "Tap anywhere" hint — visible briefly, then fades away ── */}
+      {(state.status === 'ready' || state.status === 'active') && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 1, 0] }}
+          transition={{ delay: 1, duration: 4, times: [0, 0.15, 0.7, 1] }}
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-10 pointer-events-none text-[10px] tracking-widest uppercase text-amber-400/30 whitespace-nowrap"
+        >
+          Tap anywhere to begin your experience
+        </motion.p>
+      )}
 
       {/* Ambient background — status-reactive elements */}
       <AmbientBackground status={state.status} />
@@ -284,7 +212,6 @@ function ExperienceInner() {
           <ExitMoment
             key="exit-moment"
             chauffeurName={state.chauffeurName || 'Mr. Rodriguez'}
-            audioCtxRef={audioCtxRef}
             onDimStarlight={() => setDimmingStarlight(true)}
             onComplete={() => setExitComplete(true)}
           />
@@ -429,31 +356,6 @@ function ExperienceInner() {
       >
         <span className="w-1 h-1 rounded-full bg-gold/50" />
       </button>
-
-      {/* ── Subtle tap hint — bottom-center, disappears after first interaction ── */}
-      <AnimatePresence>
-        {!hasInteracted && (
-          <motion.div
-            key="tap-hint"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, delay: 2 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
-          >
-            <motion.div
-              animate={{ scale: [1, 1.5], opacity: [0.4, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-              style={{
-                width:        '8px',
-                height:       '8px',
-                borderRadius: '50%',
-                background:   '#D4AF5A',
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* ── Gratuity pill — bottom-left, visible during ready/active ── */}
       <AnimatePresence>
@@ -765,25 +667,24 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
 
 function ExitMoment({
   chauffeurName,
-  audioCtxRef,
   onDimStarlight,
   onComplete,
 }: {
   chauffeurName: string;
-  audioCtxRef: React.MutableRefObject<AudioContext | null>;
   onDimStarlight: () => void;
   onComplete: () => void;
 }) {
   const [textVisible, setTextVisible] = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => {
-      setTextVisible(true);
-      playExitTone(audioCtxRef); // fires when text fades in (~1.5s into exit)
-    }, 1500);
+    // Exit tone fires early (300ms) — Safari sometimes allows this when the
+    // component mounts as a result of a Supabase-triggered state change that
+    // the user is actively watching. Text reveal is separate at 1.5s.
+    const t0 = setTimeout(() => playExitTone(), 300);
+    const t1 = setTimeout(() => setTextVisible(true), 1500);
     const t2 = setTimeout(() => onDimStarlight(), 8000);
     const t3 = setTimeout(() => onComplete(), 11000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
