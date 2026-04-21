@@ -2,8 +2,9 @@
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import OperatorPanel from '@/components/OperatorPanel';
-import Experience    from '@/components/Experience';
+import OperatorPanel      from '@/components/OperatorPanel';
+import Experience         from '@/components/Experience';
+import PrestigeBackground from '@/components/PrestigeBackground';
 import type { Session } from '@/lib/types';
 
 function TabletPageInner() {
@@ -38,8 +39,11 @@ function TabletPageInner() {
 
 export default function TabletPage() {
   return (
-    <Suspense>
-      <TabletPageInner />
-    </Suspense>
+    <>
+      <PrestigeBackground intensity="minimal" />
+      <Suspense>
+        <TabletPageInner />
+      </Suspense>
+    </>
   );
 }

@@ -6,8 +6,9 @@ import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
 import { supabase } from '@/lib/supabase';
-import MapEmbed       from '@/components/MapEmbed';
-import ThankYouScreen from '@/components/ThankYouScreen';
+import MapEmbed            from '@/components/MapEmbed';
+import ThankYouScreen      from '@/components/ThankYouScreen';
+import PrestigeBackground  from '@/components/PrestigeBackground';
 
 // Supabase rides row shape
 type RideRow = {
@@ -192,8 +193,20 @@ function ExperienceInner() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-lux-black flex flex-col">
 
-      {/* Ambient background — always present */}
-      <AmbientBackground status={state.status} dimmingStarlight={dimmingStarlight} />
+      {/* Ambient background — status-reactive elements */}
+      <AmbientBackground status={state.status} />
+
+      {/* Prestige starlight — visible during ready/active, dims on exit */}
+      {(state.status === 'ready' || state.status === 'active' ||
+        (state.status === 'complete' && !exitComplete)) && (
+        <motion.div
+          animate={{ opacity: dimmingStarlight ? 0 : 1 }}
+          transition={{ duration: 3 }}
+          className="pointer-events-none"
+        >
+          <PrestigeBackground intensity="full" />
+        </motion.div>
+      )}
 
       {/* ── Cinematic exit moment — plays before thank-you screen ── */}
       <AnimatePresence>
@@ -587,12 +600,11 @@ function ExperienceInner() {
 // AmbientBackground
 // ─────────────────────────────────────────────────────────
 
-function AmbientBackground({ status, dimmingStarlight = false }: { status: ExperienceStatus; dimmingStarlight?: boolean }) {
-  const isActive   = status === 'active';
-  const isReady    = status === 'ready';
+function AmbientBackground({ status }: { status: ExperienceStatus }) {
+  const isActive    = status === 'active';
+  const isReady     = status === 'ready';
   const isPreparing = status === 'preparing';
-  const isComplete = status === 'complete';
-  const showStars  = isReady || isActive;
+  const isComplete  = status === 'complete';
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -643,201 +655,7 @@ function AmbientBackground({ status, dimmingStarlight = false }: { status: Exper
         }}
       />
 
-      {/* Ambient glow — CSS-only three-layer warm light field */}
-      {showStars && (
-        <>
-          {/* Primary glow — top-center, stronger pulse */}
-          <div
-            style={{
-              position:     'fixed',
-              top:          '-100px',
-              left:         '50%',
-              transform:    'translateX(-50%)',
-              width:        '600px',
-              height:       '600px',
-              borderRadius: '50%',
-              background:   'radial-gradient(circle, rgba(212,175,90,0.05) 0%, transparent 70%)',
-              animation:    'ambientPulseStrong 8s ease-in-out infinite',
-              pointerEvents: 'none',
-              zIndex:       0,
-            }}
-          />
-          {/* Secondary glow — bottom-right, warmer tint */}
-          <div
-            style={{
-              position:     'fixed',
-              bottom:       0,
-              right:        0,
-              width:        '400px',
-              height:       '400px',
-              borderRadius: '50%',
-              background:   'radial-gradient(circle, rgba(232,198,112,0.035) 0%, transparent 70%)',
-              animation:    'ambientPulse 8s ease-in-out 4s infinite',
-              pointerEvents: 'none',
-              zIndex:       0,
-            }}
-          />
-          {/* Tertiary glow — center-left warm accent */}
-          <div
-            style={{
-              position:     'fixed',
-              top:          '40%',
-              left:         '10%',
-              width:        '300px',
-              height:       '300px',
-              borderRadius: '50%',
-              background:   'radial-gradient(circle, rgba(212,175,90,0.025) 0%, transparent 65%)',
-              animation:    'ambientPulse 12s ease-in-out 8s infinite',
-              pointerEvents: 'none',
-              zIndex:       0,
-            }}
-          />
-
-          {/* Starlight headliner — rare individual twinkles above warm glow */}
-          <motion.div
-            animate={{ opacity: dimmingStarlight ? 0 : 1 }}
-            transition={{ duration: 3 }}
-            className="pointer-events-none"
-          >
-            <StarlightHeadliner />
-          </motion.div>
-        </>
-      )}
     </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
-// StarlightHeadliner — Rolls-Royce Starlight Headliner effect
-// 180-220 static white stars; only 2-4 twinkle at any moment
-// ─────────────────────────────────────────────────────────
-
-type TwinkleState = 'idle' | 'brightening' | 'dimming';
-
-interface Star {
-  x:              number;
-  y:              number;
-  baseRadius:     number;
-  peakRadius:     number;
-  currentRadius:  number;
-  radiusSpeed:    number;
-  baseOpacity:    number;
-  currentOpacity: number;
-  twinkleState:   TwinkleState;
-  twinkleTarget:  number;
-  twinkleSpeed:   number;
-}
-
-function StarlightHeadliner() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-
-    const resize = () => {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    // Seeded deterministic random — avoids SSR/client hydration mismatches
-    const rng = (seed: number) => {
-      const x = Math.sin(seed + 1) * 43758.5453123;
-      return x - Math.floor(x);
-    };
-
-    const COUNT = 180 + Math.floor(rng(999) * 40 + 0.5); // 180–220
-
-    const stars: Star[] = Array.from({ length: COUNT }, (_, i) => {
-      const base       = rng(i * 5 + 1) * 0.14 + 0.06; // 0.06–0.20 (subtle static)
-      const baseRadius = rng(i * 5 + 3) * 1.0  + 0.8;  // 0.8–1.8 px
-      const peakRadius = rng(i * 7 + 9) * 1.0  + 2.0;  // 2.0–3.0 px
-      return {
-        x:              rng(i * 5)     * window.innerWidth,
-        y:              rng(i * 5 + 2) * window.innerHeight,
-        baseRadius,
-        peakRadius,
-        currentRadius:  baseRadius,
-        radiusSpeed:    0,
-        baseOpacity:    base,
-        currentOpacity: base,
-        twinkleState:   'idle',
-        twinkleTarget:  rng(i * 5 + 4) * 0.10 + 0.85, // 0.85–0.95
-        twinkleSpeed:   0,
-      };
-    });
-
-    const MAX_TWINKLING = 4; // up to 4 at once
-
-    function draw() {
-      ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
-
-      // ≈0.7% chance per frame at 60fps → ~1 new twinkle every 2.5s
-      const active = stars.filter(s => s.twinkleState !== 'idle');
-      if (active.length < MAX_TWINKLING && Math.random() < 0.007) {
-        const idle = stars.filter(s => s.twinkleState === 'idle');
-        if (idle.length > 0) {
-          const star   = idle[Math.floor(Math.random() * idle.length)];
-          // 3–5 seconds at 60fps → 180–300 frames per phase
-          const frames = 180 + Math.random() * 120;
-          star.twinkleSpeed = (star.twinkleTarget - star.baseOpacity) / frames;
-          star.radiusSpeed  = (star.peakRadius    - star.baseRadius)   / frames;
-          star.twinkleState = 'brightening';
-        }
-      }
-
-      for (const star of stars) {
-        if (star.twinkleState === 'brightening') {
-          star.currentOpacity += star.twinkleSpeed;
-          star.currentRadius  += star.radiusSpeed;
-          if (star.currentOpacity >= star.twinkleTarget) {
-            star.currentOpacity = star.twinkleTarget;
-            star.currentRadius  = star.peakRadius;
-            star.twinkleState   = 'dimming';
-          }
-        } else if (star.twinkleState === 'dimming') {
-          star.currentOpacity -= star.twinkleSpeed;
-          star.currentRadius  -= star.radiusSpeed;
-          if (star.currentOpacity <= star.baseOpacity) {
-            star.currentOpacity = star.baseOpacity;
-            star.currentRadius  = star.baseRadius;
-            star.twinkleState   = 'idle';
-          }
-        }
-
-        ctx!.beginPath();
-        ctx!.arc(star.x, star.y, star.currentRadius, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(255,248,220,${star.currentOpacity.toFixed(3)})`;
-        ctx!.fill();
-      }
-
-      animId = requestAnimationFrame(draw);
-    }
-
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position:      'fixed',
-        inset:         0,
-        zIndex:        1,
-        pointerEvents: 'none',
-      }}
-    />
   );
 }
 

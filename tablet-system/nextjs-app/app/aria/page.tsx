@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import AriaChat from '@/components/AriaChat';
+import AriaChat           from '@/components/AriaChat';
+import PrestigeBackground from '@/components/PrestigeBackground';
 
 export const metadata: Metadata = {
   title:       'Book Your Ride — Prestige by Synergy Lux',
@@ -14,17 +15,8 @@ export default function AriaPage() {
   return (
     <div style={{ background: '#06060A', minHeight: '100vh', color: '#EFEFEF' }}>
 
-      {/* ── Ambient top glow ───────────────────────────────── */}
-      <div
-        aria-hidden
-        style={{
-          position:   'fixed',
-          inset:      0,
-          pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 70% 40% at 50% 0%, rgba(201,168,76,0.05) 0%, transparent 70%)',
-          zIndex:     0,
-        }}
-      />
+      {/* ── Prestige ambient background ─────────────────────── */}
+      <PrestigeBackground intensity="light" />
 
       {/* ── Hero ───────────────────────────────────────────── */}
       <section style={{

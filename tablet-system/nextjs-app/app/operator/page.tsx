@@ -3,8 +3,9 @@
 import { useState, useEffect, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { experienceStore } from '@/lib/experienceStore';
-import { supabase } from '@/lib/supabase';
+import { experienceStore }    from '@/lib/experienceStore';
+import { supabase }           from '@/lib/supabase';
+import PrestigeBackground     from '@/components/PrestigeBackground';
 
 // ─────────────────────────────────────────────────────────
 // Constants
@@ -151,34 +152,7 @@ export default function OperatorPage() {
   return (
     <div className="min-h-screen bg-lux-black flex items-start sm:items-center justify-center p-4 sm:p-8 overflow-y-auto">
 
-      {/* Ambient glow — Element 1: top-center primary */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed z-0"
-        style={{
-          top:          '-120px',
-          left:         '50%',
-          width:        '600px',
-          height:       '600px',
-          borderRadius: '50%',
-          background:   'radial-gradient(circle, rgba(212,175,90,0.05) 0%, transparent 70%)',
-          animation:    'ambientPulseCenter 8s ease-in-out infinite',
-        }}
-      />
-      {/* Ambient glow — Element 2: bottom-right secondary */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed z-0"
-        style={{
-          bottom:       '-80px',
-          right:        '-80px',
-          width:        '400px',
-          height:       '400px',
-          borderRadius: '50%',
-          background:   'radial-gradient(circle, rgba(232,198,112,0.035) 0%, transparent 70%)',
-          animation:    'ambientPulse 8s ease-in-out 4s infinite',
-        }}
-      />
+      <PrestigeBackground intensity="subtle" />
 
       <AnimatePresence mode="wait">
 
