@@ -388,9 +388,10 @@ export default function AriaPage() {
         </div>
       </footer>
 
-      <p className="text-xs text-gray-400 text-center py-2">
-        © 2026 Synergy Lux Limo DFW LLC · Powered by Amirah AI
-      </p>
+      <div className="text-xs text-gray-400 text-center py-2 flex flex-col gap-0.5">
+        <span>© 2026 Synergy Lux Limo DFW LLC</span>
+        <span>(646) 879-1391</span>
+      </div>
 
     </div>
   );
