@@ -643,6 +643,9 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
               zIndex:       0,
             }}
           />
+
+          {/* Starlight headliner — rare individual twinkles above warm glow */}
+          <StarlightHeadliner />
         </>
       )}
     </div>
@@ -650,10 +653,24 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
 }
 
 // ─────────────────────────────────────────────────────────
-// CanvasStarfield — 100 drifting particles via requestAnimationFrame
+// StarlightHeadliner — Rolls-Royce Starlight Headliner effect
+// 180-220 static white stars; only 2-4 twinkle at any moment
 // ─────────────────────────────────────────────────────────
 
-function CanvasStarfield() {
+type TwinkleState = 'idle' | 'brightening' | 'dimming';
+
+interface Star {
+  x:              number;
+  y:              number;
+  radius:         number;
+  baseOpacity:    number;
+  currentOpacity: number;
+  twinkleState:   TwinkleState;
+  twinkleTarget:  number;
+  twinkleSpeed:   number;
+}
+
+function StarlightHeadliner() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -671,41 +688,65 @@ function CanvasStarfield() {
     resize();
     window.addEventListener('resize', resize);
 
-    // Seeded deterministic random using index so SSR/client match
+    // Seeded deterministic random — avoids SSR/client hydration mismatches
     const rng = (seed: number) => {
       const x = Math.sin(seed + 1) * 43758.5453123;
       return x - Math.floor(x);
     };
 
-    const particles = Array.from({ length: 100 }, (_, i) => ({
-      x:            rng(i * 3)     * window.innerWidth,
-      y:            rng(i * 3 + 1) * window.innerHeight,
-      size:         rng(i * 3 + 2) * 1.5 + 0.4,
-      speedX:       (rng(i * 7)     - 0.5) * 0.12,
-      speedY:       (rng(i * 7 + 1) - 0.5) * 0.12,
-      baseOpacity:  rng(i * 11)    * 0.22 + 0.04,
-      twinkle:      rng(i * 13)    * Math.PI * 2,
-      twinkleSpeed: rng(i * 17)    * 0.018 + 0.004,
-    }));
+    const COUNT = 180 + Math.floor(rng(999) * 40 + 0.5); // 180–220
+
+    const stars: Star[] = Array.from({ length: COUNT }, (_, i) => {
+      const base = rng(i * 5 + 1) * 0.17 + 0.08; // 0.08–0.25
+      return {
+        x:              rng(i * 5)     * window.innerWidth,
+        y:              rng(i * 5 + 2) * window.innerHeight,
+        radius:         rng(i * 5 + 3) * 1.0 + 0.5,   // 0.5–1.5 px
+        baseOpacity:    base,
+        currentOpacity: base,
+        twinkleState:   'idle',
+        twinkleTarget:  rng(i * 5 + 4) * 0.2 + 0.6,   // 0.6–0.8
+        twinkleSpeed:   0,
+      };
+    });
+
+    const MAX_TWINKLING = 3; // never more than 3 at once
 
     function draw() {
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
 
-      for (const p of particles) {
-        p.twinkle += p.twinkleSpeed;
-        const alpha = p.baseOpacity * (0.55 + 0.45 * Math.sin(p.twinkle));
+      // Rarely wake up an idle star (≈0.4% chance per frame at 60fps → ~1 new twinkle per 4s)
+      const active = stars.filter(s => s.twinkleState !== 'idle');
+      if (active.length < MAX_TWINKLING && Math.random() < 0.004) {
+        const idle = stars.filter(s => s.twinkleState === 'idle');
+        if (idle.length > 0) {
+          const star = idle[Math.floor(Math.random() * idle.length)];
+          // 3–6 seconds at 60fps → 180–360 frames per phase
+          const frames = 180 + Math.random() * 180;
+          star.twinkleSpeed = (star.twinkleTarget - star.baseOpacity) / frames;
+          star.twinkleState = 'brightening';
+        }
+      }
+
+      for (const star of stars) {
+        if (star.twinkleState === 'brightening') {
+          star.currentOpacity += star.twinkleSpeed;
+          if (star.currentOpacity >= star.twinkleTarget) {
+            star.currentOpacity = star.twinkleTarget;
+            star.twinkleState   = 'dimming';
+          }
+        } else if (star.twinkleState === 'dimming') {
+          star.currentOpacity -= star.twinkleSpeed;
+          if (star.currentOpacity <= star.baseOpacity) {
+            star.currentOpacity = star.baseOpacity;
+            star.twinkleState   = 'idle';
+          }
+        }
+
         ctx!.beginPath();
-        ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(201,168,76,${alpha.toFixed(3)})`;
+        ctx!.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(255,255,255,${star.currentOpacity.toFixed(3)})`;
         ctx!.fill();
-
-        p.x += p.speedX;
-        p.y += p.speedY;
-
-        if (p.x < 0)              p.x = canvas!.width;
-        if (p.x > canvas!.width)  p.x = 0;
-        if (p.y < 0)              p.y = canvas!.height;
-        if (p.y > canvas!.height) p.y = 0;
       }
 
       animId = requestAnimationFrame(draw);
@@ -725,66 +766,13 @@ function CanvasStarfield() {
       style={{
         position:      'fixed',
         inset:         0,
-        zIndex:        0,
+        zIndex:        1,
         pointerEvents: 'none',
-        opacity:       0.8,
       }}
     />
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// StarlightEffect
-// ─────────────────────────────────────────────────────────
-
-// 60 cinematic starlight dots — golden-angle x distribution, varied sizes/speeds/opacity
-// All values are deterministic (no Math.random) to avoid SSR hydration mismatches.
-const SIZES  = [1, 1.5, 2, 2.5, 3] as const;
-const SPEEDS = [4, 2.5, 1.5]       as const; // slow, medium, fast
-const STARS  = Array.from({ length: 60 }, (_, i) => {
-  const x     = ((i * 137.508) % 100).toFixed(1);       // golden-angle spread avoids clustering
-  const y     = ((i * 97.319 + 31) % 100).toFixed(1);   // offset so y ≠ x distribution
-  const size  = SIZES[i % 5];
-  const dur   = SPEEDS[i % 3];
-  const delay = parseFloat(((i * 0.371) % 3.5).toFixed(2));
-  const opMin = 0.08 + (i % 5) * 0.04;                  // 0.08 → 0.24
-  const opMax = opMin + 0.10 + (i % 3) * 0.04;          // opMin + 0.10–0.18 → max 0.35
-  return { x: `${x}%`, y: `${y}%`, size, dur, delay, opMin, opMax };
-});
-
-function StarlightEffect() {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1.5 }}
-      className="absolute inset-0"
-    >
-      {STARS.map((s, i) => (
-        <motion.div
-          key={i}
-          animate={{ opacity: [s.opMin, s.opMax, s.opMin] }}
-          transition={{
-            delay:    s.delay,
-            duration: s.dur,
-            repeat:   Infinity,
-            ease:     'easeInOut',
-          }}
-          style={{
-            position:     'absolute',
-            left:         s.x,
-            top:          s.y,
-            width:        s.size,
-            height:       s.size,
-            borderRadius: '50%',
-            background:   '#C9A84C',
-          }}
-        />
-      ))}
-    </motion.div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────
 // BrandMark
