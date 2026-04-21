@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
 import { supabase } from '@/lib/supabase';
-import { preloadAudio, playArrivalChime, playExitTone } from '@/lib/audio';
+import { playExitTone } from '@/lib/audio';
 import MapEmbed            from '@/components/MapEmbed';
 import ThankYouScreen      from '@/components/ThankYouScreen';
 import PrestigeBackground  from '@/components/PrestigeBackground';
@@ -133,20 +133,49 @@ function ExperienceInner() {
   const [preDropoffOcc,       setPreDropoffOcc]       = useState<string | null>(null);
   const [exitComplete,        setExitComplete]        = useState(false);
   const [dimmingStarlight,    setDimmingStarlight]    = useState(false);
-  const chimePlayed = useRef(false);
+  const [showBell,            setShowBell]            = useState(false);
+  const chimeFiredRef = useRef(false);
 
-  // Pre-unlock audio on mount by playing a silent file
+  // Show bell overlay when ride becomes ready
   useEffect(() => {
-    preloadAudio();
-  }, []);
-
-  // Arrival chime — fires once when status reaches 'ready'
-  useEffect(() => {
-    if (state.status === 'ready' && !chimePlayed.current) {
-      chimePlayed.current = true;
-      playArrivalChime();
+    if (state.status === 'ready' && !chimeFiredRef.current) {
+      setShowBell(true);
     }
   }, [state.status]);
+
+  // Bell tap — plays arrival chime synchronously inside gesture handler
+  // so Safari's autoplay policy is guaranteed to be satisfied
+  function handleBellTap() {
+    if (chimeFiredRef.current) return;
+    chimeFiredRef.current = true;
+    setShowBell(false);
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioCtx();
+
+      ([
+        [392, 0],
+        [523, 0.18],
+        [659, 0.36],
+      ] as [number, number][]).forEach(([freq, delay]) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + delay;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.08, t + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+        osc.start(t);
+        osc.stop(t + 0.7);
+      });
+
+      setTimeout(() => ctx.close(), 2000);
+    } catch { /* silent */ }
+  }
 
   // Mid-ride soft hook — show after 10 min of active ride
   useEffect(() => {
@@ -187,6 +216,89 @@ function ExperienceInner() {
           <PrestigeBackground intensity="full" />
         </motion.div>
       )}
+
+      {/* ── Bell moment — tap-to-begin, fires arrival chime on iOS Safari ── */}
+      <AnimatePresence>
+        {showBell && (
+          <motion.div
+            key="bell-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+            className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer"
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+            onClick={handleBellTap}
+          >
+            {/* Outer pulse ring */}
+            <motion.div
+              animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0, 0.3] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut' }}
+              className="absolute w-24 h-24 rounded-full border border-amber-400/30"
+            />
+
+            {/* Second pulse ring — offset */}
+            <motion.div
+              animate={{ scale: [1, 1.6, 1], opacity: [0.2, 0, 0.2] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut', delay: 0.8 }}
+              className="absolute w-24 h-24 rounded-full border border-amber-400/20"
+            />
+
+            {/* Bell container */}
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              className="flex flex-col items-center gap-4 relative z-10"
+            >
+              {/* Bell icon */}
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className="w-16 h-16 flex items-center justify-center"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="w-12 h-12">
+                  <motion.path
+                    d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                    stroke="#D4AF5A"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
+                  />
+                  <motion.path
+                    d="M13.73 21a2 2 0 0 1-3.46 0"
+                    stroke="#D4AF5A"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1, duration: 0.8 }}
+                  />
+                  <motion.circle
+                    cx="12" cy="2" r="1.5"
+                    fill="#E8C670"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: [0, 1, 0.6], scale: 1 }}
+                    transition={{ delay: 0.5, duration: 1 }}
+                  />
+                </svg>
+              </motion.div>
+
+              {/* Label */}
+              <motion.p
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2, duration: 0.8 }}
+                className="text-[10px] tracking-[5px] uppercase text-amber-400/60 font-sans"
+              >
+                Tap to begin
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Cinematic exit moment — plays before thank-you screen ── */}
       <AnimatePresence>
@@ -656,28 +768,34 @@ function ExitMoment({
   onDimStarlight: () => void;
   onComplete: () => void;
 }) {
-  const [textVisible, setTextVisible] = useState(false);
+  const [textVisible,    setTextVisible]    = useState(false);
+  const exitToneFiredRef = useRef(false);
 
   useEffect(() => {
-    // Exit tone fires early (300ms) — Safari sometimes allows this when the
-    // component mounts as a result of a Supabase-triggered state change that
-    // the user is actively watching. Text reveal is separate at 1.5s.
-    const t0 = setTimeout(() => playExitTone(), 300);
     const t1 = setTimeout(() => setTextVisible(true), 1500);
     const t2 = setTimeout(() => onDimStarlight(), 8000);
     const t3 = setTimeout(() => onComplete(), 11000);
-    return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Plays exit tone synchronously on first tap — Safari-safe
+  function handleExitTap() {
+    if (exitToneFiredRef.current) return;
+    exitToneFiredRef.current = true;
+    playExitTone();
+  }
 
   return (
     <motion.div
       key="exit-moment"
-      className="fixed inset-0 flex items-center justify-center"
+      className="fixed inset-0 flex items-center justify-center cursor-pointer"
       style={{ background: '#06060A', zIndex: 70 }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1.5 }}
+      onClick={handleExitTap}
+      onTouchStart={handleExitTap}
     >
       <AnimatePresence>
         {textVisible && (
