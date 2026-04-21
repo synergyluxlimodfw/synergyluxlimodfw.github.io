@@ -662,7 +662,10 @@ type TwinkleState = 'idle' | 'brightening' | 'dimming';
 interface Star {
   x:              number;
   y:              number;
-  radius:         number;
+  baseRadius:     number;
+  peakRadius:     number;
+  currentRadius:  number;
+  radiusSpeed:    number;
   baseOpacity:    number;
   currentOpacity: number;
   twinkleState:   TwinkleState;
@@ -697,33 +700,39 @@ function StarlightHeadliner() {
     const COUNT = 180 + Math.floor(rng(999) * 40 + 0.5); // 180–220
 
     const stars: Star[] = Array.from({ length: COUNT }, (_, i) => {
-      const base = rng(i * 5 + 1) * 0.17 + 0.08; // 0.08–0.25
+      const base       = rng(i * 5 + 1) * 0.14 + 0.06; // 0.06–0.20 (subtle static)
+      const baseRadius = rng(i * 5 + 3) * 1.0  + 0.8;  // 0.8–1.8 px
+      const peakRadius = rng(i * 7 + 9) * 1.0  + 2.0;  // 2.0–3.0 px
       return {
         x:              rng(i * 5)     * window.innerWidth,
         y:              rng(i * 5 + 2) * window.innerHeight,
-        radius:         rng(i * 5 + 3) * 1.0 + 0.5,   // 0.5–1.5 px
+        baseRadius,
+        peakRadius,
+        currentRadius:  baseRadius,
+        radiusSpeed:    0,
         baseOpacity:    base,
         currentOpacity: base,
         twinkleState:   'idle',
-        twinkleTarget:  rng(i * 5 + 4) * 0.2 + 0.6,   // 0.6–0.8
+        twinkleTarget:  rng(i * 5 + 4) * 0.10 + 0.85, // 0.85–0.95
         twinkleSpeed:   0,
       };
     });
 
-    const MAX_TWINKLING = 3; // never more than 3 at once
+    const MAX_TWINKLING = 4; // up to 4 at once
 
     function draw() {
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
 
-      // Rarely wake up an idle star (≈0.4% chance per frame at 60fps → ~1 new twinkle per 4s)
+      // ≈0.7% chance per frame at 60fps → ~1 new twinkle every 2.5s
       const active = stars.filter(s => s.twinkleState !== 'idle');
-      if (active.length < MAX_TWINKLING && Math.random() < 0.004) {
+      if (active.length < MAX_TWINKLING && Math.random() < 0.007) {
         const idle = stars.filter(s => s.twinkleState === 'idle');
         if (idle.length > 0) {
-          const star = idle[Math.floor(Math.random() * idle.length)];
-          // 3–6 seconds at 60fps → 180–360 frames per phase
-          const frames = 180 + Math.random() * 180;
+          const star   = idle[Math.floor(Math.random() * idle.length)];
+          // 3–5 seconds at 60fps → 180–300 frames per phase
+          const frames = 180 + Math.random() * 120;
           star.twinkleSpeed = (star.twinkleTarget - star.baseOpacity) / frames;
+          star.radiusSpeed  = (star.peakRadius    - star.baseRadius)   / frames;
           star.twinkleState = 'brightening';
         }
       }
@@ -731,21 +740,25 @@ function StarlightHeadliner() {
       for (const star of stars) {
         if (star.twinkleState === 'brightening') {
           star.currentOpacity += star.twinkleSpeed;
+          star.currentRadius  += star.radiusSpeed;
           if (star.currentOpacity >= star.twinkleTarget) {
             star.currentOpacity = star.twinkleTarget;
+            star.currentRadius  = star.peakRadius;
             star.twinkleState   = 'dimming';
           }
         } else if (star.twinkleState === 'dimming') {
           star.currentOpacity -= star.twinkleSpeed;
+          star.currentRadius  -= star.radiusSpeed;
           if (star.currentOpacity <= star.baseOpacity) {
             star.currentOpacity = star.baseOpacity;
+            star.currentRadius  = star.baseRadius;
             star.twinkleState   = 'idle';
           }
         }
 
         ctx!.beginPath();
-        ctx!.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(255,255,255,${star.currentOpacity.toFixed(3)})`;
+        ctx!.arc(star.x, star.y, star.currentRadius, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(255,248,220,${star.currentOpacity.toFixed(3)})`;
         ctx!.fill();
       }
 
