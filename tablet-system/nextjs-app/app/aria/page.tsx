@@ -16,7 +16,7 @@ export default function AriaPage() {
     <div style={{ background: '#06060A', minHeight: '100vh', color: '#EFEFEF' }}>
 
       {/* ── Prestige ambient background ─────────────────────── */}
-      <PrestigeBackground intensity="light" />
+      <PrestigeBackground intensity="subtle" />
 
       {/* ── Hero ───────────────────────────────────────────── */}
       <section style={{
