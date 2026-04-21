@@ -212,7 +212,7 @@ function BookingView({ onConfirmed }: { onConfirmed: () => void }) {
   );
 }
 
-export default function PrestigeTablet() {
+export default function PrestigeTablet({ forceShowDevControls = false }: { forceShowDevControls?: boolean }) {
   const [rideState, setRideState] = useState<RideState>("arrival");
   const [dataStatus, setDataStatus] = useState<DataStatus>("live");
   const [showPrompt, setShowPrompt] = useState(false);
@@ -266,7 +266,7 @@ export default function PrestigeTablet() {
       <AnimatePresence>
         {showPrompt && <MidRidePrompt key="prompt" onDismiss={handleDismiss} onBook={handleBookFromPrompt} />}
       </AnimatePresence>
-      {process.env.NODE_ENV === "development" && (
+      {(process.env.NODE_ENV === "development" || forceShowDevControls) && (
         <div style={{ position: "absolute", top: 14, right: 16, display: "flex", gap: 6, zIndex: 20 }}>
           {(["arrival", "cruise", "mid-ride", "pre-dropoff"] as RideState[]).map((s) => (
             <button key={s} onClick={() => { setRideState(s); if (s !== "mid-ride") { setShowPrompt(false); setPromptDismissed(false); } }} style={{ padding: "4px 10px", background: rideState === s ? `${GOLD}0.15)` : "rgba(255,255,255,0.05)", border: `0.5px solid ${rideState === s ? `${GOLD}0.4)` : "rgba(255,255,255,0.1)"}`, borderRadius: 20, color: rideState === s ? `${GOLD}0.8)` : "rgba(255,255,255,0.3)", fontSize: 10, cursor: "pointer", fontFamily: SANS }}>{s}</button>

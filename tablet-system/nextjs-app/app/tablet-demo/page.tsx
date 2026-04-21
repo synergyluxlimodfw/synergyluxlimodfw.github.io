@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import PrestigeTablet from "@/components/PrestigeTablet";
 
 export default function TabletDemoPage() {
@@ -11,7 +14,7 @@ export default function TabletDemoPage() {
       padding: "40px 20px",
     }}>
       <div style={{ width: "100%", maxWidth: 768 }}>
-        <PrestigeTablet />
+        <PrestigeTablet forceShowDevControls={true} />
       </div>
     </main>
   );
