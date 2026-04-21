@@ -35,12 +35,14 @@ function timeGreeting(): string {
 }
 
 // ── Arrival chime — three-note ascending sine via Web Audio API ──────────────
-function playArrivalChime() {
+async function playArrivalChime(audioCtxRef: React.MutableRefObject<AudioContext | null>) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
-    const ctx: AudioContext = new AudioCtx();
+    const ctx: AudioContext = audioCtxRef.current ?? new AudioCtx();
+    if (ctx.state === 'suspended') await ctx.resume();
+    audioCtxRef.current = ctx;
     const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
     notes.forEach((freq, i) => {
       const osc  = ctx.createOscillator();
@@ -158,7 +160,9 @@ function ExperienceInner() {
   const [preDropoffOcc,       setPreDropoffOcc]       = useState<string | null>(null);
   const [exitComplete,        setExitComplete]        = useState(false);
   const [dimmingStarlight,    setDimmingStarlight]    = useState(false);
-  const chimePlayed = useRef(false);
+  const [hasInteracted,       setHasInteracted]       = useState(false);
+  const chimePlayed  = useRef(false);
+  const audioCtxRef  = useRef<AudioContext | null>(null);
 
   // Mid-ride soft hook — show after 10 min of active ride
   useEffect(() => {
@@ -179,11 +183,35 @@ function ExperienceInner() {
     return () => clearTimeout(timer);
   }, [showReturnHook]);
 
+  // Unlock AudioContext on first gesture (browser autoplay policy)
+  useEffect(() => {
+    function unlock() {
+      setHasInteracted(true);
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new AudioCtx();
+        }
+        audioCtxRef.current?.resume().catch(() => {});
+      } catch { /* silent */ }
+    }
+    document.addEventListener('touchstart', unlock, { once: true });
+    document.addEventListener('click',      unlock, { once: true });
+    document.addEventListener('keydown',    unlock, { once: true });
+    return () => {
+      document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('click',      unlock);
+      document.removeEventListener('keydown',    unlock);
+    };
+  }, []);
+
   // Arrival chime — plays once when status first reaches 'ready'
   useEffect(() => {
     if ((state.status === 'ready') && !chimePlayed.current) {
       chimePlayed.current = true;
-      playArrivalChime();
+      playArrivalChime(audioCtxRef);
     }
   }, [state.status]);
 
@@ -358,6 +386,31 @@ function ExperienceInner() {
       >
         <span className="w-1 h-1 rounded-full bg-gold/50" />
       </button>
+
+      {/* ── Subtle tap hint — bottom-center, disappears after first interaction ── */}
+      <AnimatePresence>
+        {!hasInteracted && (
+          <motion.div
+            key="tap-hint"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, delay: 2 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.5], opacity: [0.4, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
+              style={{
+                width:        '8px',
+                height:       '8px',
+                borderRadius: '50%',
+                background:   '#D4AF5A',
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Gratuity pill — bottom-left, visible during ready/active ── */}
       <AnimatePresence>
