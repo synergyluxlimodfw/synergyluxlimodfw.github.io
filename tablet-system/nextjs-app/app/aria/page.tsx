@@ -60,8 +60,9 @@ export default function AriaPage() {
           </p>
 
           {/* Headline */}
-          <h1 style={{
-            fontFamily:  '"Cormorant Garamond", Georgia, serif',
+          <h1
+            className="font-[family-name:var(--font-cormorant)]"
+            style={{
             fontSize:    'clamp(42px, 5.5vw, 64px)',
             fontWeight:  300,
             lineHeight:  1.1,
@@ -110,6 +111,7 @@ export default function AriaPage() {
           {/* Phone */}
           <a
             href="tel:6468791391"
+            className="font-[family-name:var(--font-cormorant)]"
             style={{
               display:     'inline-flex',
               alignItems:  'center',
@@ -117,7 +119,6 @@ export default function AriaPage() {
               color:       '#C9A84C',
               textDecoration: 'none',
               fontSize:    '18px',
-              fontFamily:  '"Cormorant Garamond", Georgia, serif',
               fontWeight:  500,
               letterSpacing: '0.02em',
             }}
@@ -185,8 +186,9 @@ export default function AriaPage() {
             }}
           >
             <span style={{ color: '#C9A84C', fontSize: '18px' }}>✦</span>
-            <h3 style={{
-              fontFamily:  '"Cormorant Garamond", Georgia, serif',
+            <h3
+              className="font-[family-name:var(--font-cormorant)]"
+              style={{
               fontSize:    '24px',
               fontWeight:  400,
               color:       '#EFEFEF',
@@ -243,8 +245,9 @@ export default function AriaPage() {
                 gap:           '14px',
               }}
             >
-              <span style={{
-                fontFamily:  '"Cormorant Garamond", Georgia, serif',
+              <span
+                className="font-[family-name:var(--font-cormorant)]"
+                style={{
                 fontSize:    '40px',
                 fontWeight:  300,
                 color:       'rgba(201,168,76,0.35)',
@@ -252,8 +255,9 @@ export default function AriaPage() {
               }}>
                 {n}
               </span>
-              <h4 style={{
-                fontFamily:  '"Cormorant Garamond", Georgia, serif',
+              <h4
+                className="font-[family-name:var(--font-cormorant)]"
+                style={{
                 fontSize:    '22px',
                 fontWeight:  400,
                 color:       '#EFEFEF',
@@ -313,8 +317,9 @@ export default function AriaPage() {
           }}>
             Your Chauffeur
           </p>
-          <h2 style={{
-            fontFamily:  '"Cormorant Garamond", Georgia, serif',
+          <h2
+            className="font-[family-name:var(--font-cormorant)]"
+            style={{
             fontSize:    'clamp(32px, 4vw, 48px)',
             fontWeight:  300,
             color:       '#EFEFEF',
@@ -350,8 +355,9 @@ export default function AriaPage() {
         gap:          '20px',
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <p style={{
-            fontFamily:  '"Cormorant Garamond", Georgia, serif',
+          <p
+            className="font-[family-name:var(--font-cormorant)]"
+            style={{
             fontSize:    '18px',
             fontWeight:  500,
             color:       '#EFEFEF',
@@ -368,7 +374,8 @@ export default function AriaPage() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
           <a
             href="tel:6468791391"
-            style={{ color: '#C9A84C', textDecoration: 'none', fontSize: '15px', fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+            className="font-[family-name:var(--font-cormorant)]"
+            style={{ color: '#C9A84C', textDecoration: 'none', fontSize: '15px' }}
           >
             (646) 879-1391
           </a>

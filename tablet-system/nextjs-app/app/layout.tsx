@@ -1,11 +1,19 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({
-  subsets: ['latin'],
+  subsets:  ['latin'],
   variable: '--font-inter',
-  display: 'swap',
+  display:  'swap',
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets:  ['latin'],
+  weight:   ['300', '400', '600'],
+  style:    ['normal', 'italic'],
+  variable: '--font-cormorant',
+  display:  'swap',
 });
 
 export const metadata: Metadata = {
@@ -15,15 +23,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
+      <head />
       <body className="font-sans antialiased bg-lux-black min-h-screen">
         {children}
       </body>

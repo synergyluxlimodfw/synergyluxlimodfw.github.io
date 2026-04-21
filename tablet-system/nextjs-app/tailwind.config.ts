@@ -20,8 +20,8 @@ const config: Config = {
         'lux-gold-dim': 'rgba(201,168,76,0.12)',
       },
       fontFamily: {
-        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-        sans:  ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-cormorant)', 'Georgia', 'serif'],
+        sans:  ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
       borderColor: {
         DEFAULT: 'rgba(201,168,76,0.14)',

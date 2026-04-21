@@ -878,7 +878,7 @@ function ReadyView({
         {/* Welcome line */}
         <div className="flex flex-col items-center gap-1.5">
           <p
-            className="font-serif font-light text-gold"
+            className="font-[family-name:var(--font-cormorant)] font-light text-gold"
             style={{ fontSize: '18px', letterSpacing: '2px' }}
           >
             Welcome to Prestige
@@ -898,7 +898,7 @@ function ReadyView({
 
         {/* Serif greeting */}
         <h1
-          className="font-serif font-light leading-[1.1] text-lux-white"
+          className="font-[family-name:var(--font-cormorant)] font-light leading-[1.1] text-lux-white"
           style={{ fontSize: '86px' }}
         >
           {greeting},
@@ -960,7 +960,7 @@ function ReadyView({
             </p>
             <div className="flex items-end gap-3 leading-none">
               <span
-                className="font-serif font-light text-gold"
+                className="font-[family-name:var(--font-cormorant)] font-light text-gold"
                 style={{ fontSize: '82px', lineHeight: 1 }}
               >
                 {eta}
