@@ -122,6 +122,11 @@
   0%,100% { opacity: 0.4; transform: scale(1); }
   50%     { opacity: 0.8; transform: scale(1.05); }
 }
+/* Operator panel — element 1 combines translateX(-50%) with scale */
+@keyframes ambientPulseCenter {
+  0%,100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+  50%     { opacity: 0.8; transform: translateX(-50%) scale(1.05); }
+}
 
 @layer utilities {
   .font-serif-lux   { font-family: 'Cormorant Garamond', Georgia, serif; }

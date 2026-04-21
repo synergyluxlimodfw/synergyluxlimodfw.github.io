@@ -143,13 +143,32 @@ export default function OperatorPage() {
   return (
     <div className="min-h-screen bg-lux-black flex items-start sm:items-center justify-center p-4 sm:p-8 overflow-y-auto">
 
-      {/* Ambient glow behind card */}
+      {/* Ambient glow — Element 1: top-center primary */}
       <div
-        className="pointer-events-none fixed inset-0 z-0"
         aria-hidden
+        className="pointer-events-none fixed z-0"
         style={{
-          background:
-            'radial-gradient(ellipse 60% 40% at 50% 20%, rgba(201,168,76,0.05) 0%, transparent 70%)',
+          top:          '-120px',
+          left:         '50%',
+          width:        '600px',
+          height:       '600px',
+          borderRadius: '50%',
+          background:   'radial-gradient(circle, rgba(212,175,90,0.05) 0%, transparent 70%)',
+          animation:    'ambientPulseCenter 8s ease-in-out infinite',
+        }}
+      />
+      {/* Ambient glow — Element 2: bottom-right secondary */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed z-0"
+        style={{
+          bottom:       '-80px',
+          right:        '-80px',
+          width:        '400px',
+          height:       '400px',
+          borderRadius: '50%',
+          background:   'radial-gradient(circle, rgba(232,198,112,0.035) 0%, transparent 70%)',
+          animation:    'ambientPulse 8s ease-in-out 4s infinite',
         }}
       />
 
@@ -188,16 +207,21 @@ export default function OperatorPage() {
               <motion.div variants={sectionVariants} initial="hidden" animate="show">
 
                 {/* ── Header ─────────────────────────────── */}
-                <motion.div variants={itemVariants}>
+                <motion.div variants={itemVariants} className="pt-4">
                   <p className="text-[9px] tracking-[5px] uppercase text-gold/50 mb-4">
                     Prestige · Operator Console
                   </p>
-                  <h1 className="font-serif text-[44px] font-light text-lux-white leading-none mb-3">
+                  <h1 className="font-serif text-5xl font-light text-lux-white leading-none mb-3">
                     Prepare
                     <br />
-                    <em className="text-gold2">Journey</em>
+                    <em
+                      className="text-gold2"
+                      style={{ textShadow: '0 0 40px rgba(212,175,90,0.2)' }}
+                    >
+                      Journey
+                    </em>
                   </h1>
-                  <p className="text-[13px] text-lux-muted leading-relaxed">
+                  <p className="text-[13px] text-lux-muted leading-relaxed mb-8">
                     Confirm guest experience before arrival
                   </p>
                 </motion.div>
@@ -383,6 +407,13 @@ export default function OperatorPage() {
 
                 {/* ── CTA ─────────────────────────────────── */}
                 <motion.div variants={itemVariants} className="mt-8">
+                  {/* Gold divider */}
+                  <div style={{
+                    width:      '60px',
+                    height:     '1px',
+                    background: 'linear-gradient(to right, rgba(201,168,76,0.6), rgba(201,168,76,0.1))',
+                    margin:     '0 auto 28px',
+                  }} />
                   <CTAButton
                     loading={loading}
                     disabled={!canSubmit}
@@ -485,7 +516,10 @@ function SummaryPanel({
   musicEnabled: boolean;
 }) {
   return (
-    <div className="mt-7 rounded-2xl border border-lux-border bg-lux-card2 p-5 shadow-[inset_0_1px_0_rgba(201,168,76,0.06)]">
+    <div
+      className="mt-7 rounded-2xl border border-lux-border bg-lux-card2 p-5 shadow-[inset_0_1px_0_rgba(201,168,76,0.06)]"
+      style={{ borderTop: '2px solid rgba(201,168,76,0.25)' }}
+    >
       <p className="text-[9px] tracking-[4px] uppercase text-gold/40 mb-4">
         Experience Summary
       </p>
@@ -594,36 +628,30 @@ function CTAButton({
   disabled: boolean;
   onClick: () => void;
 }) {
+  const isDisabled = disabled || loading;
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
-      disabled={disabled || loading}
-      className={`
-        relative w-full py-[18px] rounded-2xl overflow-hidden
-        text-[11px] font-bold tracking-[0.22em] uppercase
-        text-[#06060A]
-        transition-all duration-300
-        flex items-center justify-center gap-3
-        ${disabled || loading
-          ? 'opacity-40 cursor-not-allowed bg-gradient-to-r from-[#D4AF5A] via-gold to-[#B8932E]'
-          : `
-            bg-gradient-to-r from-[#D4AF5A] via-gold to-[#B8932E]
-            shadow-[0_4px_32px_rgba(201,168,76,0.25)]
-            hover:shadow-[0_4px_44px_rgba(201,168,76,0.40)]
-            hover:brightness-110 hover:scale-[1.01]
-            active:scale-[0.98] active:brightness-95
-          `
-        }
-      `}
+      disabled={isDisabled}
+      whileHover={!isDisabled ? { scale: 1.01 } : {}}
+      whileTap={!isDisabled ? { scale: 0.98 } : {}}
+      className="relative w-full py-5 px-8 rounded-2xl overflow-hidden font-serif text-[11px] font-light tracking-[0.25em] uppercase flex items-center justify-center gap-3 transition-shadow duration-300"
+      style={{
+        background:  'linear-gradient(135deg, #C9A84C 0%, #E8C670 50%, #C9A84C 100%)',
+        color:       '#0A0A0A',
+        boxShadow:   isDisabled ? 'none' : '0 4px 32px rgba(201,168,76,0.25), 0 0 60px rgba(201,168,76,0.10)',
+        opacity:     isDisabled ? 0.4 : 1,
+        cursor:      isDisabled ? 'not-allowed' : 'pointer',
+      }}
     >
-      {/* Shimmer on hover — cosmetic */}
-      {!disabled && !loading && (
+      {/* Shimmer overlay */}
+      {!isDisabled && (
         <span
-          className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background:
-              'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)',
+            background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)',
           }}
         />
       )}
@@ -634,9 +662,9 @@ function CTAButton({
           Preparing…
         </>
       ) : (
-        'Launch Experience'
+        'Launch Prestige Experience'
       )}
-    </button>
+    </motion.button>
   );
 }
 
