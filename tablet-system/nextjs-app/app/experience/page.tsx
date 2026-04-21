@@ -981,9 +981,11 @@ function ReadyView({
 
         {/* Subtitle */}
         <p className="text-lux-muted" style={{ fontSize: '18px', letterSpacing: '1px' }}>
-          {activeRide
-            ? `Your journey to ${destination || 'your destination'} is underway`
-            : `Your journey to ${destination || 'your destination'} is prepared`}
+          Your journey to{' '}
+          <span style={{ textTransform: 'capitalize' }}>
+            {destination || 'your destination'}
+          </span>
+          {' '}{activeRide ? 'is underway' : 'is prepared'}
         </p>
 
         {/* Cabin status line — with thin 80px gold rule above */}
