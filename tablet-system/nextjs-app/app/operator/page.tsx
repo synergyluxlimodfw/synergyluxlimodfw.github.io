@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useId } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { experienceStore } from '@/lib/experienceStore';
 import { supabase } from '@/lib/supabase';
 
@@ -80,6 +80,13 @@ export default function OperatorPage() {
 
   const canSubmit = name.trim().length > 0 && destination.trim().length > 0;
 
+  // Pre-flight checklist
+  const [checklist, setChecklist] = useState([false, false, false]);
+  const allChecked = checklist.every(Boolean);
+  function toggleCheck(i: number) {
+    setChecklist(prev => prev.map((v, idx) => idx === i ? !v : v));
+  }
+
   // Hydrate store from sessionStorage on mount
   useEffect(() => { experienceStore.hydrate(); }, []);
 
@@ -137,6 +144,7 @@ export default function OperatorPage() {
     setLaunchedRideId(rideId);
     setLoading(false);
     setSuccess(true);
+    setChecklist([false, false, false]); // reset for next ride
     // Stay on success screen — operator controls ride from here
   }
 
@@ -407,6 +415,17 @@ export default function OperatorPage() {
 
                 {/* ── CTA ─────────────────────────────────── */}
                 <motion.div variants={itemVariants} className="mt-8">
+                  {/* Pre-flight checklist — appears when form is valid */}
+                  <AnimatePresence>
+                    {canSubmit && (
+                      <PreFlightChecklist
+                        key="preflight"
+                        checked={checklist}
+                        onToggle={toggleCheck}
+                      />
+                    )}
+                  </AnimatePresence>
+
                   {/* Gold divider */}
                   <div style={{
                     width:      '60px',
@@ -416,7 +435,7 @@ export default function OperatorPage() {
                   }} />
                   <CTAButton
                     loading={loading}
-                    disabled={!canSubmit}
+                    disabled={!canSubmit || !allChecked}
                     onClick={handleLaunch}
                   />
 
@@ -616,6 +635,85 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
 }
 
 // ─────────────────────────────────────────────────────────
+// PreFlightChecklist
+// ─────────────────────────────────────────────────────────
+
+const CHECKLIST_ITEMS = [
+  'Cabin temperature set',
+  'Phone charger ready',
+  'Water or refreshment placed',
+];
+
+function PreFlightChecklist({
+  checked,
+  onToggle,
+}: {
+  checked: boolean[];
+  onToggle: (i: number) => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="mb-6 rounded-2xl p-6"
+      style={{
+        background: 'rgba(212,175,90,0.04)',
+        border:     '1px solid rgba(212,175,90,0.15)',
+      }}
+    >
+      <p className="text-[9px] tracking-[4px] uppercase text-gold/50 mb-4">
+        Pre-Flight Check
+      </p>
+      <div className="space-y-3">
+        {CHECKLIST_ITEMS.map((label, i) => (
+          <motion.button
+            key={label}
+            type="button"
+            onClick={() => onToggle(i)}
+            whileTap={{ scale: 0.95 }}
+            className="w-full flex items-center gap-3 text-left"
+          >
+            {/* Circle */}
+            <div
+              className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-200"
+              style={{
+                border:     '1px solid rgba(212,175,90,0.30)',
+                background: checked[i] ? 'rgba(212,175,90,0.20)' : 'transparent',
+              }}
+            >
+              <AnimatePresence>
+                {checked[i] && (
+                  <motion.span
+                    key="check"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                    className="text-gold leading-none"
+                    style={{ fontSize: '10px' }}
+                  >
+                    ✓
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+            {/* Label */}
+            <span
+              className="text-[13px] tracking-wide transition-colors duration-200"
+              style={{ color: checked[i] ? 'rgba(239,239,239,0.80)' : 'rgba(239,239,239,0.35)' }}
+            >
+              {label}
+            </span>
+          </motion.button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // CTAButton
 // ─────────────────────────────────────────────────────────
 
@@ -629,11 +727,23 @@ function CTAButton({
   onClick: () => void;
 }) {
   const isDisabled = disabled || loading;
+  const pulseControls = useAnimation();
+
+  useEffect(() => {
+    if (!isDisabled) {
+      pulseControls.start({
+        scale: [1, 1.02, 1],
+        transition: { duration: 0.4, ease: 'easeOut' },
+      });
+    }
+  }, [isDisabled, pulseControls]);
+
   return (
     <motion.button
       type="button"
       onClick={onClick}
       disabled={isDisabled}
+      animate={pulseControls}
       whileHover={!isDisabled ? { scale: 1.01 } : {}}
       whileTap={!isDisabled ? { scale: 0.98 } : {}}
       className="relative w-full py-5 px-8 rounded-2xl overflow-hidden font-serif text-[11px] font-light tracking-[0.25em] uppercase flex items-center justify-center gap-3 transition-shadow duration-300"

@@ -33,6 +33,32 @@ function timeGreeting(): string {
   return 'Good evening';
 }
 
+// ── Arrival chime — three-note ascending sine via Web Audio API ──────────────
+function playArrivalChime() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx: AudioContext = new AudioCtx();
+    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+    notes.forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const start    = ctx.currentTime + i * 0.18;
+      const duration = 1.2;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.12, start + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+      osc.start(start);
+      osc.stop(start + duration);
+    });
+  } catch { /* silent — audio blocked or unsupported */ }
+}
+
 // ─────────────────────────────────────────────────────────
 // Page — Suspense wrapper required for useSearchParams
 // ─────────────────────────────────────────────────────────
@@ -129,6 +155,9 @@ function ExperienceInner() {
   const [showPreDropoff,      setShowPreDropoff]      = useState(false);
   const [preDropoffDest,      setPreDropoffDest]      = useState('');
   const [preDropoffOcc,       setPreDropoffOcc]       = useState<string | null>(null);
+  const [exitComplete,        setExitComplete]        = useState(false);
+  const [dimmingStarlight,    setDimmingStarlight]    = useState(false);
+  const chimePlayed = useRef(false);
 
   // Mid-ride soft hook — show after 10 min of active ride
   useEffect(() => {
@@ -149,6 +178,14 @@ function ExperienceInner() {
     return () => clearTimeout(timer);
   }, [showReturnHook]);
 
+  // Arrival chime — plays once when status first reaches 'ready'
+  useEffect(() => {
+    if ((state.status === 'ready') && !chimePlayed.current) {
+      chimePlayed.current = true;
+      playArrivalChime();
+    }
+  }, [state.status]);
+
   const showMap      = state.status === 'ready' || state.status === 'active';
   const rideIsLive   = state.status === 'ready' || state.status === 'active';
 
@@ -156,11 +193,23 @@ function ExperienceInner() {
     <div className="relative min-h-screen w-full overflow-hidden bg-lux-black flex flex-col">
 
       {/* Ambient background — always present */}
-      <AmbientBackground status={state.status} />
+      <AmbientBackground status={state.status} dimmingStarlight={dimmingStarlight} />
+
+      {/* ── Cinematic exit moment — plays before thank-you screen ── */}
+      <AnimatePresence>
+        {state.status === 'complete' && !exitComplete && (
+          <ExitMoment
+            key="exit-moment"
+            chauffeurName={state.chauffeurName || 'Mr. Rodriguez'}
+            onDimStarlight={() => setDimmingStarlight(true)}
+            onComplete={() => setExitComplete(true)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Thank you overlay — complete state or gratuity peek ── */}
       <AnimatePresence>
-        {(state.status === 'complete' || showGratuity) && (
+        {((exitComplete && state.status === 'complete') || showGratuity) && (
           <ThankYouScreen
             guestName={state.guestName}
             onTip={(percent, dollar) => {
@@ -538,7 +587,7 @@ function ExperienceInner() {
 // AmbientBackground
 // ─────────────────────────────────────────────────────────
 
-function AmbientBackground({ status }: { status: ExperienceStatus }) {
+function AmbientBackground({ status, dimmingStarlight = false }: { status: ExperienceStatus; dimmingStarlight?: boolean }) {
   const isActive   = status === 'active';
   const isReady    = status === 'ready';
   const isPreparing = status === 'preparing';
@@ -645,7 +694,13 @@ function AmbientBackground({ status }: { status: ExperienceStatus }) {
           />
 
           {/* Starlight headliner — rare individual twinkles above warm glow */}
-          <StarlightHeadliner />
+          <motion.div
+            animate={{ opacity: dimmingStarlight ? 0 : 1 }}
+            transition={{ duration: 3 }}
+            className="pointer-events-none"
+          >
+            <StarlightHeadliner />
+          </motion.div>
         </>
       )}
     </div>
@@ -788,6 +843,77 @@ function StarlightHeadliner() {
 
 
 // ─────────────────────────────────────────────────────────
+// ExitMoment — cinematic sequence when ride completes
+// ─────────────────────────────────────────────────────────
+
+function ExitMoment({
+  chauffeurName,
+  onDimStarlight,
+  onComplete,
+}: {
+  chauffeurName: string;
+  onDimStarlight: () => void;
+  onComplete: () => void;
+}) {
+  const [textVisible, setTextVisible] = useState(false);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setTextVisible(true), 1500);
+    const t2 = setTimeout(() => onDimStarlight(), 8000);
+    const t3 = setTimeout(() => onComplete(), 11000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <motion.div
+      key="exit-moment"
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ background: '#06060A', zIndex: 70 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.5 }}
+    >
+      <AnimatePresence>
+        {textVisible && (
+          <motion.div
+            key="exit-text"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
+            className="flex flex-col items-center gap-6 text-center px-8"
+          >
+            <p
+              style={{
+                fontSize:      '10px',
+                letterSpacing: '5px',
+                textTransform: 'uppercase',
+                color:         'rgba(255,255,255,0.50)',
+              }}
+            >
+              PRESTIGE · BY SYNERGY LUX
+            </p>
+            <h2
+              className="font-[family-name:var(--font-cormorant)] font-light"
+              style={{
+                fontSize:   'clamp(1.75rem, 4vw, 2.25rem)',
+                lineHeight: 1.25,
+                color:      'rgba(255,255,255,0.90)',
+              }}
+            >
+              Thank you for traveling with us
+            </h2>
+            <p style={{ fontSize: '13px', color: 'rgba(251,191,36,0.60)', letterSpacing: '2px' }}>
+              {chauffeurName} · Dallas–Fort Worth
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // BrandMark
 // ─────────────────────────────────────────────────────────
 
@@ -891,6 +1017,24 @@ function ReadyView({
     ? guestName.match(/^(Mr|Mrs|Ms|Dr)\.?\s/i) ? guestName : guestName.split(' ')[0]
     : '';
   const cabinLine = `${temperature}°F · ${music ? 'Ambient Music' : 'Quiet Mode'}`;
+
+  // Occasion-specific personalized line
+  const occasionLine = (() => {
+    const occ = (occasion || '').toLowerCase();
+    if (occ.includes('wedding')) {
+      return { text: 'Wishing you a beautiful celebration', serif: true, color: 'rgba(252,211,77,0.60)', italic: true };
+    }
+    if (occ.includes('birthday')) {
+      return { text: `Happy Birthday${firstName ? `, ${firstName}` : ''}`, serif: true, color: 'rgba(253,230,138,0.70)', italic: true };
+    }
+    if (occ.includes('anniversary')) {
+      return { text: 'Wishing you a wonderful anniversary', serif: true, color: 'rgba(252,211,77,0.60)', italic: true };
+    }
+    if (occ.includes('corporate') || occ.includes('business')) {
+      return { text: 'Your journey is confirmed and on schedule', serif: false, color: 'rgba(255,255,255,0.40)', italic: false };
+    }
+    return null;
+  })();
 
   // Name breathing animation — entrance then infinite subtle pulse
   const nameControls = useAnimation();
@@ -1000,6 +1144,26 @@ function ReadyView({
           </span>
           {' '}{activeRide ? 'is underway' : 'is prepared'}
         </p>
+
+        {/* Occasion-specific personalized line */}
+        {occasionLine && (
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.4, duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+            className={occasionLine.serif ? 'font-[family-name:var(--font-cormorant)]' : ''}
+            style={{
+              fontSize:    '15px',
+              color:       occasionLine.color,
+              fontStyle:   occasionLine.italic ? 'italic' : 'normal',
+              letterSpacing: occasionLine.serif ? '0.5px' : '1.5px',
+              textAlign:   'center',
+              marginTop:   '4px',
+            }}
+          >
+            {occasionLine.text}
+          </motion.p>
+        )}
 
         {/* Cabin status line — with thin 80px gold rule above */}
         <div className="flex flex-col items-center gap-3">
