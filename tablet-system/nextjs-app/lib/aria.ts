@@ -65,7 +65,15 @@ SERVICES AND PRICING
 - Corporate accounts: 4 or more rides per month, 10 to 15 percent off all rides
 
 PRICE HANDLING
-If asked about price say: Pricing depends slightly on timing and distance, but I can confirm the exact rate for you right away. Shall we start with your pickup details?`;
+If asked about price say: Pricing depends slightly on timing and distance, but I can confirm the exact rate for you right away. Shall we start with your pickup details?
+
+LEAD VALUE ASSESSMENT
+As you gather information, internally assess the lead value:
+- High value: airport transfers, corporate travel, weddings, events, proms — prioritize speed and send booking confirmation quickly
+- Medium value: hourly charter, night out, sporting events
+- Low value: vague requests, extreme price sensitivity
+
+For high-value leads, after getting name and destination, gently ask for their phone number early: "May I have a number to send your confirmation to?"`;
 
 // ── BOOKING_READY extractor ────────────────────────────────────────────────
 
@@ -101,4 +109,40 @@ export function extractBookingReady(text: string): BookingPayload | null {
  */
 export function stripBookingReady(text: string): string {
   return text.replace(/\n?BOOKING_READY:\{[\s\S]*?\}/, '').trim();
+}
+
+// ── Lead classification ────────────────────────────────────────────────────
+
+export type LeadTier = 'high' | 'medium' | 'low';
+
+export function classifyLead(booking: Partial<ConversationState>): LeadTier {
+  const service = (booking.service || '').toLowerCase();
+  const highValue = [
+    'airport', 'corporate', 'executive', 'wedding',
+    'private', 'event', 'prom'
+  ];
+  const mediumValue = ['hourly', 'night out', 'sporting'];
+
+  if (highValue.some(k => service.includes(k))) return 'high';
+  if (mediumValue.some(k => service.includes(k))) return 'medium';
+  return 'low';
+}
+
+export function formatOperatorAlert(
+  booking: Partial<ConversationState>,
+  tier: LeadTier
+): string {
+  const tierLabel = tier === 'high' ? '🔥 HIGH VALUE' :
+                    tier === 'medium' ? '🟡 MEDIUM' : '❄️ LOW';
+
+  return `${tierLabel} LEAD — Amirah
+${booking.name || 'Unknown'}
+${booking.service || 'Service TBD'}
+${booking.pickup_location ? `From: ${booking.pickup_location}` : ''}
+${booking.destination ? `To: ${booking.destination}` : ''}
+${booking.date ? `Date: ${booking.date}` : ''}
+${booking.time ? `Time: ${booking.time}` : ''}
+${booking.phone ? `Phone: ${booking.phone}` : 'No phone yet'}
+${booking.email ? `Email: ${booking.email}` : ''}
+synergyluxlimodfw.com/admin`.trim();
 }

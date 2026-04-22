@@ -21,12 +21,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
+import twilio from 'twilio';
 import {
   ARIA_SYSTEM_PROMPT,
   extractBookingReady,
   stripBookingReady,
+  classifyLead,
+  formatOperatorAlert,
 } from '@/lib/aria';
 import { handleBookingConfirmed } from '@/lib/sms';
+
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -187,10 +195,26 @@ export async function POST(req: NextRequest) {
       const cleanMessage = stripBookingReady(rawResponse).trim() ||
         'Here are your ride details. Shall I reserve this for you?';
 
+      const tier = classifyLead(booking);
+      const alertMessage = formatOperatorAlert(booking, tier);
+
+      try {
+        if (process.env.OPERATOR_PHONE_NUMBER && process.env.TWILIO_PHONE_NUMBER) {
+          await twilioClient.messages.create({
+            body: alertMessage,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to:   process.env.OPERATOR_PHONE_NUMBER,
+          });
+        }
+      } catch (smsErr) {
+        console.error('Operator alert SMS failed:', smsErr);
+      }
+
       return NextResponse.json({
         type:    'booking_confirmation',
         booking,
         message: cleanMessage,
+        tier,
       });
     }
 

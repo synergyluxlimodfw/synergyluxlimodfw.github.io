@@ -58,6 +58,7 @@ function BookingConfirmationCard({
   onEdit,
   isConfirming,
   confirmed,
+  tier,
 }: {
   booking:      BookingData;
   message:      string;
@@ -65,6 +66,7 @@ function BookingConfirmationCard({
   onEdit:       () => void;
   isConfirming: boolean;
   confirmed:    boolean;
+  tier?:        'high' | 'medium' | 'low' | null;
 }) {
   const fields: { icon: string; label: string; value: string }[] = [];
   if (booking.pickup_location) fields.push({ icon: '📍', label: 'Pickup',  value: booking.pickup_location });
@@ -87,7 +89,7 @@ function BookingConfirmationCard({
       }}
     >
       {/* Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
         <span style={{ color: '#C9A84C', fontSize: '14px' }}>✦</span>
         <p
           className="font-[family-name:var(--font-cormorant)]"
@@ -95,6 +97,22 @@ function BookingConfirmationCard({
         >
           Your Ride Details
         </p>
+        {tier === 'high' && (
+          <span style={{
+            fontSize:        10,
+            letterSpacing:   '1.5px',
+            textTransform:   'uppercase',
+            color:           'rgba(180,155,110,0.8)',
+            background:      'rgba(180,155,110,0.1)',
+            border:          '0.5px solid rgba(180,155,110,0.3)',
+            borderRadius:    20,
+            padding:         '3px 10px',
+            fontFamily:      'sans-serif',
+            fontWeight:      300,
+          }}>
+            Priority booking
+          </span>
+        )}
       </div>
 
       {/* Fields */}
@@ -197,6 +215,7 @@ export default function AriaChat() {
   // Confirmation card state
   const [pendingBooking,  setPendingBooking]  = useState<BookingData | null>(null);
   const [pendingMessage,  setPendingMessage]  = useState('');
+  const [pendingTier,     setPendingTier]     = useState<'high' | 'medium' | 'low' | null>(null);
   const [isConfirming,    setIsConfirming]    = useState(false);
   const [confirmed,       setConfirmed]       = useState(false);
 
@@ -282,6 +301,7 @@ export default function AriaChat() {
         // Show confirmation card — do not add a chat bubble
         setPendingBooking(data.booking);
         setPendingMessage(data.message ?? 'Shall I reserve this for you?');
+        setPendingTier(data.tier ?? null);
         setConfirmed(false);
       } else {
         // Normal message or legacy bookingCreated path
@@ -548,6 +568,7 @@ export default function AriaChat() {
             onEdit={handleEditDetails}
             isConfirming={isConfirming}
             confirmed={confirmed}
+            tier={pendingTier}
           />
         )}
 
