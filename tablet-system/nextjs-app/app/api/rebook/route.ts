@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import twilio from "twilio";
@@ -19,12 +20,15 @@ export async function POST(req: Request) {
     );
   }
 
+  const confirmToken = crypto.randomBytes(16).toString('hex');
+
   const { error: dbError } = await supabase.from("rebook_requests").insert({
-    ride_id:    rideId   || null,
-    guest_name: guestName || null,
+    ride_id:       rideId        || null,
+    guest_name:    guestName     || null,
     phone,
-    pickup:     pickup   || null,
-    occasion:   occasion || null,
+    pickup:        pickup        || null,
+    occasion:      occasion      || null,
+    confirm_token: confirmToken,
   });
 
   if (dbError) {
@@ -46,10 +50,13 @@ export async function POST(req: Request) {
 
   const operatorPhone = process.env.OPERATOR_PHONE_NUMBER;
   if (operatorPhone) {
+    const passengerName = guestName || "Guest";
+    const destination   = "your destination";
+    const confirmLink   = `${process.env.NEXT_PUBLIC_BASE_URL}/confirm?token=${confirmToken}`;
     await twilioClient.messages.create({
       to:   operatorPhone,
       from,
-      body: `[Rebook] ${guestName || "Guest"} (${phone}) — pickup: ${pickup || "TBD"} — occasion: ${occasion || "TBD"}.`,
+      body: `New rebook — ${passengerName}\n${pickup || "TBD"} → ${destination}\nPhone: ${phone}\nConfirm: ${confirmLink}`,
     });
   }
 
