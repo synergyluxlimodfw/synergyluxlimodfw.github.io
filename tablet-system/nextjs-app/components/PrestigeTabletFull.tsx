@@ -190,7 +190,7 @@ function PassiveView({ rideState, dataStatus, clientName, destination, comfortLe
       <div>
         <motion.div key={`greeting-${rideState}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } }}>
           <p style={{ fontSize: 11, letterSpacing: "1.8px", textTransform: "uppercase", color: `${CREAM}0.4)`, fontWeight: 300, marginBottom: 6, fontFamily: SANS }}>Welcome aboard</p>
-          <h1 style={{ fontFamily: SERIF, fontSize: 42, fontWeight: 300, color: "#f0ece4", lineHeight: 1.15, letterSpacing: -0.5, whiteSpace: "pre-line" }}>{greetingText}</h1>
+          <h1 style={{ fontFamily: SERIF, fontSize: 42, fontWeight: 300, color: "#f0ece4", lineHeight: 1.15, letterSpacing: -0.5, whiteSpace: "pre-line", textTransform: "capitalize" }}>{greetingText}</h1>
         </motion.div>
       </div>
 
