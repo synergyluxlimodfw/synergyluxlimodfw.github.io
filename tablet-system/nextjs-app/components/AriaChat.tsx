@@ -43,6 +43,7 @@ interface BookingData {
   pickup_location?: string;
   date?:            string;
   time?:            string;
+  service?:         string;
 }
 
 const OPENING = 'Welcome to Prestige by Synergy Lux. I am Amirah, your personal concierge. What is the occasion for your ride?';
@@ -69,11 +70,12 @@ function BookingConfirmationCard({
   tier?:        'high' | 'medium' | 'low' | null;
 }) {
   const fields: { icon: string; label: string; value: string }[] = [];
+  if (booking.service)         fields.push({ icon: '✦',  label: 'Service', value: booking.service });
   if (booking.pickup_location) fields.push({ icon: '📍', label: 'Pickup',  value: booking.pickup_location });
   if (booking.destination)     fields.push({ icon: '🏁', label: 'Drop-off', value: booking.destination });
   if (booking.date)            fields.push({ icon: '📅', label: 'Date',    value: booking.date });
   if (booking.time)            fields.push({ icon: '⏰', label: 'Time',    value: booking.time });
-  if (booking.occasion)        fields.push({ icon: '🚗', label: 'Service', value: booking.occasion });
+  if (booking.occasion)        fields.push({ icon: '🗒',  label: 'Occasion', value: booking.occasion });
 
   return (
     <div
