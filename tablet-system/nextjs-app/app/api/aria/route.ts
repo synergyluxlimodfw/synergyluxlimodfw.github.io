@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
     try {
       const result = await client.messages.create({
         model:      'claude-sonnet-4-5',
-        max_tokens: 1000,
+        max_tokens: 1500,
         system:     ARIA_SYSTEM_PROMPT,
         messages,
       });
@@ -180,6 +180,9 @@ export async function POST(req: NextRequest) {
         .filter(block => block.type === 'text')
         .map(block => (block as { type: 'text'; text: string }).text)
         .join('');
+      console.log('[aria raw length]', rawResponse.length);
+      console.log('[aria has BOOKING_READY]', rawResponse.includes('BOOKING_READY'));
+      console.log('[aria raw tail]', rawResponse.substring(rawResponse.length - 200));
     } catch (err) {
       console.error('[Aria] Anthropic error:', err);
       return NextResponse.json({
