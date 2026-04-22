@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { getMetrics, getEvents, clearEvents } from '@/lib/events';
 import type { ConversionMetrics, TrackEvent } from '@/lib/events';
+import { supabase } from '@/lib/supabase';
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -47,8 +48,11 @@ export default function AdminPage() {
   const [customers,   setCustomers]   = useState<CustomerLead[]>([]);
   const [funnelStats, setFunnelStats] = useState<FunnelStats | null>(null);
   const [apiError,    setApiError]    = useState(false);
+  const [liveRides,        setLiveRides]        = useState<any[]>([]);
+  const [rebookRequests,   setRebookRequests]   = useState<any[]>([]);
+  const [todayStats,       setTodayStats]       = useState({ rides: 0, revenue: 0, pending: 0 });
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     // ── localStorage metrics (client-side events) ──
     setMetrics(getMetrics());
     setEvents(getEvents().slice(0, 50));
@@ -64,6 +68,30 @@ export default function AdminPage() {
       .then(r => r.json())
       .then(d => setFunnelStats(d.stats ?? null))
       .catch(() => setApiError(true));
+
+    // ── Fetch today's rides from Supabase ──
+    const today = new Date().toISOString().split('T')[0];
+    const { data: todayRides } = await supabase
+      .from('rides')
+      .select('*')
+      .gte('created_at', today)
+      .order('created_at', { ascending: false });
+    if (todayRides) setLiveRides(todayRides);
+
+    // ── Fetch rebook requests ──
+    const { data: rebooks } = await supabase
+      .from('rebook_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (rebooks) setRebookRequests(rebooks);
+
+    // ── Today stats ──
+    setTodayStats({
+      rides:   todayRides?.length || 0,
+      revenue: (todayRides?.length || 0) * 165,
+      pending: rebooks?.filter((r: any) => r.status === 'pending').length || 0,
+    });
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
@@ -110,6 +138,18 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-8 py-10 space-y-12">
+
+        {/* ── 0. Today Stats (live Supabase) ─────────────── */}
+        <section>
+          <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted mb-4">
+            Today
+          </p>
+          <div className="grid grid-cols-3 gap-4">
+            <StatCard label="Rides Today"      value={String(todayStats.rides)}   delay={0}    color="#C9A84C" />
+            <StatCard label="Est. Revenue"     value={`$${todayStats.revenue}`}   delay={0.06} color="#4ADE80" />
+            <StatCard label="Pending Rebooks"  value={String(todayStats.pending)} delay={0.12} color="#FCD34D" />
+          </div>
+        </section>
 
         {/* ── 1. Ride Conversion Metrics (localStorage) ── */}
         {rideStats && (
@@ -257,55 +297,125 @@ export default function AdminPage() {
           )}
         </section>
 
-        {/* ── 5. Active Rides (mock) ──────────────────────── */}
+        {/* ── 5. Active Rides (live) ──────────────────────── */}
         <section>
           <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted mb-5">
-            Active Rides (Mock)
+            Today&apos;s Rides
           </p>
-          <div className="space-y-3">
-            {rides.map((ride, i) => (
-              <motion.div
-                key={ride.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.07 + 0.2 }}
-                className="rounded-2xl p-5 grid grid-cols-[1fr_1fr_1fr_120px_80px] items-center gap-4"
-                style={{ background: '#0F0F14', border: '1px solid rgba(201,168,76,0.08)' }}
-              >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {liveRides.length === 0 ? (
+              <p style={{ color: 'rgba(240,236,228,0.3)', fontSize: 13, fontWeight: 300, fontFamily: 'sans-serif', padding: '20px 0' }}>
+                No rides today yet.
+              </p>
+            ) : liveRides.map((ride) => (
+              <div key={ride.id} style={{
+                background: 'rgba(180,155,110,0.06)',
+                border: '0.5px solid rgba(180,155,110,0.15)',
+                borderRadius: 10,
+                padding: '14px 16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
                 <div>
-                  <p className="text-[14px] font-medium text-lux-white">{ride.guest}</p>
-                  <p className="text-[11px] text-lux-muted mt-0.5">{ride.time}</p>
+                  <p style={{ color: '#f0ece4', fontSize: 14, fontWeight: 400, fontFamily: 'sans-serif', marginBottom: 4, textTransform: 'capitalize' }}>
+                    {ride.guest_name || 'Guest'}
+                  </p>
+                  <p style={{ color: 'rgba(240,236,228,0.4)', fontSize: 12, fontWeight: 300, fontFamily: 'sans-serif' }}>
+                    → {ride.destination || 'Unknown destination'}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-[12px] text-lux-muted">From</p>
-                  <p className="text-[13px] text-lux-white">{ride.pickup}</p>
+                <div style={{
+                  padding: '4px 12px',
+                  borderRadius: 20,
+                  fontSize: 11,
+                  fontFamily: 'sans-serif',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  background: ride.status === 'active' ? 'rgba(34,197,94,0.15)' :
+                              ride.status === 'complete' ? 'rgba(180,155,110,0.15)' :
+                              'rgba(255,255,255,0.06)',
+                  color: ride.status === 'active' ? 'rgba(34,197,94,0.9)' :
+                         ride.status === 'complete' ? 'rgba(180,155,110,0.8)' :
+                         'rgba(255,255,255,0.4)',
+                  border: `0.5px solid ${ride.status === 'active' ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                }}>
+                  {ride.status || 'preparing'}
                 </div>
-                <div>
-                  <p className="text-[12px] text-lux-muted">To</p>
-                  <p className="text-[13px] text-lux-white">{ride.dropoff}</p>
-                </div>
-                <div>
-                  <p className="text-[12px] text-lux-muted">Chauffeur</p>
-                  <p className="text-[13px] text-lux-white">{ride.chauffeur}</p>
-                </div>
-                <div className="text-right">
-                  <span
-                    className="inline-block text-[10px] font-bold tracking-[2px] uppercase rounded-full px-3 py-1"
-                    style={{
-                      color:      PHASE_COLORS[ride.phase] ?? '#666672',
-                      background: `${PHASE_COLORS[ride.phase] ?? '#666672'}18`,
-                      border:     `1px solid ${PHASE_COLORS[ride.phase] ?? '#666672'}30`,
-                    }}
-                  >
-                    {ride.phase}
-                  </span>
-                </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* ── 6. Quick Actions ────────────────────────────── */}
+        {/* ── 6. Rebook Requests ──────────────────────────── */}
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ color: 'rgba(180,155,110,0.8)', fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 300, fontFamily: 'sans-serif', marginBottom: 16 }}>
+            Rebook Requests
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {rebookRequests.length === 0 ? (
+              <p style={{ color: 'rgba(240,236,228,0.3)', fontSize: 13, fontWeight: 300, fontFamily: 'sans-serif', padding: '20px 0' }}>
+                No rebook requests yet.
+              </p>
+            ) : rebookRequests.map((r) => (
+              <div key={r.id} style={{
+                background: 'rgba(180,155,110,0.06)',
+                border: '0.5px solid rgba(180,155,110,0.15)',
+                borderRadius: 10,
+                padding: '14px 16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 12,
+              }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ color: '#f0ece4', fontSize: 14, fontWeight: 400, fontFamily: 'sans-serif', marginBottom: 4, textTransform: 'capitalize' }}>
+                    {r.passenger_name || 'Guest'}
+                  </p>
+                  <p style={{ color: 'rgba(240,236,228,0.4)', fontSize: 12, fontWeight: 300, fontFamily: 'sans-serif' }}>
+                    {r.pickup ? `${r.pickup} → ` : ''}{r.destination || 'Unknown route'}
+                  </p>
+                  {r.phone && (
+                    <p style={{ color: 'rgba(180,155,110,0.5)', fontSize: 11, fontWeight: 300, fontFamily: 'sans-serif', marginTop: 4 }}>
+                      {r.phone}
+                    </p>
+                  )}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                  <div style={{
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    fontSize: 11,
+                    fontFamily: 'sans-serif',
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase',
+                    background: r.status === 'confirmed' ? 'rgba(34,197,94,0.15)' : 'rgba(255,165,0,0.1)',
+                    color: r.status === 'confirmed' ? 'rgba(34,197,94,0.9)' : 'rgba(255,165,0,0.8)',
+                    border: `0.5px solid ${r.status === 'confirmed' ? 'rgba(34,197,94,0.3)' : 'rgba(255,165,0,0.2)'}`,
+                  }}>
+                    {r.status || 'pending'}
+                  </div>
+                  {r.confirm_token && r.status !== 'confirmed' && (
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_BASE_URL}/confirm?token=${r.confirm_token}`}
+                      style={{
+                        fontSize: 11,
+                        color: 'rgba(180,155,110,0.7)',
+                        fontFamily: 'sans-serif',
+                        textDecoration: 'none',
+                        letterSpacing: '0.5px',
+                      }}
+                    >
+                      Confirm →
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 7. Quick Actions ────────────────────────────── */}
         <section className="grid grid-cols-4 gap-4">
           <ActionCard icon="+"  title="Start New Ride"   sub="Open operator panel"  href="/" />
           <ActionCard icon="↗"  title="View Experience"  sub="Live tablet preview"  href="/drivers" />
