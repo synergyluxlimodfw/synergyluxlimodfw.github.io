@@ -328,6 +328,11 @@ type RideData = { rideId: string | null; phone: string; pickup: string; guestNam
 function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideData: RideData }) {
   const [glowing, setGlowing] = useState(false);
   const [sending, setSending] = useState(false);
+  const [showFields, setShowFields] = useState(false);
+  const [bookDate, setBookDate] = useState('');
+  const [bookTime, setBookTime] = useState('');
+  const [bookPickup, setBookPickup] = useState(rideData.pickup || '');
+  const [bookDestination, setBookDestination] = useState(rideData.destination || '');
   async function handleBook() {
     if (!rideData.phone) {
       console.warn('No phone number — rebook will proceed without SMS');
@@ -342,10 +347,12 @@ function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideD
           originalRideId: rideData.rideId,
           passengerName:  rideData.guestName,
           phone:          rideData.phone,
-          pickup:         rideData.pickup,
-          destination:    rideData.destination,
+          pickup:         bookPickup || rideData.pickup,
+          destination:    bookDestination || rideData.destination,
           vehicleType:    rideData.vehicleType || '2024 Cadillac Escalade',
           occasion:       rideData.occasion,
+          preferred_date: bookDate,
+          preferred_time: bookTime,
         }),
       });
     } catch {
@@ -356,25 +363,292 @@ function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideD
     onConfirmed();
   }
   return (
-    <div style={{ position: "relative", zIndex: 1, padding: "44px 48px 44px", minHeight: 560, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      height: '100%',
+      padding: '48px 48px 40px',
+    }}>
+      {/* Top */}
       <div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } }}>
-          <p style={{ fontSize: 11, letterSpacing: "2.5px", textTransform: "uppercase", color: `${GOLD}0.7)`, fontWeight: 300, marginBottom: 12, fontFamily: SANS }}>Your journey continues</p>
-          <h2 style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 300, color: "#f0ece4", lineHeight: 1.2, whiteSpace: "pre-line" }}>{"Where to\nnext?"}</h2>
-        </motion.div>
+        <p style={{
+          fontSize: 10,
+          letterSpacing: '3px',
+          textTransform: 'uppercase',
+          color: 'rgba(180,155,110,0.5)',
+          fontWeight: 300,
+          marginBottom: 16,
+          fontFamily: "'DM Sans', system-ui, sans-serif",
+        }}>
+          Your journey continues
+        </p>
+        <h2 style={{
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          fontSize: showFields ? 36 : 52,
+          fontWeight: 300,
+          color: '#f0ece4',
+          lineHeight: 1.1,
+          marginBottom: 32,
+          transition: 'font-size 0.3s ease',
+          whiteSpace: 'pre-line',
+        }}>
+          {showFields ? 'Reserve your\nnext ride.' : 'Where to\nnext?'}
+        </h2>
+
+        {/* Fields — shown after tapping Book This Ride Again */}
+        {showFields && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+
+            {/* Pickup */}
+            <div>
+              <p style={{ fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(240,236,228,0.3)', fontWeight: 300, marginBottom: 6, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+                Pickup
+              </p>
+              <input
+                type="text"
+                value={bookPickup}
+                onChange={e => setBookPickup(e.target.value)}
+                placeholder="Pickup location"
+                style={{
+                  width: '100%',
+                  background: 'rgba(180,155,110,0.06)',
+                  border: '0.5px solid rgba(180,155,110,0.25)',
+                  borderRadius: 8,
+                  padding: '12px 16px',
+                  color: '#f0ece4',
+                  fontSize: 14,
+                  fontFamily: "'DM Sans', system-ui, sans-serif",
+                  fontWeight: 300,
+                  outline: 'none',
+                  boxSizing: 'border-box' as const,
+                }}
+              />
+            </div>
+
+            {/* Destination */}
+            <div>
+              <p style={{ fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(240,236,228,0.3)', fontWeight: 300, marginBottom: 6, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+                Destination
+              </p>
+              <input
+                type="text"
+                value={bookDestination}
+                onChange={e => setBookDestination(e.target.value)}
+                placeholder="Destination"
+                style={{
+                  width: '100%',
+                  background: 'rgba(180,155,110,0.06)',
+                  border: '0.5px solid rgba(180,155,110,0.25)',
+                  borderRadius: 8,
+                  padding: '12px 16px',
+                  color: '#f0ece4',
+                  fontSize: 14,
+                  fontFamily: "'DM Sans', system-ui, sans-serif",
+                  fontWeight: 300,
+                  outline: 'none',
+                  boxSizing: 'border-box' as const,
+                }}
+              />
+            </div>
+
+            {/* Date and Time row */}
+            <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(240,236,228,0.3)', fontWeight: 300, marginBottom: 6, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+                  Date
+                </p>
+                <input
+                  type="date"
+                  value={bookDate}
+                  onChange={e => setBookDate(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(180,155,110,0.06)',
+                    border: '0.5px solid rgba(180,155,110,0.25)',
+                    borderRadius: 8,
+                    padding: '12px 16px',
+                    color: bookDate ? '#f0ece4' : 'rgba(240,236,228,0.3)',
+                    fontSize: 14,
+                    fontFamily: "'DM Sans', system-ui, sans-serif",
+                    fontWeight: 300,
+                    outline: 'none',
+                    boxSizing: 'border-box' as const,
+                    colorScheme: 'dark',
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 10, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(240,236,228,0.3)', fontWeight: 300, marginBottom: 6, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+                  Time
+                </p>
+                <input
+                  type="time"
+                  value={bookTime}
+                  onChange={e => setBookTime(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(180,155,110,0.06)',
+                    border: '0.5px solid rgba(180,155,110,0.25)',
+                    borderRadius: 8,
+                    padding: '12px 16px',
+                    color: bookTime ? '#f0ece4' : 'rgba(240,236,228,0.3)',
+                    fontSize: 14,
+                    fontFamily: "'DM Sans', system-ui, sans-serif",
+                    fontWeight: 300,
+                    outline: 'none',
+                    boxSizing: 'border-box' as const,
+                    colorScheme: 'dark',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1, transition: { duration: 1.0, ease: EASE } }}>
-        <button onClick={handleBook} disabled={sending} style={{ width: "100%", padding: 18, background: `${GOLD}0.15)`, border: `0.5px solid ${GOLD}0.5)`, borderRadius: 10, color: "#d4b896", fontSize: 15, fontFamily: SANS, fontWeight: 400, letterSpacing: "1px", cursor: sending ? "default" : "pointer", textTransform: "uppercase", marginBottom: 12, boxShadow: glowing ? `0 0 0 1px ${GOLD}0.3)` : "none", transition: "box-shadow 0.3s ease", opacity: sending ? 0.6 : 1 }}>{sending ? "Sending…" : "Book this ride again"}</button>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {["Schedule return", "Plan a new trip"].map((label) => (
-            <button key={label} style={{ padding: 15, background: "transparent", border: `0.5px solid ${CREAM}0.1)`, borderRadius: 10, color: `${CREAM}0.55)`, fontSize: 13, fontFamily: SANS, fontWeight: 300, cursor: "pointer" }}>{label}</button>
-          ))}
+
+      {/* Middle — buttons */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {!showFields ? (
+          <>
+            {/* Primary CTA — shows fields */}
+            <button
+              type="button"
+              onClick={() => setShowFields(true)}
+              style={{
+                width: '100%',
+                padding: '20px',
+                background: 'rgba(180,155,110,0.12)',
+                border: '0.5px solid rgba(180,155,110,0.4)',
+                borderRadius: 12,
+                color: 'rgba(180,155,110,0.9)',
+                fontSize: 12,
+                fontFamily: "'DM Sans', system-ui, sans-serif",
+                fontWeight: 400,
+                letterSpacing: '2px',
+                textTransform: 'uppercase' as const,
+                cursor: 'pointer',
+              }}
+            >
+              Book This Ride Again
+            </button>
+
+            {/* Ghost buttons */}
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                type="button"
+                onClick={() => { setBookPickup(rideData.destination || ''); setBookDestination(rideData.pickup || ''); setShowFields(true); }}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '0.5px solid rgba(255,255,255,0.08)',
+                  borderRadius: 10,
+                  color: 'rgba(240,236,228,0.35)',
+                  fontSize: 11,
+                  fontFamily: "'DM Sans', system-ui, sans-serif",
+                  fontWeight: 300,
+                  cursor: 'pointer',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                Schedule Return
+              </button>
+              <button
+                type="button"
+                onClick={() => { setBookPickup(''); setBookDestination(''); setShowFields(true); }}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '0.5px solid rgba(255,255,255,0.08)',
+                  borderRadius: 10,
+                  color: 'rgba(240,236,228,0.35)',
+                  fontSize: 11,
+                  fontFamily: "'DM Sans', system-ui, sans-serif",
+                  fontWeight: 300,
+                  cursor: 'pointer',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                Plan a New Trip
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Confirm button — shown after fields appear */}
+            <button
+              type="button"
+              onClick={handleBook}
+              disabled={sending}
+              style={{
+                width: '100%',
+                padding: '20px',
+                background: sending ? 'rgba(180,155,110,0.06)' : 'rgba(180,155,110,0.12)',
+                border: `0.5px solid ${sending ? 'rgba(180,155,110,0.2)' : 'rgba(180,155,110,0.4)'}`,
+                borderRadius: 12,
+                color: sending ? 'rgba(180,155,110,0.4)' : 'rgba(180,155,110,0.9)',
+                fontSize: 12,
+                fontFamily: "'DM Sans', system-ui, sans-serif",
+                fontWeight: 400,
+                letterSpacing: '2px',
+                textTransform: 'uppercase' as const,
+                cursor: sending ? 'not-allowed' : 'pointer',
+                boxShadow: glowing ? '0 0 24px rgba(180,155,110,0.3)' : 'none',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {sending ? 'Reserving...' : 'Confirm Reservation'}
+            </button>
+
+            {/* Back button */}
+            <button
+              type="button"
+              onClick={() => setShowFields(false)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                background: 'transparent',
+                border: 'none',
+                color: 'rgba(240,236,228,0.2)',
+                fontSize: 11,
+                fontFamily: "'DM Sans', system-ui, sans-serif",
+                cursor: 'pointer',
+                letterSpacing: '1px',
+                textTransform: 'uppercase' as const,
+              }}
+            >
+              Back
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Bottom hint */}
+      {!showFields && (
+        <div style={{ textAlign: 'center' as const }}>
+          <p style={{
+            fontSize: 11,
+            color: 'rgba(180,155,110,0.45)',
+            fontWeight: 300,
+            fontFamily: "'DM Sans', system-ui, sans-serif",
+            letterSpacing: '0.5px',
+            marginBottom: 6,
+          }}>
+            ✦ 10% preferred rate when reserved before arrival
+          </p>
+          <p style={{
+            fontSize: 11,
+            color: 'rgba(240,236,228,0.2)',
+            fontWeight: 300,
+            fontFamily: "'DM Sans', system-ui, sans-serif",
+            letterSpacing: '0.5px',
+          }}>
+            Your chauffeur and preferences are already saved
+          </p>
         </div>
-      </motion.div>
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE, delay: 0.5 } }} style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 10 }}>
-        <p style={{ fontSize: 12, color: `${GOLD}0.75)`, fontFamily: SANS, fontWeight: 300, letterSpacing: "0.4px" }}>10% preferred rate when reserved before arrival</p>
-        <p style={{ fontSize: 11, color: `${CREAM}0.22)`, fontFamily: SANS, fontWeight: 300, letterSpacing: "0.3px" }}>Your chauffeur and preferences are already saved</p>
-      </motion.div>
+      )}
     </div>
   );
 }
