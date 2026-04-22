@@ -1110,7 +1110,30 @@ function calculatePrice(){
   if(link!=='#booking'){depBtn.target='_blank';depBtn.textContent='Reserve with Deposit — $'+dep;}
   else{depBtn.target='';depBtn.textContent='Reserve with Deposit';}
 }
-function scrollToBooking(){document.getElementById('booking').scrollIntoView({behavior:'smooth'});}
+var SVC_TO_FORM={
+  airport_dfw:'Airport Transfer — DFW ($155–$195)',
+  airport_love:'Airport Transfer — Love Field ($140–$180)',
+  corporate:'Corporate / Executive ($155+)',
+  wedding_4:'Wedding ($625+)',wedding_8:'Wedding ($625+)',
+  prom:'Prom / Event ($575)',
+  hourly_2:'Hourly Charter ($165/hr)',hourly_3:'Hourly Charter ($165/hr)',
+  hourly_4:'Hourly Charter ($165/hr)',hourly_5:'Hourly Charter ($165/hr)',
+  nightout:'Night Out ($475)',sporting:'Sporting Event ($300)'
+};
+var CITY_LABELS={
+  dallas:'Dallas, TX',fortworth:'Fort Worth, TX',plano:'Plano, TX',
+  frisco:'Frisco, TX',southlake:'Southlake, TX',irving:'Irving, TX',
+  arlington:'Arlington, TX',addison:'Addison, TX'
+};
+function scrollToBooking(){
+  var svc=document.getElementById('calcService').value;
+  var pickup=document.getElementById('calcPickup').value;
+  var formSvc=document.getElementById('f_service');
+  var formPickup=document.getElementById('f_pickup');
+  if(svc&&SVC_TO_FORM[svc]){formSvc.value=SVC_TO_FORM[svc];}
+  if(pickup&&CITY_LABELS[pickup]&&formPickup&&!formPickup.value){formPickup.value=CITY_LABELS[pickup];}
+  document.getElementById('booking').scrollIntoView({behavior:'smooth'});
+}
 function toggleNav(){document.getElementById('navLinks').classList.toggle('open');}
 function toggleFaq(btn){
   var a=btn.nextElementSibling,open=a.classList.contains('open');
