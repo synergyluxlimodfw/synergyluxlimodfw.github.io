@@ -20,6 +20,7 @@ export async function POST(req: Request) {
     vehicleType,
     occasion,
   } = await req.json();
+  console.log('[rebook]', { originalRideId, passengerName, phone, pickup, destination });
 
   if (!phone || !E164.test(phone)) {
     return NextResponse.json(
