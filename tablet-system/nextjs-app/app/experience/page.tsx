@@ -225,9 +225,7 @@ function ExperienceInner() {
     return (
       <ThankYouScreen
         guestName={state.guestName}
-        onTip={(percent, dollar) => {
-          console.log('[tip]', { percent, dollar });
-        }}
+        onTip={() => {}}
       />
     );
   }

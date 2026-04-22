@@ -416,11 +416,12 @@ export default function AdminPage() {
         </section>
 
         {/* ── 7. Quick Actions ────────────────────────────── */}
-        <section className="grid grid-cols-4 gap-4">
-          <ActionCard icon="+"  title="Start New Ride"   sub="Open operator panel"  href="/" />
-          <ActionCard icon="↗"  title="View Experience"  sub="Live tablet preview"  href="/drivers" />
-          <ActionCard icon="✓"  title="Success Page"     sub="Post-payment view"    href="/success" />
-          <ActionCard icon="✦"  title="Synergy Lux"      sub="Return to main site"  href="https://synergyluxlimodfw.github.io" external />
+        <section className="grid grid-cols-5 gap-4">
+          <ActionCard icon="+"  title="Start New Ride"   sub="Open operator panel"        href="/" />
+          <ActionCard icon="↗"  title="View Experience"  sub="Live tablet preview"        href="/drivers" />
+          <ActionCard icon="✓"  title="Success Page"     sub="Post-payment view"          href="/success" />
+          <ActionCard icon="✦"  title="Corporate Page"   sub="Share with business leads"  href="/corporate" />
+          <ActionCard icon="✦"  title="Synergy Lux"      sub="Return to main site"        href="https://synergyluxlimodfw.github.io" external />
         </section>
 
       </main>
