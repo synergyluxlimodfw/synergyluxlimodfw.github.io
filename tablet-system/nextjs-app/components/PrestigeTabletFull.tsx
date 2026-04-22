@@ -697,8 +697,8 @@ export default function PrestigeTabletFull({
   const [vipRides] = useState(6);
   const liveRideState = useRef<RideState>(rideState);
 
-  const clientNameFinal  = externalClientName  ?? clientName;
-  const destinationFinal = externalDestination ?? destination;
+  const clientNameFinal  = (externalClientName  ?? clientName).replace(/\b\w/g, (c: string) => c.toUpperCase());
+  const destinationFinal = (externalDestination ?? destination).replace(/\b\w/g, (c: string) => c.toUpperCase());
   const phoneFinal       = externalPhone       ?? passengerPhone;
   const pickupFinal      = externalPickup      ?? pickupLocation;
   const rideIdFinal      = externalRideId      ?? rideId;
