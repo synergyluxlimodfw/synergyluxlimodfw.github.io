@@ -100,6 +100,7 @@ function ExperienceInner() {
           { event: 'UPDATE', schema: 'public', table: 'rides', filter: `id=eq.${targetId}` },
           (payload) => {
             const row = payload.new as RideRow;
+            console.log('[realtime]', row.status, 'show_booking:', row.show_booking);
             setPrestigePhone((row as any)?.phone || '');
             setPrestigePickup((row as any)?.pickup || '');
             setPrestigeEta((row as any)?.eta_minutes || 0);
