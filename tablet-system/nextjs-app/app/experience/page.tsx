@@ -88,6 +88,7 @@ function ExperienceInner() {
 
       if (ride) experienceStore.loadFromRide(ride as RideRow);
       setPrestigeRideId(ride?.id || '');
+      setPrestigeEta(ride?.eta_minutes || 0);
       setPrestigePhone((ride as any)?.phone || '');
       setPrestigePickup((ride as any)?.pickup || '');
 
@@ -101,6 +102,7 @@ function ExperienceInner() {
             const row = payload.new as RideRow;
             setPrestigePhone((row as any)?.phone || '');
             setPrestigePickup((row as any)?.pickup || '');
+            setPrestigeEta((row as any)?.eta_minutes || 0);
 
             // Operator triggered booking screen — show pre-dropoff conversion screen
             if (row.show_booking === true) {
@@ -145,6 +147,7 @@ function ExperienceInner() {
   const [prestigePhone,  setPrestigePhone]  = useState<string>('');
   const [prestigePickup, setPrestigePickup] = useState<string>('');
   const [prestigeRideId, setPrestigeRideId] = useState<string>('');
+  const [prestigeEta,    setPrestigeEta]    = useState<number>(0);
 
   // Show bell overlay when ride becomes ready
   useEffect(() => {
@@ -214,6 +217,7 @@ function ExperienceInner() {
     if (status === "preparing") return "arrival";
     if (status === "ready") return "arrival";
     if (status === "active") return "cruise";
+    if (status === "complete") return "pre-dropoff";
     return "arrival";
   }
 
@@ -286,6 +290,7 @@ function ExperienceInner() {
           externalPhone={prestigePhone}
           externalPickup={prestigePickup}
           externalOccasion={state.occasion || ''}
+          externalEta={prestigeEta}
           hideStartScreen={true}
           hideDevControls={true}
         />

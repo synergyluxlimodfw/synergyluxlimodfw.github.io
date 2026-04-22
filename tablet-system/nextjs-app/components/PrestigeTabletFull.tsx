@@ -154,7 +154,7 @@ function ActionModal({ type, onClose, onComfortChange, comfortLevel }: { type: "
 }
 
 // ── Passive View ──────────────────────────────────────────────────────────────
-function PassiveView({ rideState, dataStatus, clientName, destination, comfortLevel, onActionTap, vipRides }: {
+function PassiveView({ rideState, dataStatus, clientName, destination, comfortLevel, onActionTap, vipRides, externalEta }: {
   rideState: RideState;
   dataStatus: DataStatus;
   clientName: string;
@@ -162,10 +162,11 @@ function PassiveView({ rideState, dataStatus, clientName, destination, comfortLe
   comfortLevel: ComfortLevel;
   onActionTap: (type: "request" | "comfort" | "receipt") => void;
   vipRides: number;
+  externalEta?: number;
 }) {
   const etaMap: Record<RideState, number> = { start: 0, arrival: 2, cruise: 18, "mid-ride": 12, "pre-dropoff": 4 };
   const progressMap: Record<RideState, number> = { start: 0, arrival: 5, cruise: 35, "mid-ride": 62, "pre-dropoff": 88 };
-  const eta = etaMap[rideState];
+  const eta = externalEta ?? etaMap[rideState];
   const progress = progressMap[rideState];
   const etaDisplay = dataStatus !== "live" ? "—" : `${eta} min`;
   const greetingText = rideState === "arrival"
@@ -198,7 +199,7 @@ function PassiveView({ rideState, dataStatus, clientName, destination, comfortLe
           <p style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: `${CREAM}0.35)`, fontWeight: 300, fontFamily: SANS }}>Arriving in</p>
           <p style={{ fontFamily: SERIF, fontSize: 52, fontWeight: 300, color: dataStatus !== "live" ? `${CREAM}0.25)` : "#f0ece4", lineHeight: 1, letterSpacing: -1, transition: "color 0.8s ease" }}>{etaDisplay}</p>
           <div style={{ width: 32, height: 0.5, background: `${GOLD}0.4)`, margin: "16px 0" }} />
-          <p style={{ fontSize: 16, fontWeight: 400, color: `${CREAM}0.8)` }}>{destination || "DFW International Airport"}</p>
+          <p style={{ fontSize: 16, fontWeight: 400, color: `${CREAM}0.8)`, textTransform: "capitalize" }}>{destination || "DFW International Airport"}</p>
           <p style={{ fontSize: 13, fontWeight: 300, color: `${CREAM}0.4)`, marginTop: 4 }}>Mr. Rodriguez — 2024 Cadillac Escalade</p>
         </motion.div>
 
@@ -388,6 +389,7 @@ export default function PrestigeTabletFull({
   externalPhone,
   externalPickup,
   externalOccasion,
+  externalEta,
   hideStartScreen = false,
   hideDevControls = false,
 }: {
@@ -399,6 +401,7 @@ export default function PrestigeTabletFull({
   externalPhone?: string;
   externalPickup?: string;
   externalOccasion?: string;
+  externalEta?: number;
   hideStartScreen?: boolean;
   hideDevControls?: boolean;
 }) {
@@ -429,10 +432,10 @@ export default function PrestigeTabletFull({
   useEffect(() => { liveRideState.current = rideState; }, [rideState]);
 
   useEffect(() => {
-    if (externalRideState && !hideStartScreen) {
+    if (externalRideState) {
       setRideState(externalRideState);
     }
-  }, [externalRideState, hideStartScreen]);
+  }, [externalRideState]);
 
   useEffect(() => {
     if (rideState === "mid-ride" && !promptDismissed && !bookedFromPrompt) {
@@ -485,7 +488,7 @@ export default function PrestigeTabletFull({
           </motion.div>
         ) : (
           <motion.div key={`passive-${rideState}`} initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 0.9, ease: EASE } }} exit={{ opacity: 0, transition: { duration: 0.6, ease: EASE } }}>
-            <PassiveView rideState={rideState} dataStatus={dataStatus} clientName={clientNameFinal} destination={destinationFinal} comfortLevel={comfortLevel} onActionTap={setActiveModal} vipRides={vipRides} />
+            <PassiveView rideState={rideState} dataStatus={dataStatus} clientName={clientNameFinal} destination={destinationFinal} comfortLevel={comfortLevel} onActionTap={setActiveModal} vipRides={vipRides} externalEta={externalEta} />
           </motion.div>
         )}
       </AnimatePresence>
