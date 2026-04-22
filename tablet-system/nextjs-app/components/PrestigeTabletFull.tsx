@@ -324,7 +324,7 @@ function ConfirmationView({ clientName, destination, onComplete, returnState }: 
 }
 
 // ── Booking View ──────────────────────────────────────────────────────────────
-type RideData = { rideId: string | null; phone: string; pickup: string; guestName: string; destination: string; occasion: string };
+type RideData = { rideId: string | null; phone: string; pickup: string; guestName: string; destination: string; occasion: string; vehicleType?: string };
 function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideData: RideData }) {
   const [glowing, setGlowing] = useState(false);
   const [sending, setSending] = useState(false);
@@ -341,11 +341,13 @@ function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideD
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          rideId:    rideData.rideId,
-          phone:     rideData.phone,
-          pickup:    rideData.pickup,
-          occasion:  rideData.occasion,
-          guestName: rideData.guestName,
+          originalRideId: rideData.rideId,
+          passengerName:  rideData.guestName,
+          phone:          rideData.phone,
+          pickup:         rideData.pickup,
+          destination:    rideData.destination,
+          vehicleType:    rideData.vehicleType || '2024 Cadillac Escalade',
+          occasion:       rideData.occasion,
         }),
       });
     } catch {
