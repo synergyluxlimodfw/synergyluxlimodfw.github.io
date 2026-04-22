@@ -11,7 +11,15 @@ const supabase = createClient(
 const E164 = /^\+[1-9]\d{7,14}$/;
 
 export async function POST(req: Request) {
-  const { rideId, phone, pickup, occasion, guestName } = await req.json();
+  const {
+    originalRideId,
+    passengerName,
+    phone,
+    pickup,
+    destination,
+    vehicleType,
+    occasion,
+  } = await req.json();
 
   if (!phone || !E164.test(phone)) {
     return NextResponse.json(
@@ -23,12 +31,16 @@ export async function POST(req: Request) {
   const confirmToken = crypto.randomBytes(16).toString('hex');
 
   const { error: dbError } = await supabase.from("rebook_requests").insert({
-    ride_id:       rideId        || null,
-    guest_name:    guestName     || null,
+    original_ride_id: originalRideId  || null,
+    passenger_name:   passengerName   || null,
     phone,
-    pickup:        pickup        || null,
-    occasion:      occasion      || null,
-    confirm_token: confirmToken,
+    pickup:           pickup          || null,
+    destination:      destination     || null,
+    vehicle_type:     vehicleType     || '2024 Cadillac Escalade',
+    occasion:         occasion        || null,
+    status:           'pending',
+    source:           'tablet',
+    confirm_token:    confirmToken,
   });
 
   if (dbError) {
@@ -50,13 +62,11 @@ export async function POST(req: Request) {
 
   const operatorPhone = process.env.OPERATOR_PHONE_NUMBER;
   if (operatorPhone) {
-    const passengerName = guestName || "Guest";
-    const destination   = "your destination";
-    const confirmLink   = `${process.env.NEXT_PUBLIC_BASE_URL}/confirm?token=${confirmToken}`;
+    const confirmLink = `${process.env.NEXT_PUBLIC_BASE_URL}/confirm?token=${confirmToken}`;
     await twilioClient.messages.create({
       to:   operatorPhone,
       from,
-      body: `New rebook — ${passengerName}\n${pickup || "TBD"} → ${destination}\nPhone: ${phone}\nConfirm: ${confirmLink}`,
+      body: `New rebook — ${passengerName || "Guest"}\n${pickup || "TBD"} → ${destination || "TBD"}\nPhone: ${phone}\nConfirm: ${confirmLink}`,
     });
   }
 
