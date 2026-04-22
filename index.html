@@ -1151,6 +1151,22 @@ function handleBooking(e){
       method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,passengers:passengers,notes:notes,submitted_at:submitted})
     }).catch(function(e){console.log('Zapier:',e);});
+    fetch('https://synergyluxlimodfw-github-io.vercel.app/api/booking-notify',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        Name:document.getElementById('f_name').value,
+        Phone:document.getElementById('f_phone').value,
+        Email:document.getElementById('f_email').value,
+        Service:document.getElementById('f_service').value,
+        Pickup_Location:document.getElementById('f_pickup').value,
+        Dropoff_Location:document.getElementById('f_dropoff').value,
+        Date:document.getElementById('f_date').value,
+        Time:document.getElementById('f_time').value,
+        Passengers:document.getElementById('f_passengers').value,
+        Notes:document.getElementById('f_notes').value,
+      })
+    }).catch(function(e){console.warn('SMS notify failed:',e);});
     return emailjs.send('service_tnx9bxv','template_i4rw16m',templateParams);
   })
   .then(function(){
