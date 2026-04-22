@@ -330,9 +330,7 @@ function BookingView({ onConfirmed, rideData }: { onConfirmed: () => void; rideD
   const [sending, setSending] = useState(false);
   async function handleBook() {
     if (!rideData.phone) {
-      console.warn('No phone number available for rebook');
-      setTimeout(() => { onConfirmed(); }, 600);
-      return;
+      console.warn('No phone number — rebook will proceed without SMS');
     }
     setGlowing(true);
     setSending(true);

@@ -22,9 +22,9 @@ export async function POST(req: Request) {
   } = await req.json();
   console.log('[rebook]', { originalRideId, passengerName, phone, pickup, destination });
 
-  if (!phone || !E164.test(phone)) {
+  if (!passengerName) {
     return NextResponse.json(
-      { error: "Invalid phone number — E.164 format required (e.g. +12145550000)" },
+      { error: 'Missing passenger name' },
       { status: 400 }
     );
   }
@@ -55,11 +55,17 @@ export async function POST(req: Request) {
   );
   const from = process.env.TWILIO_PHONE_NUMBER!;
 
-  await twilioClient.messages.create({
-    to:   phone,
-    from,
-    body: `Synergy Lux: Your ride request has been received. Our team will confirm your booking shortly. — Synergy Lux Limo DFW`,
-  });
+  try {
+    if (phone) {
+      await twilioClient.messages.create({
+        to:   phone,
+        from,
+        body: `Synergy Lux: Your ride request has been received. Our team will confirm your booking shortly. — Synergy Lux Limo DFW`,
+      });
+    }
+  } catch (smsError) {
+    console.error('SMS to passenger failed:', smsError);
+  }
 
   const operatorPhone = process.env.OPERATOR_PHONE_NUMBER;
   if (operatorPhone) {
