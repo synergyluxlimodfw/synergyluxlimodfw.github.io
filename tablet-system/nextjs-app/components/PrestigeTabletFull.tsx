@@ -267,7 +267,7 @@ function ConfirmationView({ clientName, destination, onComplete, returnState }: 
   useEffect(() => {
     const t1 = setTimeout(() => setStage("confirmed"), 300);
     const t2 = setTimeout(() => setStage("done"), 4500);
-    const t3 = setTimeout(() => onComplete(returnState), 8500);
+    const t3 = setTimeout(() => onComplete(returnState), 7000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete, returnState]);
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -419,6 +419,7 @@ export default function PrestigeTabletFull({
   const [promptDismissed, setPromptDismissed] = useState(false);
   const [bookedFromPrompt, setBookedFromPrompt] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [showTip, setShowTip] = useState(false);
   const [vipRides] = useState(6);
   const liveRideState = useRef<RideState>(rideState);
 
@@ -480,7 +481,14 @@ export default function PrestigeTabletFull({
           </motion.div>
         ) : isConfirming ? (
           <motion.div key="confirmation" initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 1.0, ease: EASE } }} exit={{ opacity: 0, transition: { duration: 0.7, ease: EASE } }}>
-            <ConfirmationView clientName={clientNameFinal} destination={destinationFinal} returnState={liveRideState.current} onComplete={(returnTo) => { setConfirming(false); setRideState(returnTo); }} />
+            <ConfirmationView clientName={clientNameFinal} destination={destinationFinal} returnState={liveRideState.current} onComplete={(returnTo) => {
+                setConfirming(false);
+                setShowTip(true);
+                setTimeout(() => {
+                  setShowTip(false);
+                  setRideState(returnTo);
+                }, 10000);
+              }} />
           </motion.div>
         ) : isBookingView ? (
           <motion.div key="booking" initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 1.0, ease: EASE } }} exit={{ opacity: 0, transition: { duration: 0.7, ease: EASE } }}>
@@ -495,6 +503,105 @@ export default function PrestigeTabletFull({
 
       <AnimatePresence>
         {showPrompt && <MidRidePrompt key="prompt" onDismiss={handleDismiss} onBook={handleBookFromPrompt} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showTip && (
+          <motion.div
+            key="tip-overlay"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: [0.23, 1, 0.32, 1] } }}
+            exit={{ opacity: 0, y: 20, transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] } }}
+            style={{
+              position: "absolute",
+              bottom: 40,
+              left: 48,
+              right: 48,
+              background: "rgba(22,20,18,0.97)",
+              border: "0.5px solid rgba(180,155,110,0.25)",
+              borderRadius: 16,
+              padding: "28px 32px",
+              backdropFilter: "blur(20px)",
+              zIndex: 15,
+            }}
+          >
+            <p style={{
+              fontSize: 11,
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              color: "rgba(180,155,110,0.5)",
+              fontWeight: 300,
+              marginBottom: 8,
+              fontFamily: "'DM Sans', system-ui, sans-serif",
+            }}>Optional</p>
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: 22,
+              fontWeight: 300,
+              color: "#f0ece4",
+              marginBottom: 20,
+              lineHeight: 1.3,
+            }}>
+              Would you like to extend your appreciation?
+            </p>
+            <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+              {[
+                { label: "10%", value: "10" },
+                { label: "15%", value: "15" },
+                { label: "20%", value: "20", recommended: true },
+                { label: "25%", value: "25" },
+              ].map((tip) => (
+                <button
+                  key={tip.value}
+                  onClick={() => { setShowTip(false); }}
+                  style={{
+                    flex: 1,
+                    padding: "14px 8px",
+                    background: tip.recommended ? "rgba(180,155,110,0.2)" : "rgba(180,155,110,0.06)",
+                    border: `0.5px solid ${tip.recommended ? "rgba(180,155,110,0.6)" : "rgba(180,155,110,0.2)"}`,
+                    borderRadius: 8,
+                    color: tip.recommended ? "#d4b896" : "rgba(240,236,228,0.6)",
+                    fontSize: 14,
+                    fontFamily: "'DM Sans', system-ui, sans-serif",
+                    fontWeight: tip.recommended ? 400 : 300,
+                    cursor: "pointer",
+                  }}
+                >
+                  {tip.label}
+                </button>
+              ))}
+            </div>
+            <p style={{
+              fontSize: 10,
+              letterSpacing: "1.5px",
+              textTransform: "uppercase",
+              color: "rgba(180,155,110,0.4)",
+              textAlign: "center",
+              fontWeight: 300,
+              fontFamily: "'DM Sans', system-ui, sans-serif",
+              marginBottom: 12,
+            }}>
+              Most guests choose 20%
+            </p>
+            <button
+              onClick={() => setShowTip(false)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                background: "transparent",
+                border: "none",
+                color: "rgba(240,236,228,0.2)",
+                fontSize: 11,
+                fontFamily: "'DM Sans', system-ui, sans-serif",
+                cursor: "pointer",
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+              }}
+            >
+              Gratuity is entirely at your discretion
+            </button>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       <AnimatePresence>

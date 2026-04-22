@@ -30,7 +30,7 @@ interface TipSelectorProps {
 }
 
 export default function TipSelector({ onTip }: TipSelectorProps) {
-  const [selected, setSelected] = useState<PresetKey>('fifteen');
+  const [selected, setSelected] = useState<PresetKey>('twenty');
 
   const url = TIP_LINKS[selected as TipKey];
 
@@ -64,6 +64,20 @@ export default function TipSelector({ onTip }: TipSelectorProps) {
           />
         ))}
       </div>
+
+      {/* Social proof */}
+      <p style={{
+        fontSize: 11,
+        letterSpacing: '1.5px',
+        textTransform: 'uppercase',
+        color: 'rgba(180,155,110,0.5)',
+        textAlign: 'center',
+        fontWeight: 300,
+        marginTop: 8,
+        fontFamily: "'DM Sans', system-ui, sans-serif",
+      }}>
+        Most guests choose 20%
+      </p>
 
       {/* Live QR code */}
       <TipQRCode url={url} />
