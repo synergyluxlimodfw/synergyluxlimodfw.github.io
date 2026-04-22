@@ -19,6 +19,8 @@ export async function POST(req: Request) {
     destination,
     vehicleType,
     occasion,
+    preferred_date,
+    preferred_time,
   } = await req.json();
   console.log('[rebook]', { originalRideId, passengerName, phone, pickup, destination });
 
@@ -42,6 +44,8 @@ export async function POST(req: Request) {
     status:           'pending',
     source:           'tablet',
     confirm_token:    confirmToken,
+    preferred_date:   preferred_date || null,
+    preferred_time:   preferred_time || null,
   });
 
   if (dbError) {
