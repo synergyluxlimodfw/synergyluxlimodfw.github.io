@@ -13,7 +13,7 @@
  *   4. Send a contextual follow-up SMS so the conversation continues naturally
  *
  * Configure in ElevenLabs Dashboard → Agent → Analysis → Post-call webhook
- * URL: https://synergyluxlimodfw-github-io.vercel.app/api/voice/elevenlabs-webhook
+ * URL: https://app.synergyluxlimodfw.com/api/voice/elevenlabs-webhook
  *
  * ElevenLabs webhook payload shape (simplified):
  * {
