@@ -70,10 +70,9 @@ export async function POST(req: NextRequest) {
     // Update lead status if exists
     if (phone) {
       await supabase
-        .from('rides')
+        .from('leads')
         .update({ status: 'link_sent' })
-        .eq('phone', phone)
-        .eq('status', 'scheduled');
+        .eq('phone', phone);
     }
 
     return NextResponse.json({
