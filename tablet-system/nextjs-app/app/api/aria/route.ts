@@ -150,11 +150,14 @@ export async function POST(req: NextRequest) {
 
         // Update lead status to booked
         if (bookingData.phone?.trim()) {
-          await supabaseAdmin
-            .from('leads')
-            .update({ status: 'booked' })
-            .eq('phone', bookingData.phone.trim())
-            .catch(err => console.error('Lead status update error:', err));
+          try {
+            await supabaseAdmin
+              .from('leads')
+              .update({ status: 'booked' })
+              .eq('phone', bookingData.phone.trim());
+          } catch (err) {
+            console.error('Lead status update error:', err);
+          }
         }
       }
 
