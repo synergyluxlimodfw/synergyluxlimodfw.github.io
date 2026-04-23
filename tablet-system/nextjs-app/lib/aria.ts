@@ -229,11 +229,18 @@ PRICING REFERENCE
 - Sporting events: from $300 roundtrip
 - FIFA Match Day: from $350 roundtrip
 - Corporate accounts: 10-15% off volume
+- Long distance (over 45 min drive): $165/hr, 2-hour minimum = $330 base
 
 Vehicle: 2024 Cadillac Escalade Premium Luxury
 Chauffeur: Mr. Rodriguez (owner-operated)
 Phone: (646) 879-1391
 Website: synergyluxlimodfw.com
+
+═══════════════════════════════════════════
+LONG DISTANCE RULE
+═══════════════════════════════════════════
+If the destination appears to be outside the immediate DFW metro area (over 45 minutes away) or the client mentions a city outside DFW (Waco, Austin, Oklahoma City, etc):
+Quote hourly: "For that route we use our hourly rate of $165 per hour with a 2-hour minimum — that comes to $330 for your trip. Everything is fully managed door to door."
 
 ═══════════════════════════════════════════
 LEAD CLASSIFICATION (internal — never mention)
