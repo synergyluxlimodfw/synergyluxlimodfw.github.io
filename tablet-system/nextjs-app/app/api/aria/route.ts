@@ -115,6 +115,18 @@ export async function POST(req: NextRequest) {
 
       const { data, error, occasionValue } = await saveBooking(bookingData);
 
+      // Cancel any pending follow-ups for this phone
+      if (bookingData.phone) {
+        const digits = bookingData.phone.replace(/\D/g, '');
+        const formattedPhone = digits.length === 10 ? `+1${digits}` : `+${digits}`;
+        const { error: cancelErr } = await supabaseAdmin
+          .from('scheduled_messages')
+          .update({ sent: true })
+          .eq('phone', formattedPhone)
+          .eq('sent', false);
+        if (cancelErr) console.error('Cancel follow-up error:', cancelErr);
+      }
+
       if (error) {
         console.error('[Aria/confirm] Supabase insert error:', error);
         return NextResponse.json({
@@ -219,6 +231,44 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Normal response ───────────────────────────────────────────────────
+
+    // Schedule follow-ups if a phone number was just provided
+    const lastUserMessage = messages[messages.length - 1];
+    const phoneRegex = /(\+?1?\s?)?(\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4})/;
+    const hasPhone = lastUserMessage?.content &&
+      phoneRegex.test(lastUserMessage.content);
+
+    if (hasPhone && lastUserMessage?.role === 'user') {
+      const phoneMatch = lastUserMessage.content.match(phoneRegex);
+      const phone = phoneMatch ? phoneMatch[0].replace(/\D/g, '') : null;
+      const formattedPhone = phone && phone.length === 10 ?
+        `+1${phone}` : phone ? `+${phone}` : null;
+
+      if (formattedPhone) {
+        const now = new Date();
+        const oneHour       = new Date(now.getTime() + 60 * 60 * 1000);
+        const twentyFourHrs = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+        const { error: scheduleErr } = await supabaseAdmin.from('scheduled_messages').insert([
+          {
+            type:     'followup_1h',
+            phone:    formattedPhone,
+            send_at:  oneHour.toISOString(),
+            sent:     false,
+            message:  `Hi, this is Amirah with Synergy Lux. I wanted to make sure your transportation is taken care of. Still need a ride? I can have everything arranged in minutes. synergyluxlimodfw.com`,
+          },
+          {
+            type:     'followup_24h',
+            phone:    formattedPhone,
+            send_at:  twentyFourHrs.toISOString(),
+            sent:     false,
+            message:  `Hi, Amirah from Synergy Lux checking in. Your ride details are saved — just say the word and Mr. Rodriguez will take care of everything. (646) 879-1391`,
+          },
+        ]);
+        if (scheduleErr) console.error('Follow-up schedule error:', scheduleErr);
+      }
+    }
+
     return NextResponse.json({
       type:     'message',
       response: stripBookingReady(rawResponse),
