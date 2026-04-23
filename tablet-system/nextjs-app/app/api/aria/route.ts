@@ -147,6 +147,15 @@ export async function POST(req: NextRequest) {
           date:         bookingData.date?.trim()        ?? null,
           time:         bookingData.time?.trim()        ?? null,
         }).catch(err => console.error('[SMS] Aria confirm error:', err));
+
+        // Update lead status to booked
+        if (bookingData.phone?.trim()) {
+          await supabaseAdmin
+            .from('leads')
+            .update({ status: 'booked' })
+            .eq('phone', bookingData.phone.trim())
+            .catch(err => console.error('Lead status update error:', err));
+        }
       }
 
       return NextResponse.json({
@@ -220,6 +229,26 @@ export async function POST(req: NextRequest) {
         }
       } catch (smsErr) {
         console.error('Operator alert SMS failed:', smsErr);
+      }
+
+      // Save to leads table
+      try {
+        await supabaseAdmin
+          .from('leads')
+          .upsert({
+            name:        booking.name?.trim()            || null,
+            phone:       booking.phone?.trim()           || null,
+            pickup:      booking.pickup_location?.trim() || null,
+            destination: booking.destination?.trim()     || null,
+            datetime:    booking.date?.trim()
+                           ? `${booking.date.trim()} ${booking.time?.trim() ?? ''}`.trim()
+                           : null,
+            occasion:    booking.occasion?.trim()        || null,
+            source:      'amirah',
+            status:      'new',
+          }, { onConflict: 'phone' });
+      } catch (leadErr) {
+        console.error('Lead save error:', leadErr);
       }
 
       return NextResponse.json({
