@@ -81,6 +81,7 @@ async function saveBooking(booking: BookingData, fallbackPhone?: string) {
       guest_name:   booking.name?.trim()        || null,
       client_phone: booking.phone?.trim()       || fallbackPhone || null,
       destination:  booking.destination?.trim() || null,
+      pickup:       booking.pickup_location?.trim() || null,
       occasion:     occasionValue,
       chauffeur:    'Mr. Rodriguez',
       status:       'scheduled',
@@ -219,6 +220,28 @@ export async function POST(req: NextRequest) {
       const cleanMessage = stripBookingReady(rawResponse).trim() ||
         'Here are your ride details. Shall I reserve this for you?';
 
+      // Check availability before confirming
+      let availabilityWarning = null;
+      if (booking.date && booking.time) {
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+          const availRes = await fetch(
+            `${baseUrl}/api/availability?date=${encodeURIComponent(booking.date)}&time=${encodeURIComponent(booking.time)}`
+          );
+          const availData = await availRes.json();
+          if (!availData.available && availData.nextAvailable) {
+            const next = new Date(availData.nextAvailable);
+            const nextStr = next.toLocaleString('en-US', {
+              weekday: 'short', month: 'short', day: 'numeric',
+              hour: '2-digit', minute: '2-digit'
+            });
+            availabilityWarning = `That time is already reserved — I can take care of you at ${nextStr} instead.`;
+          }
+        } catch (availErr) {
+          console.error('Availability check error:', availErr);
+        }
+      }
+
       const tier = classifyLead(booking);
       const alertMessage = formatOperatorAlert(booking, tier);
 
@@ -255,10 +278,11 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json({
-        type:    'booking_confirmation',
+        type:                'booking_confirmation',
         booking,
-        message: cleanMessage,
+        message:             availabilityWarning || cleanMessage,
         tier,
+        availabilityWarning: availabilityWarning || null,
       });
     }
 
