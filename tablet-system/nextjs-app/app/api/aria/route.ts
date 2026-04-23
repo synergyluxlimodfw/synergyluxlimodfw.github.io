@@ -96,6 +96,7 @@ async function saveBooking(booking: BookingData, fallbackPhone?: string) {
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  console.log('[aria POST called]', new Date().toISOString());
   try {
     let body: Record<string, unknown>;
 
@@ -228,6 +229,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
+    console.error('[aria CATCH]', JSON.stringify(error));
     console.error('[Aria] Unhandled error:', error);
     return NextResponse.json({
       type:     'message',
