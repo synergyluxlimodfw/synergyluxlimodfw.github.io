@@ -96,7 +96,6 @@ async function saveBooking(booking: BookingData, fallbackPhone?: string) {
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  console.log('[aria POST called]', new Date().toISOString());
   try {
     let body: Record<string, unknown>;
 
@@ -181,9 +180,6 @@ export async function POST(req: NextRequest) {
         .filter(block => block.type === 'text')
         .map(block => (block as { type: 'text'; text: string }).text)
         .join('');
-      console.log('[aria raw length]', rawResponse.length);
-      console.log('[aria has BOOKING_READY]', rawResponse.includes('BOOKING_READY'));
-      console.log('[aria raw tail]', rawResponse.substring(rawResponse.length - 200));
     } catch (err) {
       console.error('[Aria] Anthropic error:', err);
       return NextResponse.json({
@@ -229,7 +225,6 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[aria CATCH]', JSON.stringify(error));
     console.error('[Aria] Unhandled error:', error);
     return NextResponse.json({
       type:     'message',
