@@ -82,6 +82,7 @@ export default function AdminPage() {
   const [allLeads,         setAllLeads]         = useState<UnifiedLead[]>([]);
   const [leadsFilter,      setLeadsFilter]      = useState<'all' | 'booking' | 'rebook' | 'inquiry'>('all');
   const [leadsLoading,     setLeadsLoading]     = useState(true);
+  const [convMetrics,      setConvMetrics]      = useState<any>(null);
 
   const refresh = useCallback(async () => {
     // ── localStorage metrics ──
@@ -207,6 +208,12 @@ export default function AdminPage() {
 
     setAllLeads(combined);
     setLeadsLoading(false);
+
+    // Conversion metrics
+    fetch('/api/admin/metrics')
+      .then(r => r.json())
+      .then(d => setConvMetrics(d))
+      .catch(err => console.error('Metrics fetch error:', err));
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
@@ -275,8 +282,72 @@ export default function AdminPage() {
           </div>
         </section>
 
-        {/* ── 1. LEADS DASHBOARD ──────────────────────────── */}
+        {/* ── 1. LEADS PIPELINE ──────────────────────────── */}
         <section>
+          {/* Conversion Intelligence Bar */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <ConversionCard
+              label="Total Leads"
+              value={convMetrics ? String(convMetrics.total) : '—'}
+              sub="all time"
+              color="#C9A84C"
+            />
+            <ConversionCard
+              label="Conversion Rate"
+              value={convMetrics ? `${convMetrics.conversionRate}%` : '—'}
+              sub={`today: ${convMetrics?.todayConversionRate ?? '—'}%`}
+              color={
+                convMetrics
+                  ? Number(convMetrics.conversionRate) >= 25 ? '#4ADE80'
+                  : Number(convMetrics.conversionRate) >= 15 ? '#FCD34D'
+                  : '#F87171'
+                  : '#666672'
+              }
+            />
+            <ConversionCard
+              label="Revenue Left"
+              value={convMetrics ? `$${convMetrics.revenueLeftOnTable}` : '—'}
+              sub={`${convMetrics?.linkSent ?? 0} links unpaid`}
+              color="#F87171"
+            />
+            <ConversionCard
+              label="Today"
+              value={convMetrics ? String(convMetrics.todayTotal) : '—'}
+              sub={`${convMetrics?.todayBooked ?? 0} booked today`}
+              color="#818CF8"
+            />
+          </div>
+
+          {/* Follow-up Alert */}
+          {convMetrics && convMetrics.linkNotPaid.length > 0 && (
+            <div
+              className="rounded-2xl px-5 py-4 mb-5"
+              style={{ background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.20)' }}
+            >
+              <p className="text-[10px] tracking-[3px] uppercase mb-3" style={{ color: '#F87171' }}>
+                ⚡ Follow-up needed — {convMetrics.linkNotPaid.length} unpaid links
+              </p>
+              <div className="space-y-2">
+                {convMetrics.linkNotPaid.slice(0, 5).map((l: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <span className="text-[12px] text-lux-white">{l.name || 'Guest'}</span>
+                    <span className="text-[11px] text-lux-muted tabular-nums">{l.phone}</span>
+                    <span className="text-[11px]" style={{ color: 'rgba(248,113,113,0.7)' }}>
+                      {l.destination || '—'}
+                    </span>
+                    <a
+                      href={`sms:${l.phone}`}
+                      className="text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-lg"
+                      style={{ color: '#F87171', border: '1px solid rgba(248,113,113,0.30)' }}
+                    >
+                      Call Back
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Header row */}
           <div className="flex items-center justify-between mb-5">
             <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted">
@@ -317,7 +388,6 @@ export default function AdminPage() {
             <EmptyCard text="No leads yet — bookings, rebook requests, and Amirah chats will appear here." />
           ) : (
             <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(201,168,76,0.10)' }}>
-              {/* Table header */}
               <div
                 className="grid px-5 py-3 text-[10px] tracking-[2px] uppercase"
                 style={{
@@ -335,7 +405,6 @@ export default function AdminPage() {
                 <span>Amount</span>
               </div>
 
-              {/* Rows */}
               {filteredLeads.map((lead, i) => {
                 const typeConf   = TYPE_CONFIG[lead.type];
                 const statusConf = STATUS_CONFIG[lead.status] ?? { color: '#666672', bg: 'rgba(102,102,114,0.10)' };
@@ -352,7 +421,6 @@ export default function AdminPage() {
                       background: i % 2 === 0 ? '#09090E' : '#0F0F14',
                     }}
                   >
-                    {/* Name + occasion */}
                     <div>
                       <p className="text-[13px] font-medium text-lux-white">{lead.name}</p>
                       {(lead.occasion || lead.destination) && (
@@ -361,24 +429,16 @@ export default function AdminPage() {
                         </p>
                       )}
                     </div>
-
-                    {/* Phone */}
                     <p className="text-[11px] text-lux-muted tabular-nums">{lead.phone}</p>
-
-                    {/* Type badge */}
                     <span
                       className="inline-flex items-center text-[9px] font-bold tracking-[1.5px] uppercase rounded-full px-2.5 py-1 w-fit"
                       style={{ color: typeConf.color, background: typeConf.bg, border: `1px solid ${typeConf.border}` }}
                     >
                       {typeConf.label}
                     </span>
-
-                    {/* Date */}
                     <p className="text-[11px] text-lux-muted/70 tabular-nums">
                       {new Date(lead.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                     </p>
-
-                    {/* Status badge */}
                     <span
                       className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase rounded-full px-2.5 py-1 w-fit"
                       style={{ color: statusConf.color, background: statusConf.bg, border: `1px solid ${statusConf.color}33` }}
@@ -386,8 +446,6 @@ export default function AdminPage() {
                       <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: statusConf.color }} />
                       {lead.status}
                     </span>
-
-                    {/* Amount */}
                     <p className="text-[12px] tabular-nums" style={{ color: lead.amount ? '#4ADE80' : 'rgba(102,102,114,0.5)' }}>
                       {lead.amount ? `$${lead.amount}` : '—'}
                     </p>
@@ -593,6 +651,25 @@ function ActionCard({ icon, title, sub, href, external }: {
       <p className="text-[14px] font-medium text-lux-white mb-1">{title}</p>
       <p className="text-[12px] text-lux-muted">{sub}</p>
     </a>
+  );
+}
+
+function ConversionCard({ label, value, sub, color }: {
+  label: string; value: string; sub: string; color: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl p-5"
+      style={{ background: '#0F0F14', border: '1px solid rgba(201,168,76,0.10)' }}
+    >
+      <p className="text-[10px] tracking-[2.5px] uppercase text-lux-muted mb-2">{label}</p>
+      <p className="font-serif-lux text-[32px] font-light leading-none mb-1" style={{ color }}>
+        {value}
+      </p>
+      <p className="text-[10px] text-lux-muted/50 tracking-wide">{sub}</p>
+    </motion.div>
   );
 }
 
