@@ -400,6 +400,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   100% { background-position: 200% 0; }
 }
 .shimmer-text {
+  display: inline-block;
   background: linear-gradient(90deg, #C9A84C 0%, #f0ece4 50%, #C9A84C 100%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -423,7 +424,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 <nav>
   <a href="/" class="nav-logo">
     <img src="synergy-logo-new.png" alt="Synergy Lux Limo DFW">
-    <div class="nav-logo-text shimmer-text">SYNERGY LUX<span>LIMO DFW</span></div>
+    <div class="nav-logo-text"><span class="shimmer-text">SYNERGY LUX</span><span class="shimmer-text">LIMO DFW</span></div>
   </a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#calculator">Price Calculator</a></li>
