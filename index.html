@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DFW Luxury Car Service | Black Car & Limo Service Dallas Fort Worth | Synergy Lux Limo</title>
-<meta name="description" content="Premium black car & limo service in Dallas-Fort Worth. Airport transfers, corporate travel, weddings & events. 2023 Cadillac Escalade. On-time guarantee. Flat rates. Call (646) 879-1391.">
+<title>Synergy Lux Limo DFW | Private Chauffeur Service Dallas–Fort Worth</title>
+<meta name="description" content="Premium black car & limo service in Dallas-Fort Worth. Airport transfers, corporate travel, weddings & events. 2024 Cadillac Escalade. On-time guarantee. Flat rates. Call (646) 879-1391.">
 <meta name="keywords" content="DFW luxury car service, Dallas limo service, Fort Worth black car service, DFW airport limo, Dallas airport transfer, Escalade limo Dallas, executive car service DFW, corporate car service Dallas, wedding limo DFW, luxury transportation Dallas Fort Worth">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Synergy Lux Limo DFW">
 <link rel="canonical" href="https://www.synergyluxlimodfw.com">
 <meta property="og:title" content="Synergy Lux Limo DFW | Premium Black Car Service Dallas Fort Worth">
-<meta property="og:description" content="Family-owned & operated luxury car service. 2023 Cadillac Escalade. Airport transfers, corporate travel, weddings. Flat rates. On-time guarantee. (646) 879-1391">
+<meta property="og:description" content="Family-owned & operated luxury car service. 2024 Cadillac Escalade. Airport transfers, corporate travel, weddings. Flat rates. On-time guarantee. (646) 879-1391">
 <meta property="og:type" content="business.business">
 <meta property="og:url" content="https://www.synergyluxlimodfw.com">
 <meta property="og:locale" content="en_US">
@@ -395,6 +395,17 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   .hero h1{font-size:clamp(34px,9vw,52px);}
   .gallery-grid{grid-template-columns:1fr;}
 }
+@keyframes goldShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #C9A84C 0%, #f0ece4 50%, #C9A84C 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldShimmer 4s linear infinite;
+}
 </style>
 </head>
 <body>
@@ -412,7 +423,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 <nav>
   <a href="/" class="nav-logo">
     <img src="synergy-logo-new.png" alt="Synergy Lux Limo DFW">
-    <div class="nav-logo-text">SYNERGY LUX<span>LIMO DFW</span></div>
+    <div class="nav-logo-text shimmer-text">SYNERGY LUX<span>LIMO DFW</span></div>
   </a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#calculator">Price Calculator</a></li>
@@ -1311,5 +1322,20 @@ document.querySelectorAll('.reveal').forEach(function(el){revealObs.observe(el);
 
 <link rel="stylesheet" href="aria-chat.css">
 <script src="aria-chat.js"></script>
+<script>
+window.addEventListener('scroll', function() {
+  const nav = document.querySelector('nav');
+  if (!nav) return;
+  if (window.scrollY > 80) {
+    nav.style.padding = '8px 0';
+    nav.style.backdropFilter = 'blur(16px)';
+    nav.style.boxShadow = '0 4px 30px rgba(0,0,0,0.5)';
+  } else {
+    nav.style.padding = '';
+    nav.style.backdropFilter = '';
+    nav.style.boxShadow = '';
+  }
+});
+</script>
 </body>
 </html>
