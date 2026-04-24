@@ -83,6 +83,10 @@ export default function AdminPage() {
   const [leadsFilter,      setLeadsFilter]      = useState<'all' | 'booking' | 'rebook' | 'inquiry'>('all');
   const [leadsLoading,     setLeadsLoading]     = useState(true);
   const [convMetrics,      setConvMetrics]      = useState<any>(null);
+  const [outreachLeads,    setOutreachLeads]    = useState<any[]>([]);
+  const [outreachFilter,   setOutreachFilter]   = useState<'all' | 'new' | 'contacted' | 'replied'>('new');
+  const [copiedId,         setCopiedId]         = useState<string | null>(null);
+  const [outreachLoading,  setOutreachLoading]  = useState(true);
 
   const refresh = useCallback(async () => {
     // ── localStorage metrics ──
@@ -209,6 +213,17 @@ export default function AdminPage() {
     setAllLeads(combined);
     setLeadsLoading(false);
 
+    // Fetch outreach leads from leads table
+    const { data: outreach } = await supabase
+      .from('leads')
+      .select('id, first_name, last_name, name, job_title, company, location, linkedin_url, email, lead_type, priority, status, email_subject, email_body, linkedin_message, followup_message, created_at, last_contacted_at, follow_up_due')
+      .in('source', ['linkedin-apify', 'serpapi-google', 'manual'])
+      .order('priority', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (outreach) setOutreachLeads(outreach);
+    setOutreachLoading(false);
+
     // Conversion metrics
     fetch('/api/admin/metrics')
       .then(r => r.json())
@@ -219,6 +234,26 @@ export default function AdminPage() {
   useEffect(() => { refresh(); }, [refresh]);
 
   function handleClear() { clearEvents(); refresh(); }
+
+  async function markContacted(id: string) {
+    const followUp = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+    await supabase
+      .from('leads')
+      .update({
+        status: 'contacted',
+        last_contacted_at: new Date().toISOString(),
+        follow_up_due: followUp,
+        contact_attempts: 1,
+      })
+      .eq('id', id);
+    setOutreachLeads(prev => prev.map(l => l.id === id ? { ...l, status: 'contacted' } : l));
+  }
+
+  function copyToClipboard(text: string, id: string) {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  }
 
   // ── Stat cards ─────────────────────────────────────────
 
@@ -452,6 +487,128 @@ export default function AdminPage() {
                   </motion.div>
                 );
               })}
+            </div>
+          )}
+        </section>
+
+        {/* ── OUTREACH LEADS ──────────────────────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted">Outreach Pipeline</p>
+              <p className="text-[11px] text-lux-muted/50 mt-1">LinkedIn scraped leads — email drafts ready</p>
+            </div>
+            <div className="flex gap-2">
+              {(['new','contacted','replied','all'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setOutreachFilter(f)}
+                  className="text-[9px] tracking-[2px] uppercase px-3 py-1.5 rounded-lg transition-all"
+                  style={{
+                    background: outreachFilter === f ? 'rgba(201,168,76,0.15)' : '#0F0F14',
+                    border: outreachFilter === f ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.08)',
+                    color: outreachFilter === f ? '#C9A84C' : 'rgba(240,236,228,0.3)',
+                  }}
+                >
+                  {f} ({outreachLeads.filter(l => f === 'all' ? true : l.status === f).length})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {(() => {
+            const due = outreachLeads.filter(l => l.follow_up_due && new Date(l.follow_up_due) <= new Date() && l.status === 'contacted');
+            return due.length > 0 ? (
+              <div className="rounded-2xl px-5 py-4 mb-5" style={{ background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.20)' }}>
+                <p className="text-[10px] tracking-[3px] uppercase mb-2" style={{ color: '#F87171' }}>
+                  ⚡ {due.length} follow-up{due.length > 1 ? 's' : ''} due today
+                </p>
+                {due.slice(0, 3).map((l: any) => (
+                  <p key={l.id} className="text-[11px] text-lux-muted">{l.name || `${l.first_name} ${l.last_name}`} — {l.company}</p>
+                ))}
+              </div>
+            ) : null;
+          })()}
+
+          {outreachLoading ? (
+            <EmptyCard text="Loading outreach leads..." />
+          ) : outreachLeads.filter(l => outreachFilter === 'all' ? true : l.status === outreachFilter).length === 0 ? (
+            <EmptyCard text="No leads in this category yet." />
+          ) : (
+            <div className="space-y-3">
+              {outreachLeads
+                .filter(l => outreachFilter === 'all' ? true : l.status === outreachFilter)
+                .map((lead: any) => (
+                  <div
+                    key={lead.id}
+                    className="rounded-2xl p-5"
+                    style={{ background: '#0F0F14', border: `1px solid ${lead.priority === 'high' ? 'rgba(201,168,76,0.20)' : 'rgba(201,168,76,0.08)'}` }}
+                  >
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-[14px] font-medium text-lux-white">
+                            {lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown'}
+                          </p>
+                          {lead.priority === 'high' && (
+                            <span className="text-[8px] tracking-[2px] uppercase px-2 py-0.5 rounded-full" style={{ color: '#C9A84C', background: 'rgba(201,168,76,0.10)', border: '1px solid rgba(201,168,76,0.25)' }}>🔥 High</span>
+                          )}
+                          <span className="text-[8px] tracking-[2px] uppercase px-2 py-0.5 rounded-full" style={{ color: lead.status === 'contacted' ? '#FCD34D' : lead.status === 'replied' ? '#4ADE80' : '#818CF8', background: 'rgba(129,140,248,0.10)' }}>{lead.status}</span>
+                        </div>
+                        <p className="text-[12px] text-lux-muted">{lead.job_title} {lead.company ? `@ ${lead.company}` : ''}</p>
+                        {lead.location && <p className="text-[10px] text-lux-muted/50 mt-0.5">{lead.location}</p>}
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        {lead.linkedin_url && (
+                          <a href={lead.linkedin_url} target="_blank" rel="noopener noreferrer"
+                            className="text-[9px] tracking-[2px] uppercase px-3 py-1.5 rounded-lg"
+                            style={{ color: '#378ADD', border: '1px solid rgba(55,138,221,0.30)', background: 'rgba(55,138,221,0.08)' }}>
+                            LinkedIn →
+                          </a>
+                        )}
+                        {lead.status === 'new' && (
+                          <button onClick={() => markContacted(lead.id)}
+                            className="text-[9px] tracking-[2px] uppercase px-3 py-1.5 rounded-lg transition-all hover:opacity-80"
+                            style={{ color: '#4ADE80', border: '1px solid rgba(74,222,128,0.30)', background: 'rgba(74,222,128,0.08)' }}>
+                            Mark Contacted
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {lead.linkedin_message && (
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-[9px] tracking-[2px] uppercase text-lux-muted/50">LinkedIn Message</p>
+                          <button onClick={() => copyToClipboard(lead.linkedin_message, `li-${lead.id}`)}
+                            className="text-[9px] tracking-[1px] uppercase px-2 py-1 rounded"
+                            style={{ color: copiedId === `li-${lead.id}` ? '#4ADE80' : '#C9A84C', border: '1px solid rgba(201,168,76,0.20)' }}>
+                            {copiedId === `li-${lead.id}` ? 'Copied ✓' : 'Copy'}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-lux-muted/70 leading-relaxed p-3 rounded-lg" style={{ background: 'rgba(201,168,76,0.04)', border: '1px solid rgba(201,168,76,0.08)' }}>
+                          {lead.linkedin_message}
+                        </p>
+                      </div>
+                    )}
+
+                    {lead.email_subject && lead.email_body && (
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-[9px] tracking-[2px] uppercase text-lux-muted/50">Email — {lead.email_subject}</p>
+                          <button onClick={() => copyToClipboard(`Subject: ${lead.email_subject}\n\n${lead.email_body}`, `em-${lead.id}`)}
+                            className="text-[9px] tracking-[1px] uppercase px-2 py-1 rounded"
+                            style={{ color: copiedId === `em-${lead.id}` ? '#4ADE80' : '#C9A84C', border: '1px solid rgba(201,168,76,0.20)' }}>
+                            {copiedId === `em-${lead.id}` ? 'Copied ✓' : 'Copy Email'}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-lux-muted/70 leading-relaxed p-3 rounded-lg whitespace-pre-line" style={{ background: 'rgba(201,168,76,0.04)', border: '1px solid rgba(201,168,76,0.08)' }}>
+                          {lead.email_body}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
             </div>
           )}
         </section>
