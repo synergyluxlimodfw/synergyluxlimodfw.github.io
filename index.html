@@ -438,12 +438,14 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <div class="hero-overlay"></div>
 
   <p class="hero-eyebrow">Synergy Lux Limo DFW</p>
-  <h1>Private Chauffeur Experience<br><em>Dallas–Fort Worth</em></h1>
-  <p class="hero-sub">Discreet. Consistent. Precisely executed.</p>
-  <p class="hero-third reveal" style="opacity:0;animation:fadeUp 1.2s ease 1.2s forwards;">For clients who expect more than transportation.</p>
+  <h1>Private Chauffeur Service<br><em>Dallas–Fort Worth</em></h1>
+  <p class="hero-sub">Elite service. Personal touch.</p>
+  <p class="hero-third reveal" style="opacity:0;animation:fadeUp 1.2s ease 1.2s forwards;">
+    For executives, professionals, and families who require consistency, discretion, and direct access to their driver.
+  </p>
   <div class="hero-btns">
-    <a href="#booking" class="btn-gold">Book a Ride</a>
-    <a href="/experience.html" class="btn-outline">View Private Experience &nbsp;→</a>
+    <a href="#private-client" class="btn-gold">Request Your Chauffeur</a>
+    <a href="#booking" class="btn-outline">Book a Single Ride &nbsp;→</a>
   </div>
 
   <div class="hero-scroll">
@@ -633,7 +635,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     </div>
     <div class="skip-row">
       <div class="skip-cell bad">✗ Economy vehicles</div>
-      <div class="skip-cell good">✓ 2023 Escalade</div>
+      <div class="skip-cell good">✓ 2024 Escalade</div>
     </div>
     <div class="skip-row">
       <div class="skip-cell bad">✗ No flight tracking</div>
@@ -645,6 +647,25 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     </div>
   </div>
 </div>
+
+
+<!-- ══ PRIVATE CLIENT ══ -->
+<section id="private-client" class="sec" style="background:#0a0a0f;border-top:1px solid rgba(201,168,76,0.15);border-bottom:1px solid rgba(201,168,76,0.15);">
+  <div class="sec-inner" style="max-width:700px;margin:0 auto;text-align:center;">
+    <p class="eyebrow reveal" style="justify-content:center;">Private Clients</p>
+    <h2 class="sec-h2 reveal d1">Become a<br><em>Private Client</em></h2>
+    <div class="sec-body reveal d2" style="margin:0 auto;">
+      <p>For clients who require transportation multiple times per month. Direct access to your chauffeur, priority scheduling, and a service experience tailored to your routine.</p>
+    </div>
+    <div class="serve-list reveal d3" style="margin:32px auto;max-width:480px;">
+      <div class="serve-line">Priority booking &amp; guaranteed availability</div>
+      <div class="serve-line">Direct communication — no apps, no dispatch</div>
+      <div class="serve-line">Same vehicle and chauffeur every time</div>
+      <div class="serve-line">Flexible monthly scheduling</div>
+    </div>
+    <a href="#booking" class="btn-gold reveal d4">Request Private Chauffeur Access</a>
+  </div>
+</section>
 
 
 <!-- ══ PRICE CALCULATOR ══ -->
@@ -1174,7 +1195,7 @@ function handleBooking(e){
       method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,passengers:passengers,notes:notes,submitted_at:submitted})
     }).catch(function(e){console.log('Zapier:',e);});
-    fetch('https://synergyluxlimodfw-github-io.vercel.app/api/booking-notify',{
+    fetch('https://app.synergyluxlimodfw.com/api/booking-notify',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
