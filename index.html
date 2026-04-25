@@ -407,6 +407,33 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   -webkit-text-fill-color: transparent;
   animation: goldShimmer 4s linear infinite;
 }
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox-overlay.active {
+  display: flex;
+}
+.lightbox-overlay img {
+  max-width: 90vw;
+  max-height: 85vh;
+  border-radius: 16px;
+  object-fit: contain;
+}
+.lightbox-close {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  font-size: 48px;
+  color: #C9A84C;
+  cursor: pointer;
+  line-height: 1;
+}
 </style>
 </head>
 <body>
@@ -980,7 +1007,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <h2 class="sec-h2 reveal d1">Comfort Without<br><em>Compromise</em></h2>
   <div class="fleet-inner reveal d2">
     <div class="fleet-img">
-      <img src="interior-seats-panoramic.jpg" alt="2023 Cadillac Escalade Premium Luxury — Synergy Lux Limo DFW">
+      <img src="interior-seats-panoramic.jpg" alt="2024 Cadillac Escalade Premium Luxury — Synergy Lux Limo DFW">
       <div class="fleet-badge">Super Cruise Equipped</div>
     </div>
     <div>
@@ -1007,11 +1034,11 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <p class="eyebrow reveal">Gallery</p>
   <h2 class="sec-h2 reveal d1">The Synergy Lux <em>Experience</em></h2>
   <div class="gallery-grid reveal d2">
-    <img src="interior-dashboard.jpg" alt="2023 Cadillac Escalade Dashboard" class="gallery-wide">
+    <img src="interior-dashboard.jpg" alt="2024 Cadillac Escalade Dashboard" class="gallery-wide">
     <img src="interior-front-seats.jpg" alt="Escalade Premium Leather Interior">
     <img src="interior-steering.jpg" alt="Escalade Steering Wheel">
     <img src="interior-rear-seats.jpg" alt="Escalade Rear Seats">
-    <img src="escalade-exterior-side.jpg" alt="2023 Cadillac Escalade Exterior" class="gallery-wide">
+    <img src="escalade-exterior-side.jpg" alt="2024 Cadillac Escalade Exterior" class="gallery-wide">
   </div>
 </section>
 
@@ -1321,6 +1348,10 @@ var revealObs=new IntersectionObserver(function(entries){
 document.querySelectorAll('.reveal').forEach(function(el){revealObs.observe(el);});
 </script>
 
+<div class="lightbox-overlay" id="lightbox" onclick="if(event.target===this||event.target.classList.contains('lightbox-close'))document.getElementById('lightbox').classList.remove('active')">
+  <span class="lightbox-close">×</span>
+  <img id="lightbox-img" src="" alt="">
+</div>
 <link rel="stylesheet" href="aria-chat.css">
 <script src="aria-chat.js"></script>
 <script>
@@ -1336,6 +1367,17 @@ window.addEventListener('scroll', function() {
     nav.style.backdropFilter = '';
     nav.style.boxShadow = '';
   }
+});
+document.querySelectorAll('.gallery-grid img').forEach(function(img) {
+  img.style.cursor = 'pointer';
+  img.addEventListener('click', function() {
+    document.getElementById('lightbox-img').src = this.src;
+    document.getElementById('lightbox-img').alt = this.alt;
+    document.getElementById('lightbox').classList.add('active');
+  });
+});
+document.addEventListener('keydown', function(e) {
+  if(e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
 });
 </script>
 </body>
