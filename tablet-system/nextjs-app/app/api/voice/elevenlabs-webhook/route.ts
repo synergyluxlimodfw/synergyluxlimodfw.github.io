@@ -104,6 +104,7 @@ export async function POST(req: NextRequest) {
     const destination = field(dc, 'destination', 'dropoff', 'drop_off');
     const date        = field(dc, 'date', 'ride_date');
     const time        = field(dc, 'time', 'ride_time', 'pickup_time');
+    const price       = field(dc, 'price', 'amount', 'total');
 
     if (!phone) {
       console.warn('[ElevenLabs webhook] No phone number found in payload');
@@ -160,9 +161,9 @@ export async function POST(req: NextRequest) {
         // Everything collected — move to confirmation
         smsBody = [
           `Hi${firstName ? ` ${firstName}` : ''}, this is Amirah with Synergy Lux.`,
-          `I have your ${occasion} to ${destination}${date ? ` on ${date}` : ''}${time ? ` at ${time}` : ''}.`,
+          `I have your ${occasion} to ${destination}${date ? ` on ${date}` : ''}${time ? ` at ${time}` : ''}${price ? ` for $${price}` : ''}.`,
           '',
-          "I'll get that secured for you — just reply to confirm and I'll take it from here.",
+          'Reply YES to receive your secure payment link.',
           '',
           'Reply STOP to opt out.',
         ].join('\n');

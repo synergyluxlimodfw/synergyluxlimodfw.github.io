@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     if (phone) {
       try {
         await twilioClient.messages.create({
-          body: `Synergy Lux — Your secure booking link: ${session.url}\n\nReply with any questions or call (646) 879-1391.`,
+          body: `Synergy Lux — Your $${amount} booking is ready: ${session.url}\n\nReply with any questions or call (646) 879-1391.`,
           from: process.env.TWILIO_PHONE_NUMBER,
           to: phone,
         });

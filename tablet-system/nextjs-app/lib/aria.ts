@@ -210,7 +210,7 @@ The moment you have ALL of these: name, phone, pickup_location, destination, dat
 Emit BOOKING_READY at the END of your confirmation message — never alone, never at the start:
 
 "You're all set. I'll make sure everything is ready for you.
-BOOKING_READY:{"name":"...","phone":"...","pickup_location":"...","destination":"...","date":"...","time":"...","service":"...","occasion":"...","notes":""}"
+BOOKING_READY:{"name":"...","phone":"...","pickup_location":"...","destination":"...","date":"...","time":"...","service":"...","occasion":"...","price":"155","notes":""}"
 
 CRITICAL RULES:
 - BOOKING_READY fires on the SAME message as your confirmation
@@ -219,6 +219,7 @@ CRITICAL RULES:
 - service field MUST be populated
 - service must match the type: Airport Transfer, Hourly Charter, Wedding, Night Out, Sporting Event, Corporate, FIFA Transfer, etc.
 - occasion describes the ride purpose: "Airport transfer", "Wedding day", "Business travel", "Night out", "FIFA match day", etc.
+- price MUST be the numeric dollar amount you quoted (e.g. "155", "330") — no $ sign, no text
 
 ═══════════════════════════════════════════
 FOLLOW-UP (when client goes silent)
@@ -276,6 +277,7 @@ export interface BookingPayload {
   time?:            string;
   service?:         string;
   occasion?:        string;
+  price?:           string;
   notes?:           string;
 }
 
@@ -322,15 +324,21 @@ PRICING
 - FIFA Match Day: from $350 roundtrip
 - Long distance (45+ min): $165/hr, 2hr min
 
+PRICE QUOTE — REQUIRED BEFORE ENDING
+Before collecting name/phone, always state the price clearly:
+"That comes to $[PRICE], total. I'll send everything to you by text right after this call."
+Never end a call without quoting the price.
+
 BOOKING_READY
 When you have name, phone, pickup, destination, date, time, and service — end your confirmation message with:
 
-BOOKING_READY:{"name":"...","phone":"...","pickup_location":"...","destination":"...","date":"...","time":"...","service":"...","occasion":"...","notes":""}
+BOOKING_READY:{"name":"...","phone":"...","pickup_location":"...","destination":"...","date":"...","time":"...","service":"...","occasion":"...","price":"155","notes":""}
 
 Rules:
 - Emit on the SAME message as your confirmation — never alone
 - Empty fields use "" not null
-- service options: Airport Transfer, Hourly Charter, Wedding, Night Out, Corporate, FIFA Transfer, Sporting Event`;
+- service options: Airport Transfer, Hourly Charter, Wedding, Night Out, Corporate, FIFA Transfer, Sporting Event
+- price MUST be the numeric dollar amount quoted (e.g. "155") — no $ sign, no text`;
 
 /**
  * Extracts the BookingPayload from a BOOKING_READY:{...} tag in Aria's response.

@@ -159,6 +159,29 @@ export async function POST(req: NextRequest) {
           date:         booking.date?.trim()        ?? null,
           time:         booking.time?.trim()        ?? null,
         }).catch(err => console.error('[SMS/incoming] handleBookingConfirmed error:', err));
+
+        // Send Stripe payment link (non-blocking)
+        const price = parseFloat(booking.price ?? '');
+        if (!isNaN(price) && price > 0 && (booking.phone?.trim() || from)) {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+            || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null);
+          if (!baseUrl) {
+            console.error('[SMS/incoming] No base URL configured — cannot send payment link');
+          } else {
+            fetch(`${baseUrl}/api/send-booking-link`, {
+              method:  'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                phone:       booking.phone?.trim() || from,
+                amount:      price,
+                name:        booking.name?.trim()            || '',
+                pickup:      booking.pickup_location?.trim() || '',
+                destination: booking.destination?.trim()     || '',
+                occasion:    booking.occasion?.trim()        || '',
+              }),
+            }).catch(err => console.error('[SMS/incoming] send-booking-link error:', err));
+          }
+        }
       }
     }
 
