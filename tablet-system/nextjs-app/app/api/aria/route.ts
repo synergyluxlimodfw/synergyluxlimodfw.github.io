@@ -24,7 +24,6 @@ import { createClient } from '@supabase/supabase-js';
 import twilio from 'twilio';
 import {
   ARIA_SYSTEM_PROMPT,
-  ARIA_VOICE_PROMPT,
   extractBookingReady,
   stripBookingReady,
   classifyLead,
@@ -170,7 +169,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Mode 1: normal chat ───────────────────────────────────────────────
-    const isVoice = body.source === 'voice';
     const raw = body.messages;
     if (!Array.isArray(raw) || raw.length === 0) {
       return NextResponse.json({ error: 'messages array required' }, { status: 422 });
@@ -202,7 +200,7 @@ export async function POST(req: NextRequest) {
         {
           model:      'claude-sonnet-4-5',
           max_tokens: 1500,
-          system:     (isVoice ? ARIA_VOICE_PROMPT : ARIA_SYSTEM_PROMPT) + `\n\nCURRENT TIME CONTEXT:\nThe current time is ${new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit', hour12: true })} Central Time. Use this to determine the correct greeting — Good morning (5am–11:59am), Good afternoon (12pm–5:59pm), Good evening (6pm–4:59am).`,
+          system:     ARIA_SYSTEM_PROMPT + `\n\nCURRENT TIME CONTEXT:\nThe current time is ${new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit', hour12: true })} Central Time. Use this to determine the correct greeting — Good morning (5am–11:59am), Good afternoon (12pm–5:59pm), Good evening (6pm–4:59am).`,
           messages,
         },
         { signal: controller.signal }
