@@ -192,20 +192,34 @@ export async function POST(req: NextRequest) {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     let rawResponse: string;
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), 25000);
 
     try {
-      const result = await client.messages.create({
-        model:      'claude-sonnet-4-5',
-        max_tokens: 1500,
-        system:     ARIA_SYSTEM_PROMPT + `\n\nCURRENT TIME CONTEXT:\nThe current time is ${new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit', hour12: true })} Central Time. Use this to determine the correct greeting — Good morning (5am–11:59am), Good afternoon (12pm–5:59pm), Good evening (6pm–4:59am).`,
-        messages,
-      });
+      const result = await client.messages.create(
+        {
+          model:      'claude-sonnet-4-5',
+          max_tokens: 1500,
+          system:     ARIA_SYSTEM_PROMPT + `\n\nCURRENT TIME CONTEXT:\nThe current time is ${new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit', hour12: true })} Central Time. Use this to determine the correct greeting — Good morning (5am–11:59am), Good afternoon (12pm–5:59pm), Good evening (6pm–4:59am).`,
+          messages,
+        },
+        { signal: controller.signal }
+      );
+      clearTimeout(timeoutId);
 
       rawResponse = result.content
         .filter(block => block.type === 'text')
         .map(block => (block as { type: 'text'; text: string }).text)
         .join('');
     } catch (err) {
+      clearTimeout(timeoutId);
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.error('[Aria] Request timed out after 25s');
+        return NextResponse.json({
+          type:     'message',
+          response: "I'm sorry — it's taking a moment on our end. Please try again or call us directly at (646) 879-1391.",
+        });
+      }
       console.error('[Aria] Anthropic error:', err);
       return NextResponse.json({
         type:     'message',
