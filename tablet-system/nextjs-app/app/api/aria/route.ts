@@ -197,7 +197,7 @@ export async function POST(req: NextRequest) {
       const result = await client.messages.create({
         model:      'claude-sonnet-4-5',
         max_tokens: 1500,
-        system:     ARIA_SYSTEM_PROMPT,
+        system:     ARIA_SYSTEM_PROMPT + `\n\nCURRENT TIME CONTEXT:\nThe current time is ${new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit', hour12: true })} Central Time. Use this to determine the correct greeting — Good morning (5am–11:59am), Good afternoon (12pm–5:59pm), Good evening (6pm–4:59am).`,
         messages,
       });
 
