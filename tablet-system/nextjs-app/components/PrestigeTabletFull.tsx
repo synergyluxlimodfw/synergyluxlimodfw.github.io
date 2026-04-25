@@ -30,8 +30,8 @@ function RideStartScreen({ onStart }: { onStart: (name: string, destination: str
   return (
     <div style={{ position: "relative", zIndex: 1, padding: "44px 48px", minHeight: 560, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } }}>
-        <p style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: `${GOLD}0.7)`, fontWeight: 300, marginBottom: 8, fontFamily: SANS }}>Synergy Lux · Ride Setup</p>
-        <h1 style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 300, color: "#f0ece4", lineHeight: 1.2 }}>{"Start the\njourney."}</h1>
+        <p style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: `${GOLD}0.7)`, fontWeight: 300, marginBottom: 8, fontFamily: SANS }}>Synergy Lux · Private Chauffeur Service</p>
+        <h1 style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 300, color: "#f0ece4", lineHeight: 1.2 }}>{"Your chauffeur\nis ready."}</h1>
       </motion.div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE, delay: 0.15 } }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -75,7 +75,7 @@ function RideStartScreen({ onStart }: { onStart: (name: string, destination: str
       </motion.div>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 0.9, ease: EASE, delay: 0.3 } }}>
         <button onClick={handleStart} style={{ width: "100%", padding: 18, background: `${GOLD}0.15)`, border: `0.5px solid ${GOLD}0.5)`, borderRadius: 10, color: "#d4b896", fontSize: 15, fontFamily: SANS, fontWeight: 400, letterSpacing: "1px", cursor: "pointer", textTransform: "uppercase" }}>
-          Begin Ride
+          Begin Journey
         </button>
       </motion.div>
     </div>
@@ -99,11 +99,11 @@ function FallbackView() {
   return (
     <div style={{ position: "relative", zIndex: 1, padding: "44px 48px 40px", minHeight: 560, display: "flex", flexDirection: "column", justifyContent: "center", gap: 16 }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } }}>
-        <p style={{ fontSize: 11, letterSpacing: "1.8px", textTransform: "uppercase", color: `${CREAM}0.3)`, fontWeight: 300, marginBottom: 6, fontFamily: SANS }}>Please stand by</p>
-        <h1 style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 300, color: "#f0ece4", lineHeight: 1.2, whiteSpace: "pre-line" }}>{"Reconnecting\nyour journey."}</h1>
+        <p style={{ fontSize: 11, letterSpacing: "1.8px", textTransform: "uppercase", color: `${CREAM}0.3)`, fontWeight: 300, marginBottom: 6, fontFamily: SANS }}>One moment</p>
+        <h1 style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 300, color: "#f0ece4", lineHeight: 1.2, whiteSpace: "pre-line" }}>{"We'll be ready\nwhen you are."}</h1>
       </motion.div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE, delay: 0.15 } }}>
-        <p style={{ fontSize: 13, fontWeight: 300, color: `${CREAM}0.35)`, fontFamily: SANS }}>Your chauffeur continues on route.</p>
+        <p style={{ fontSize: 13, fontWeight: 300, color: `${CREAM}0.35)`, fontFamily: SANS }}>Sit back. You're in good hands.</p>
       </motion.div>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 0.4, duration: 1.0 } }} style={{ display: "flex", gap: 6, marginTop: 8 }}>
         {[0, 1, 2].map((i) => (
