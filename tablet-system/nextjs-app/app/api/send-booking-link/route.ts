@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
+import { sendBookingLink as sendBookingLinkEmail } from '@/lib/email';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -17,7 +18,7 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { phone, amount, name, pickup, destination, occasion } = await req.json();
+    const { phone, amount, name, pickup, destination, occasion, email, service, date, time } = await req.json();
 
     if (!amount || !name || !destination) {
       return NextResponse.json(
@@ -65,6 +66,21 @@ export async function POST(req: NextRequest) {
       } catch (smsErr) {
         console.error('SMS failed:', smsErr);
       }
+    }
+
+    // Send email fallback in parallel (non-blocking)
+    if (email) {
+      sendBookingLinkEmail({
+        to:          email,
+        name:        name        || '',
+        service:     service     || occasion || '',
+        pickup:      pickup      || '',
+        destination: destination || '',
+        date:        date        || '',
+        time:        time        || '',
+        price:       amount,
+        stripeUrl:   session.url!,
+      }).catch(err => console.error('[send-booking-link] Email send error:', err));
     }
 
     // Update lead status if exists

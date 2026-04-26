@@ -178,6 +178,10 @@ export async function POST(req: NextRequest) {
                 pickup:      booking.pickup_location?.trim() || '',
                 destination: booking.destination?.trim()     || '',
                 occasion:    booking.occasion?.trim()        || '',
+                email:       booking.email?.trim()           || '',
+                service:     booking.service?.trim()         || booking.occasion?.trim() || '',
+                date:        booking.date?.trim()            || '',
+                time:        booking.time?.trim()            || '',
               }),
             }).catch(err => console.error('[SMS/incoming] send-booking-link error:', err));
           }
