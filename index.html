@@ -302,6 +302,13 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .rev-text{font-size:13px;color:rgba(239,239,239,0.65);line-height:1.85;font-weight:300;font-style:italic;margin-bottom:20px;}
 .rev-author{font-size:10px;font-weight:600;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
 .rev-role{font-size:11px;color:var(--muted);margin-top:3px;}
+.rev-featured{border:1px solid rgba(201,168,76,0.18);background:rgba(201,168,76,0.03);padding:48px 56px;margin-top:56px;position:relative;}
+.rev-featured::before{content:'';position:absolute;top:0;left:56px;width:40px;height:2px;background:var(--gold);}
+.rev-featured .rev-text{font-size:17px;line-height:1.9;color:rgba(239,239,239,0.82);margin-bottom:28px;}
+.rev-featured .rev-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.rev-featured .rev-author{font-size:11px;}
+.rev-featured .rev-source{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(239,239,239,0.3);padding-left:16px;border-left:1px solid rgba(201,168,76,0.2);}
+@media(max-width:600px){.rev-featured{padding:36px 28px;}.rev-featured .rev-text{font-size:14px;}}
 
 /* ── FAQ ── */
 .faq-inner{max-width:720px;margin:52px auto 0;}
@@ -509,6 +516,20 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 <section class="sec sec-dark" id="reviews">
   <p class="eyebrow reveal">Client Experiences</p>
   <h2 class="sec-h2 reveal d1">What Our Clients <em>Are Saying</em></h2>
+
+  <!-- ── Featured review — Lindsey K., Yelp ── -->
+  <div class="rev-featured reveal d1">
+    <div class="rev-stars">★★★★★</div>
+    <p class="rev-text">"Mr. Rodriguez was incredibly professional, very knowledgeable about the city and even gave me suggestions for visiting local restaurants and venues! I would highly recommend him and I will be using him in the future!"</p>
+    <div class="rev-meta">
+      <div>
+        <div class="rev-author">Lindsey K.</div>
+        <div class="rev-role">April 2026</div>
+      </div>
+      <div class="rev-source">★ via Yelp</div>
+    </div>
+  </div>
+
   <div class="reviews-grid reveal d2">
     <div class="rev-card">
       <div class="rev-stars">★★★★★</div>
