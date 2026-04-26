@@ -159,14 +159,7 @@ export async function POST(req: NextRequest) {
 
       if (missingFields.length === 0) {
         // Everything collected — move to confirmation
-        smsBody = [
-          `Hi${firstName ? ` ${firstName}` : ''}, this is Amirah with Synergy Lux.`,
-          `I have your ${occasion} to ${destination}${date ? ` on ${date}` : ''}${time ? ` at ${time}` : ''}${price ? ` for $${price}` : ''}.`,
-          '',
-          'Reply YES to receive your secure payment link.',
-          '',
-          'Reply STOP to opt out.',
-        ].join('\n');
+        smsBody = `Hi${firstName ? ` ${firstName}` : ''}, this is Amirah with Synergy Lux. Your ${occasion} to ${destination}${date ? ` on ${date}` : ''}${time ? ` at ${time}` : ''}${price ? ` for $${price}` : ''} is being reviewed by your chauffeur. He'll confirm shortly.\n\nTo secure your ride now: reply YES and we'll send your payment link immediately.\n\nReply STOP to opt out.`;
       } else {
         smsBody = [
           `Hi${firstName ? ` ${firstName}` : ''}, this is Amirah with Synergy Lux — following up from your call.`,
