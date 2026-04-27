@@ -34,6 +34,21 @@ type UnifiedLead = {
   source?: string;
 };
 
+type WebsiteQuote = {
+  id: string;
+  name: string | null;
+  phone: string | null;
+  service: string | null;
+  date: string | null;
+  time: string | null;
+  pickup: string | null;
+  dropoff: string | null;
+  passengers: number;
+  quoted_price: number | null;
+  status: string;
+  created_at: string;
+};
+
 // ── Mock data ──────────────────────────────────────────────
 
 const MOCK_RIDES: MockRide[] = [
@@ -87,6 +102,9 @@ export default function AdminPage() {
   const [outreachFilter,   setOutreachFilter]   = useState<'all' | 'new' | 'contacted' | 'replied'>('new');
   const [copiedId,         setCopiedId]         = useState<string | null>(null);
   const [outreachLoading,  setOutreachLoading]  = useState(true);
+  const [quotes,           setQuotes]           = useState<WebsiteQuote[]>([]);
+  const [quotesLoading,    setQuotesLoading]    = useState(true);
+  const [sendingPaymentId, setSendingPaymentId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     // ── localStorage metrics ──
@@ -214,15 +232,19 @@ export default function AdminPage() {
     setLeadsLoading(false);
 
     // Fetch outreach leads from leads table
-    const { data: outreach } = await supabase
-      .from('leads')
-      .select('id, first_name, last_name, name, job_title, company, location, linkedin_url, email, lead_type, priority, status, email_subject, email_body, linkedin_message, followup_message, created_at, last_contacted_at, follow_up_due')
-      .in('source', ['linkedin-apify', 'serpapi-google', 'manual'])
-      .order('priority', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(100);
-    if (outreach) setOutreachLeads(outreach);
-    setOutreachLoading(false);
+    fetch('/api/admin/outreach')
+      .then(r => r.json())
+      .then(d => { setOutreachLeads(d.leads || []); setOutreachLoading(false); })
+      .catch(() => setOutreachLoading(false));
+
+    // ── Website quote requests ──
+    setQuotesLoading(true);
+    const { data: quotesData } = await supabase
+      .from('website_quotes')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (quotesData) setQuotes(quotesData as WebsiteQuote[]);
+    setQuotesLoading(false);
 
     // Conversion metrics
     fetch('/api/admin/metrics')
@@ -237,15 +259,11 @@ export default function AdminPage() {
 
   async function markContacted(id: string) {
     const followUp = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-    await supabase
-      .from('leads')
-      .update({
-        status: 'contacted',
-        last_contacted_at: new Date().toISOString(),
-        follow_up_due: followUp,
-        contact_attempts: 1,
-      })
-      .eq('id', id);
+    await fetch('/api/admin/outreach', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
     setOutreachLeads(prev => prev.map(l => l.id === id ? { ...l, status: 'contacted' } : l));
   }
 
@@ -253,6 +271,34 @@ export default function AdminPage() {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  }
+
+  async function confirmQuote(id: string) {
+    await supabase.from('website_quotes').update({ status: 'confirmed' }).eq('id', id);
+    setQuotes(prev => prev.map(q => q.id === id ? { ...q, status: 'confirmed' } : q));
+  }
+
+  async function sendPaymentLink(quote: WebsiteQuote) {
+    if (!quote.phone || !quote.quoted_price) return;
+    setSendingPaymentId(quote.id);
+    try {
+      await fetch('/api/send-booking-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone:       quote.phone,
+          name:        quote.name ?? '',
+          amount:      quote.quoted_price,
+          service:     quote.service ?? '',
+          pickup:      quote.pickup ?? '',
+          destination: quote.dropoff ?? '',
+          date:        quote.date ?? '',
+          time:        quote.time ?? '',
+        }),
+      });
+    } finally {
+      setSendingPaymentId(null);
+    }
   }
 
   // ── Stat cards ─────────────────────────────────────────
@@ -316,6 +362,157 @@ export default function AdminPage() {
             <StatCard label="Pending Rebooks" value={String(todayStats.pending)} delay={0.12} color="#FCD34D" />
           </div>
         </section>
+
+        {/* ── QUOTE REQUESTS ──────────────────────────────── */}
+        {(() => {
+          const now      = new Date();
+          const todayStr = now.toISOString().split('T')[0];
+          const weekStart = new Date(now);
+          weekStart.setDate(now.getDate() - now.getDay());
+          weekStart.setHours(0, 0, 0, 0);
+
+          const qToday     = quotes.filter(q => q.created_at.startsWith(todayStr)).length;
+          const qWeek      = quotes.filter(q => new Date(q.created_at) >= weekStart).length;
+          const qPending   = quotes.filter(q => q.status === 'pending').length;
+          const qConfirmed = quotes.filter(q => q.status === 'confirmed').length;
+
+          const QUOTE_STATUS: Record<string, { color: string; bg: string }> = {
+            pending:   { color: '#FCD34D', bg: 'rgba(252,211,77,0.10)'  },
+            confirmed: { color: '#4ADE80', bg: 'rgba(74,222,128,0.10)'  },
+            cancelled: { color: '#F87171', bg: 'rgba(248,113,113,0.10)' },
+          };
+
+          return (
+            <section>
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted">Quote Requests</p>
+                  <p className="text-[11px] text-lux-muted/50 mt-1">Website calculator leads — ready to confirm</p>
+                </div>
+                <p className="text-[10px] tracking-[2px] uppercase" style={{ color: 'rgba(201,168,76,0.5)' }}>
+                  {quotes.length} total
+                </p>
+              </div>
+
+              {/* Summary cards */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <ConversionCard label="Today"     value={String(qToday)}     sub="quote requests"  color="#C9A84C" />
+                <ConversionCard label="This Week" value={String(qWeek)}      sub="quote requests"  color="#818CF8" />
+                <ConversionCard label="Pending"   value={String(qPending)}   sub="awaiting action" color="#FCD34D" />
+                <ConversionCard label="Confirmed" value={String(qConfirmed)} sub="payment sent"    color="#4ADE80" />
+              </div>
+
+              {quotesLoading ? (
+                <div className="rounded-2xl p-8 text-center" style={{ background: '#0F0F14', border: '1px solid rgba(201,168,76,0.08)' }}>
+                  <p className="text-[12px] text-lux-muted tracking-wide">Loading quote requests…</p>
+                </div>
+              ) : quotes.length === 0 ? (
+                <EmptyCard text="No quote requests yet — website calculator submissions will appear here." />
+              ) : (
+                <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(201,168,76,0.10)', overflowX: 'auto' }}>
+                  {/* Header */}
+                  <div
+                    className="px-5 py-3 text-[10px] tracking-[2px] uppercase"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '110px 120px 120px 130px 190px 110px 70px 90px 185px',
+                      color: '#666672',
+                      borderBottom: '1px solid rgba(201,168,76,0.08)',
+                      background: '#0F0F14',
+                      minWidth: 1240,
+                    }}
+                  >
+                    <span>Received</span>
+                    <span>Name</span>
+                    <span>Phone</span>
+                    <span>Service</span>
+                    <span>Route</span>
+                    <span>Ride Date</span>
+                    <span>Price</span>
+                    <span>Status</span>
+                    <span>Actions</span>
+                  </div>
+
+                  {/* Rows */}
+                  <div style={{ minWidth: 1240 }}>
+                    {quotes.map((q, i) => {
+                      const sc = QUOTE_STATUS[q.status] ?? { color: '#666672', bg: 'rgba(102,102,114,0.10)' };
+                      const received = new Date(q.created_at).toLocaleString('en-US', {
+                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
+                      });
+                      return (
+                        <motion.div
+                          key={q.id}
+                          initial={{ opacity: 0, x: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.025 }}
+                          className="px-5 py-3 items-center"
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '110px 120px 120px 130px 190px 110px 70px 90px 185px',
+                            borderBottom: i < quotes.length - 1 ? '1px solid rgba(201,168,76,0.06)' : 'none',
+                            background: i % 2 === 0 ? '#09090E' : '#0F0F14',
+                          }}
+                        >
+                          <p className="text-[11px] text-lux-muted/70 tabular-nums">{received}</p>
+                          <p className="text-[13px] font-medium text-lux-white truncate pr-2">{q.name ?? '—'}</p>
+                          <a
+                            href={`tel:${q.phone}`}
+                            className="text-[11px] tabular-nums hover:text-gold transition-colors"
+                            style={{ color: 'rgba(201,168,76,0.7)' }}
+                          >
+                            {q.phone ?? '—'}
+                          </a>
+                          <p className="text-[11px] text-lux-muted truncate pr-2">{q.service ?? '—'}</p>
+                          <p className="text-[11px] text-lux-muted/70 truncate pr-2">
+                            {q.pickup && q.dropoff ? `${q.pickup} → ${q.dropoff}` : q.pickup ?? q.dropoff ?? '—'}
+                          </p>
+                          <p className="text-[11px] text-lux-muted/70 tabular-nums">{q.date ?? '—'}</p>
+                          <p className="text-[12px] tabular-nums font-medium" style={{ color: '#4ADE80' }}>
+                            {q.quoted_price ? `$${q.quoted_price}` : '—'}
+                          </p>
+                          <span
+                            className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase rounded-full px-2.5 py-1 w-fit"
+                            style={{ color: sc.color, background: sc.bg, border: `1px solid ${sc.color}33` }}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: sc.color }} />
+                            {q.status}
+                          </span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {q.status !== 'confirmed' && (
+                              <button
+                                onClick={() => confirmQuote(q.id)}
+                                className="text-[9px] tracking-[1.5px] uppercase px-2.5 py-1 rounded-lg transition-all hover:opacity-80"
+                                style={{ color: '#4ADE80', border: '1px solid rgba(74,222,128,0.30)', background: 'rgba(74,222,128,0.06)' }}
+                              >
+                                Confirm
+                              </button>
+                            )}
+                            <button
+                              onClick={() => sendPaymentLink(q)}
+                              disabled={sendingPaymentId === q.id}
+                              className="text-[9px] tracking-[1.5px] uppercase px-2.5 py-1 rounded-lg transition-all hover:opacity-80 disabled:opacity-40"
+                              style={{ color: '#C9A84C', border: '1px solid rgba(201,168,76,0.30)', background: 'rgba(201,168,76,0.06)' }}
+                            >
+                              {sendingPaymentId === q.id ? 'Sending…' : 'Pay Link'}
+                            </button>
+                            <a
+                              href={`tel:${q.phone}`}
+                              className="text-[9px] tracking-[1.5px] uppercase px-2.5 py-1 rounded-lg transition-all hover:opacity-80"
+                              style={{ color: '#666672', border: '1px solid rgba(102,102,114,0.25)', background: 'rgba(102,102,114,0.04)' }}
+                            >
+                              Call
+                            </a>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </section>
+          );
+        })()}
 
         {/* ── 1. LEADS PIPELINE ──────────────────────────── */}
         <section>
