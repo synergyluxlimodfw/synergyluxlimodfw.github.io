@@ -7,7 +7,7 @@ const twilioClient = twilio(
   process.env.TWILIO_AUTH
 );
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-01-27.acacia' });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia' });
 
 const OPERATOR_PHONE = '+16468791391';
 const FROM_PHONE     = process.env.TWILIO_PHONE!;
