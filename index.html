@@ -853,6 +853,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
           <input type="text" id="reqName"  placeholder="Your name"  autocomplete="given-name" />
           <input type="tel"  id="reqPhone" placeholder="Your phone" autocomplete="tel" />
         </div>
+        <p style="font-size:10px;color:rgba(239,239,239,0.38);line-height:1.6;margin:10px 0 14px;font-weight:300;">By providing your phone number you consent to receive SMS messages from Synergy Lux Limo DFW regarding your booking. Reply STOP to opt out.</p>
         <button class="quote-confirm-btn" id="confirmBtn" onclick="confirmQuoteRequest()">Confirm My Request</button>
       </div>
       <div class="quote-success" id="quoteSuccess"></div>
@@ -872,6 +873,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     <form class="form-grid reveal d2" id="bookingForm" onsubmit="return handleBooking(event);">
       <div class="fg"><label>Full Name *</label><input type="text" id="f_name" name="Name" placeholder="Your full name" required></div>
       <div class="fg"><label>Phone Number *</label><input type="tel" id="f_phone" name="Phone" placeholder="(000) 000-0000" required></div>
+      <div class="fg full" style="margin-top:-8px;"><p style="font-size:10px;color:rgba(239,239,239,0.38);line-height:1.6;font-weight:300;">By providing your phone number you consent to receive SMS messages from Synergy Lux Limo DFW regarding your booking. Reply STOP to opt out.</p></div>
       <div class="fg"><label>Service Type *</label>
         <select id="f_service" name="Service" required>
           <option value="">Select a service</option>
