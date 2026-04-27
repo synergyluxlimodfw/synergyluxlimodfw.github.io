@@ -198,18 +198,37 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .calc-header{text-align:center;margin-bottom:48px;}
 .calc-header h2{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,44px);font-weight:300;margin-bottom:10px;}
 .calc-header p{color:var(--muted);font-size:13px;}
-.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.calc-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.calc-row-full{grid-template-columns:1fr;}
+.calc-row-3col{grid-template-columns:1fr 1fr 1fr;}
 .calc-field{display:flex;flex-direction:column;gap:8px;}
 .calc-field label{font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);}
-.calc-field input,.calc-field select{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--white);padding:13px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;width:100%;}
+.calc-field input,.calc-field select{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--white);padding:13px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;width:100%;-webkit-appearance:none;appearance:none;}
+.calc-field input[type=date]{color-scheme:dark;}
+.calc-field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.7) sepia(1) saturate(3) hue-rotate(5deg);cursor:pointer;opacity:0.7;}
 .calc-field input:focus,.calc-field select:focus{border-color:rgba(201,168,76,0.5);}
+.calc-field input::placeholder{color:rgba(239,239,239,0.25);}
 .calc-field select option{background:#141414;}
-.calc-btn{width:100%;background:var(--gold);color:#000;border:none;padding:15px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.3s;margin-bottom:20px;}
+.calc-toggle-wrap{display:flex;align-items:center;gap:12px;padding:13px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);cursor:pointer;height:48px;box-sizing:border-box;}
+.calc-toggle-wrap:hover{border-color:rgba(201,168,76,0.3);}
+.calc-toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
+.calc-toggle input{opacity:0;width:0;height:0;position:absolute;}
+.calc-toggle-track{position:absolute;inset:0;background:rgba(255,255,255,0.1);border-radius:20px;transition:background 0.25s;}
+.calc-toggle input:checked+.calc-toggle-track{background:var(--gold);}
+.calc-toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform 0.25s;}
+.calc-toggle input:checked~.calc-toggle-track .calc-toggle-thumb{transform:translateX(16px);}
+.calc-toggle-label{font-size:12px;color:rgba(239,239,239,0.55);font-weight:300;}
+.calc-btn{width:100%;background:var(--gold);color:#000;border:none;padding:16px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:background 0.3s;margin-top:8px;margin-bottom:20px;}
 .calc-btn:hover{background:var(--gold2);}
-.price-result{display:none;background:rgba(201,168,76,0.06);border:1px solid var(--border);padding:32px;text-align:center;}
+.calc-btn:disabled{opacity:0.6;cursor:not-allowed;}
+.price-result{display:none;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.18);padding:36px 32px;text-align:center;}
 .price-result.show{display:block;}
-.price-main{font-family:'Cormorant Garamond',serif;font-size:68px;font-weight:300;color:var(--gold);line-height:1;}
-.price-label{font-size:11px;color:var(--muted);margin-top:6px;margin-bottom:20px;letter-spacing:1px;text-transform:uppercase;}
+.price-main{font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;color:var(--gold);line-height:1;}
+.price-label{font-size:11px;color:var(--muted);margin-top:8px;margin-bottom:20px;letter-spacing:1.5px;text-transform:uppercase;}
+.price-summary{background:rgba(0,0,0,0.25);border:1px solid rgba(201,168,76,0.10);padding:18px 20px;margin-bottom:20px;text-align:left;}
+.summary-row{font-size:12px;color:rgba(239,239,239,0.6);padding:4px 0;line-height:1.6;}
+.summary-from{color:rgba(239,239,239,0.85);}
+.summary-to{color:var(--gold);opacity:0.85;}
 .price-breakdown{font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:24px;}
 .price-breakdown span{color:var(--white);font-weight:500;}
 .price-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
@@ -218,6 +237,7 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .btn-dep-now{background:transparent;border:1px solid var(--border);color:var(--gold);padding:13px 32px;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all 0.3s;cursor:pointer;font-family:'Inter',sans-serif;}
 .btn-dep-now:hover{background:rgba(201,168,76,0.08);}
 .calc-note{text-align:center;font-size:11px;color:var(--muted);margin-top:12px;}
+@media(max-width:600px){.calc-row{grid-template-columns:1fr;}.calc-row-3col{grid-template-columns:1fr 1fr;}}
 
 /* ── BOOKING FORM ── */
 .booking-sec{border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
@@ -444,6 +464,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   line-height: 1;
 }
 </style>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOWMJuY_dQuywNAjny-qNlNL3DqgwrDRc&libraries=places&callback=initQuoteCalc" async defer></script>
 </head>
 <body>
 
@@ -645,62 +666,84 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     <div class="calc-header reveal">
       <p class="eyebrow" style="justify-content:center;">Instant Pricing</p>
       <h2>Get Your Instant Quote</h2>
-      <p>No forms, no waiting. See your price instantly.</p>
+      <p>Exact pricing based on your route — no estimates, no surprises.</p>
     </div>
-    <div class="calc-grid reveal d1">
+
+    <!-- Row 1: Service -->
+    <div class="calc-row calc-row-full reveal d1">
       <div class="calc-field">
         <label>Service Type</label>
-        <select id="calcService" onchange="calculatePrice()">
+        <select id="calcService">
           <option value="">Select service...</option>
-          <option value="airport_dfw">Airport Transfer — DFW Airport</option>
-          <option value="airport_love">Airport Transfer — Love Field</option>
-          <option value="corporate">Corporate / Executive</option>
-          <option value="wedding_4">Wedding — 4 Hours</option>
-          <option value="wedding_8">Wedding — Full Day (8 hrs)</option>
-          <option value="prom">Prom / Special Event</option>
-          <option value="hourly_2">Hourly Charter — 2 Hours</option>
-          <option value="hourly_3">Hourly Charter — 3 Hours</option>
-          <option value="hourly_4">Hourly Charter — 4 Hours</option>
-          <option value="hourly_5">Hourly Charter — 5+ Hours</option>
-          <option value="nightout">Night Out — 3 Hours</option>
-          <option value="sporting">Sporting Event (Roundtrip)</option>
-          <option value="fifa">🏆 FIFA Match Day — from $350 roundtrip</option>
-          <option value="nye">New Year's Eve Special</option>
-        </select>
-      </div>
-      <div class="calc-field">
-        <label>Pickup Area</label>
-        <select id="calcPickup" onchange="calculatePrice()">
-          <option value="">Select area...</option>
-          <option value="dallas">Dallas / Uptown</option>
-          <option value="fortworth">Fort Worth</option>
-          <option value="plano">Plano / Allen</option>
-          <option value="frisco">Frisco / McKinney</option>
-          <option value="southlake">Southlake / Westlake</option>
-          <option value="irving">Irving / Las Colinas</option>
-          <option value="arlington">Arlington / Grand Prairie</option>
-          <option value="addison">Addison / Carrollton</option>
-        </select>
-      </div>
-      <div class="calc-field">
-        <label>Trip Type</label>
-        <select id="calcTrip" onchange="calculatePrice()">
-          <option value="oneway">One Way</option>
-          <option value="roundtrip">Round Trip</option>
-        </select>
-      </div>
-      <div class="calc-field">
-        <label>Add-ons</label>
-        <select id="calcAddons" onchange="calculatePrice()">
-          <option value="0">No add-ons</option>
-          <option value="25">Meet & Greet (+$25)</option>
-          <option value="40">Meet & Greet + Amenities (+$40)</option>
+          <option value="airport_dfw">DFW Airport Transfer</option>
+          <option value="airport_love">Love Field Transfer</option>
+          <option value="hourly">Hourly Charter</option>
+          <option value="wedding">Wedding Package</option>
+          <option value="nightout">Night Out</option>
+          <option value="fifa">🏆 FIFA Match Day</option>
+          <option value="longdistance">Long Distance</option>
         </select>
       </div>
     </div>
-    <div class="price-result reveal d2" id="priceResult">
-      <div class="price-main" id="priceMain">$0</div>
-      <div class="price-label" id="priceLabel">Estimated total</div>
+
+    <!-- Row 2: Date + Time -->
+    <div class="calc-row reveal d1">
+      <div class="calc-field">
+        <label>Date</label>
+        <input type="date" id="calcDate" />
+      </div>
+      <div class="calc-field">
+        <label>Pickup Time</label>
+        <select id="calcTime">
+          <option value="">Select time...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 3: Addresses -->
+    <div class="calc-row reveal d2">
+      <div class="calc-field">
+        <label>Pickup Address or Landmark</label>
+        <input type="text" id="calcPickupAddr" placeholder="e.g. DFW Terminal D, Ritz-Carlton Dallas…" autocomplete="off" />
+      </div>
+      <div class="calc-field">
+        <label>Drop-off Address or Landmark</label>
+        <input type="text" id="calcDropoffAddr" placeholder="e.g. 1500 Marilla St, Dallas…" autocomplete="off" />
+      </div>
+    </div>
+
+    <!-- Row 4: Passengers + Return toggle -->
+    <div class="calc-row reveal d2">
+      <div class="calc-field">
+        <label>Passengers</label>
+        <select id="calcPassengers">
+          <option value="1">1 passenger</option>
+          <option value="2">2 passengers</option>
+          <option value="3">3 passengers</option>
+          <option value="4">4 passengers</option>
+          <option value="5">5 passengers</option>
+          <option value="6">6 passengers</option>
+        </select>
+      </div>
+      <div class="calc-field">
+        <label>Return Trip</label>
+        <div class="calc-toggle-wrap" onclick="document.getElementById('calcReturn').click()">
+          <label class="calc-toggle">
+            <input type="checkbox" id="calcReturn" onclick="event.stopPropagation()" />
+            <div class="calc-toggle-track"><div class="calc-toggle-thumb"></div></div>
+          </label>
+          <span class="calc-toggle-label">Include return trip</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn reveal d3" id="calcBtn" onclick="getQuote()">Get My Exact Quote</button>
+
+    <!-- Results -->
+    <div class="price-result" id="priceResult">
+      <div class="price-main" id="priceMain"></div>
+      <div class="price-label" id="priceLabel"></div>
+      <div class="price-summary" id="priceSummary"></div>
       <div class="price-breakdown" id="priceBreakdown"></div>
       <div class="price-btns">
         <button class="btn-pay-now" onclick="scrollToBooking()">Book This Ride</button>
@@ -1107,80 +1150,157 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 <script>
 emailjs.init({publicKey:'vOq3riFbW3wniDu9K'});
 
-var PRICES={
-  airport_dfw:{dallas:165,fortworth:180,plano:180,frisco:195,southlake:175,irving:155,arlington:185,addison:170},
-  airport_love:{dallas:140,fortworth:165,plano:165,frisco:180,southlake:160,irving:145,arlington:170,addison:150},
-  corporate:{dallas:155,fortworth:170,plano:165,frisco:180,southlake:170,irving:155,arlington:170,addison:160},
-  wedding_4:{base:625},wedding_8:{base:1100},prom:{base:575},
-  hourly_2:{base:330},hourly_3:{base:495},hourly_4:{base:660},hourly_5:{base:825},
-  nightout:{base:475},sporting:{base:300},fifa:{base:350},nye:{base:750}
-};
-var SVC_LABELS={
-  airport_dfw:'Airport Transfer DFW',airport_love:'Airport Transfer Love Field',
-  corporate:'Corporate',wedding_4:'Wedding 4hrs',wedding_8:'Wedding Full Day',
-  prom:'Prom/Event',hourly_2:'Hourly 2hrs',hourly_3:'Hourly 3hrs',
-  hourly_4:'Hourly 4hrs',hourly_5:'Hourly 5hrs+',
-  nightout:'Night Out',sporting:'Sporting Event',fifa:'FIFA Match Day',nye:'NYE Special'
-};
-var STRIPE_LINKS={
-  airport_dfw:'https://buy.stripe.com/00w3cp7J2b7NafF2Uf8Vi06',
-  airport_love:'https://buy.stripe.com/cNi6oBaVe2BhafFgL58Vi08',
-  corporate:'#booking',
-  wedding_4:'https://buy.stripe.com/6oU00d9Ra8ZF0F5cuP8Vi0b',
-  wedding_8:'https://buy.stripe.com/6oU00d9Ra8ZF0F5cuP8Vi0b',
-  prom:'https://buy.stripe.com/4gM5kx8N6b7N1J9eCX8Vi0d',
-  hourly_2:'https://buy.stripe.com/6oU5kxe7q7VB2NdamH8Vi09',
-  hourly_3:'#booking',hourly_4:'#booking',hourly_5:'#booking',
-  nightout:'https://buy.stripe.com/3cI8wJ4wQ8ZF1J91Qb8Vi0h',
-  sporting:'https://buy.stripe.com/aFafZb7J2dfVevV3Yj8Vi0f',
-  fifa:'/fifa-2026.html',nye:'#booking'
-};
-function calculatePrice(){
-  var svc=document.getElementById('calcService').value;
-  var pickup=document.getElementById('calcPickup').value;
-  var trip=document.getElementById('calcTrip').value;
-  var addons=parseInt(document.getElementById('calcAddons').value)||0;
-  var result=document.getElementById('priceResult');
-  if(!svc){result.classList.remove('show');return;}
-  var base=0,p=PRICES[svc];
-  if(p.base!==undefined){base=p.base;}
-  else{if(!pickup){result.classList.remove('show');return;}base=p[pickup]||155;}
-  if(trip==='roundtrip'&&p.base===undefined)base=Math.round(base*1.8);
-  base+=addons;
-  var dep=Math.ceil(base*0.5);
-  document.getElementById('priceMain').textContent='$'+base;
-  document.getElementById('priceLabel').textContent=SVC_LABELS[svc]||svc;
-  document.getElementById('priceBreakdown').innerHTML='Full: <span>$'+base+'</span> &nbsp;·&nbsp; 50% Deposit: <span>$'+dep+'</span><br><span style="color:var(--gold);font-size:11px;">Submit form below or call (646) 879-1391</span>';
-  result.classList.add('show');
-  var depBtn=document.getElementById('calcDepositBtn');
-  var link=STRIPE_LINKS[svc]||'#booking';
-  depBtn.href=link;
-  if(link!=='#booking'){depBtn.target='_blank';depBtn.textContent='Reserve with Deposit — $'+dep;}
-  else{depBtn.target='';depBtn.textContent='Reserve with Deposit';}
+// ── Quote Calculator ──────────────────────────────────────────
+var _quoteData = {};
+
+function initQuoteCalc() {
+  // Build 15-min time intervals
+  var sel = document.getElementById('calcTime');
+  for (var h = 0; h < 24; h++) {
+    for (var m = 0; m < 60; m += 15) {
+      var h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      var ampm = h < 12 ? 'AM' : 'PM';
+      var label = h12 + ':' + (m === 0 ? '00' : m) + ' ' + ampm;
+      var val = (h < 10 ? '0' + h : h) + ':' + (m === 0 ? '00' : m);
+      var opt = document.createElement('option');
+      opt.value = val; opt.textContent = label;
+      sel.appendChild(opt);
+    }
+  }
+  // Block past dates
+  var today = new Date();
+  document.getElementById('calcDate').min = today.toISOString().split('T')[0];
+
+  // Google Places autocomplete
+  var opts = { componentRestrictions: { country: 'us' } };
+  new google.maps.places.Autocomplete(document.getElementById('calcPickupAddr'), opts);
+  new google.maps.places.Autocomplete(document.getElementById('calcDropoffAddr'), opts);
 }
-var SVC_TO_FORM={
-  airport_dfw:'Airport Transfer — DFW ($155–$195)',
-  airport_love:'Airport Transfer — Love Field ($140–$180)',
-  corporate:'Corporate / Executive ($155+)',
-  wedding_4:'Wedding ($625+)',wedding_8:'Wedding ($625+)',
-  prom:'Prom / Event ($575)',
-  hourly_2:'Hourly Charter ($165/hr)',hourly_3:'Hourly Charter ($165/hr)',
-  hourly_4:'Hourly Charter ($165/hr)',hourly_5:'Hourly Charter ($165/hr)',
-  nightout:'Night Out ($475)',sporting:'Sporting Event ($300)'
-};
-var CITY_LABELS={
-  dallas:'Dallas, TX',fortworth:'Fort Worth, TX',plano:'Plano, TX',
-  frisco:'Frisco, TX',southlake:'Southlake, TX',irving:'Irving, TX',
-  arlington:'Arlington, TX',addison:'Addison, TX'
-};
-function scrollToBooking(){
-  var svc=document.getElementById('calcService').value;
-  var pickup=document.getElementById('calcPickup').value;
-  var formSvc=document.getElementById('f_service');
-  var formPickup=document.getElementById('f_pickup');
-  if(svc&&SVC_TO_FORM[svc]){formSvc.value=SVC_TO_FORM[svc];}
-  if(pickup&&CITY_LABELS[pickup]&&formPickup&&!formPickup.value){formPickup.value=CITY_LABELS[pickup];}
-  document.getElementById('booking').scrollIntoView({behavior:'smooth'});
+
+function calcExactPrice(svc, distMiles, durMins, isReturn) {
+  var base = 0, label = '', note = '';
+  var fixedServices = ['wedding', 'nightout', 'fifa'];
+  var autoLong = durMins > 45 && fixedServices.indexOf(svc) === -1 && svc !== 'airport_dfw' && svc !== 'airport_love';
+
+  if (svc === 'longdistance' || autoLong) {
+    var hrs = Math.max(2, Math.ceil(durMins / 60));
+    base = 165 * hrs;
+    label = 'Long Distance — ' + hrs + ' hr minimum';
+    note = '$165/hr &times; ' + hrs + ' hours';
+  } else if (svc === 'airport_dfw') {
+    var over = Math.max(0, distMiles - 20);
+    var mileage = Math.round(over * 2.5);
+    base = 155 + mileage;
+    label = 'DFW Airport Transfer';
+    note = '$155 base' + (mileage > 0 ? ' + $' + mileage + ' mileage (' + Math.round(distMiles) + ' mi)' : ' · ' + Math.round(distMiles) + ' mi');
+  } else if (svc === 'airport_love') {
+    var over2 = Math.max(0, distMiles - 15);
+    var mileage2 = Math.round(over2 * 2.5);
+    base = 140 + mileage2;
+    label = 'Love Field Transfer';
+    note = '$140 base' + (mileage2 > 0 ? ' + $' + mileage2 + ' mileage (' + Math.round(distMiles) + ' mi)' : ' · ' + Math.round(distMiles) + ' mi');
+  } else if (svc === 'hourly') {
+    var hrs2 = Math.max(2, Math.ceil(durMins / 60));
+    base = 165 * hrs2;
+    label = 'Hourly Charter — ' + hrs2 + ' hours';
+    note = '$165/hr &times; ' + hrs2 + ' hour minimum';
+  } else if (svc === 'wedding') {
+    base = 625; label = 'Wedding Package — 4 hours included'; note = 'Flat rate';
+  } else if (svc === 'nightout') {
+    base = 475; label = 'Night Out — 3 hours included'; note = 'Flat rate';
+  } else if (svc === 'fifa') {
+    base = 350; label = '🏆 FIFA Match Day — Roundtrip'; note = 'Roundtrip base rate';
+  }
+
+  if (isReturn && svc !== 'fifa') {
+    base = base * 2;
+    label += ' (roundtrip)';
+  }
+  return { price: base, label: label, note: note };
+}
+
+function getQuote() {
+  var svc     = document.getElementById('calcService').value;
+  var dateVal = document.getElementById('calcDate').value;
+  var timeVal = document.getElementById('calcTime').value;
+  var pickup  = document.getElementById('calcPickupAddr').value.trim();
+  var dropoff = document.getElementById('calcDropoffAddr').value.trim();
+  var pax     = document.getElementById('calcPassengers').value;
+  var ret     = document.getElementById('calcReturn').checked;
+
+  if (!svc)     { alert('Please select a service type.'); return; }
+  if (!dateVal) { alert('Please select a date.'); return; }
+  if (!timeVal) { alert('Please select a pickup time.'); return; }
+  if (!pickup)  { alert('Please enter a pickup address.'); return; }
+  if (!dropoff) { alert('Please enter a drop-off address.'); return; }
+
+  // 2-hour advance booking guard
+  var selDT = new Date(dateVal + 'T' + timeVal + ':00');
+  var minDT = new Date(Date.now() + 2 * 60 * 60 * 1000);
+  if (selDT < minDT) {
+    alert('Please select a time at least 2 hours from now.\nFor urgent bookings call Amirah at (646) 879-1391.');
+    return;
+  }
+
+  var btn = document.getElementById('calcBtn');
+  btn.textContent = 'Calculating route…'; btn.disabled = true;
+
+  var svc2 = new google.maps.DistanceMatrixService();
+  svc2.getDistanceMatrix({
+    origins: [pickup], destinations: [dropoff],
+    travelMode: google.maps.TravelMode.DRIVING,
+    unitSystem: google.maps.UnitSystem.IMPERIAL,
+  }, function(resp, status) {
+    btn.textContent = 'Get My Exact Quote'; btn.disabled = false;
+    if (status !== 'OK' || !resp.rows[0] || resp.rows[0].elements[0].status !== 'OK') {
+      alert('Could not calculate this route. Please check your addresses and try again.');
+      return;
+    }
+    var el       = resp.rows[0].elements[0];
+    var distMi   = el.distance.value / 1609.34;
+    var durMin   = el.duration.value / 60;
+    var distTxt  = el.distance.text;
+    var durTxt   = el.duration.text;
+    var result   = calcExactPrice(svc, distMi, durMin, ret);
+    var dep      = Math.ceil(result.price * 0.5);
+
+    var timeSel  = document.getElementById('calcTime');
+    var timeTxt  = timeSel.options[timeSel.selectedIndex].text;
+    var dateTxt  = new Date(dateVal + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'long', day:'numeric', year:'numeric' });
+
+    document.getElementById('priceMain').textContent = '$' + result.price;
+    document.getElementById('priceLabel').textContent = result.label;
+    document.getElementById('priceSummary').innerHTML =
+      '<div class="summary-row">' + dateTxt + ' &nbsp;·&nbsp; ' + timeTxt + ' &nbsp;·&nbsp; ' + pax + ' passenger' + (pax > 1 ? 's' : '') + '</div>' +
+      '<div class="summary-row"><span class="summary-from">✦ ' + pickup + '</span></div>' +
+      '<div class="summary-row"><span class="summary-to">→ ' + dropoff + '</span></div>' +
+      '<div class="summary-row" style="color:rgba(239,239,239,0.4);font-size:11px;">' + distTxt + ' &nbsp;·&nbsp; ' + durTxt + ' drive</div>';
+    document.getElementById('priceBreakdown').innerHTML =
+      result.note + ' &nbsp;&nbsp;·&nbsp;&nbsp; <span>50% deposit: $' + dep + '</span>';
+
+    var resultEl = document.getElementById('priceResult');
+    resultEl.classList.add('show');
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    _quoteData = { svc:svc, date:dateVal, time:timeVal, pickup:pickup, dropoff:dropoff, passengers:pax, price:result.price };
+  });
+}
+
+function scrollToBooking() {
+  var svcMap = {
+    airport_dfw:'Airport Transfer — DFW', airport_love:'Airport Transfer — Love Field',
+    hourly:'Hourly Charter ($165/hr)', wedding:'Wedding Package ($625)',
+    nightout:'Night Out ($475)', fifa:'FIFA Match Day ($350)', longdistance:'Long Distance ($165/hr)'
+  };
+  var d = _quoteData;
+  var el = function(id){ return document.getElementById(id); };
+  if (d.svc && el('f_service'))    el('f_service').value    = svcMap[d.svc] || d.svc;
+  if (d.pickup && el('f_pickup'))  el('f_pickup').value     = d.pickup;
+  if (d.dropoff && el('f_dropoff'))el('f_dropoff').value    = d.dropoff;
+  if (d.date && el('f_date'))      el('f_date').value       = d.date;
+  if (d.time && el('f_time'))      el('f_time').value       = d.time;
+  if (d.passengers && el('f_passengers')) el('f_passengers').value = d.passengers;
+  document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
 }
 function toggleNav(){document.getElementById('navLinks').classList.toggle('open');}
 function toggleFaq(btn){
