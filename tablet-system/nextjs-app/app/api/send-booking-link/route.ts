@@ -4,21 +4,21 @@ import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
 import { sendBookingLink as sendBookingLinkEmail } from '@/lib/email';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(req: NextRequest) {
   try {
     const { phone, amount, name, pickup, destination, occasion, email, service, date, time } = await req.json();
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+    const twilioClient = twilio(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN
+    );
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     if (!amount || !name || !destination) {
       return NextResponse.json(
