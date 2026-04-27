@@ -1,7 +1,5 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 interface BookingLinkEmailParams {
   to:          string;
   name:        string;
@@ -15,6 +13,12 @@ interface BookingLinkEmailParams {
 }
 
 export async function sendBookingLink(params: BookingLinkEmailParams): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || apiKey.startsWith('re_placeholder')) {
+    console.warn('[email] RESEND_API_KEY not configured — skipping email');
+    return;
+  }
+  const resend = new Resend(apiKey);
   const { to, name, service, pickup, destination, date, time, price, stripeUrl } = params;
 
   const text = [
