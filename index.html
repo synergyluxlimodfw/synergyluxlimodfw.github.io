@@ -238,6 +238,20 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .btn-dep-now:hover{background:rgba(201,168,76,0.08);}
 .calc-note{text-align:center;font-size:11px;color:var(--muted);margin-top:12px;}
 @media(max-width:600px){.calc-row{grid-template-columns:1fr;}.calc-row-3col{grid-template-columns:1fr 1fr;}}
+.quote-request-form{margin-top:24px;border-top:1px solid rgba(201,168,76,0.14);padding-top:24px;display:none;}
+.quote-request-form.show{display:block;}
+.quote-request-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.quote-request-fields input{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--white);padding:13px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;width:100%;box-sizing:border-box;}
+.quote-request-fields input:focus{border-color:rgba(201,168,76,0.5);}
+.quote-request-fields input::placeholder{color:rgba(239,239,239,0.25);}
+.quote-confirm-btn{width:100%;background:var(--gold);color:#000;border:none;padding:14px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.3s;}
+.quote-confirm-btn:hover{background:var(--gold2);}
+.quote-confirm-btn:disabled{opacity:0.6;cursor:not-allowed;}
+.quote-success{margin-top:20px;padding:20px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.20);text-align:left;display:none;}
+.quote-success.show{display:block;}
+.quote-success-title{font-size:13px;color:#4ADE80;font-weight:500;margin-bottom:8px;}
+.quote-success-body{font-size:12px;color:rgba(239,239,239,0.6);line-height:1.9;}
+@media(max-width:600px){.quote-request-fields{grid-template-columns:1fr;}}
 
 /* ── BOOKING FORM ── */
 .booking-sec{border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
@@ -746,11 +760,21 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="price-summary" id="priceSummary"></div>
       <div class="price-breakdown" id="priceBreakdown"></div>
       <div class="price-btns">
-        <button class="btn-pay-now" onclick="scrollToBooking()">Book This Ride</button>
+        <button class="btn-pay-now" id="requestRideBtn" onclick="showRequestForm()">Request This Ride — $<span id="requestPrice">0</span></button>
         <a class="btn-dep-now" href="tel:+18883306902">Call Amirah</a>
       </div>
-      <div class="calc-note" style="margin-bottom:8px;">Price confirmed at booking · Zelle or card accepted</div>
-      <div class="calc-note"><a href="#" onclick="document.getElementById('aria-launcher')&&document.getElementById('aria-launcher').click();return false;" style="color:var(--gold);text-decoration:none;opacity:0.8;">Or chat with Amirah for a custom quote →</a></div>
+      <div class="calc-note" style="margin-bottom:6px;">Price confirmed at booking · Zelle or card accepted</div>
+      <div class="calc-note">Prefer to talk first? <a href="tel:6468791391" style="color:var(--gold);text-decoration:none;">Call (646) 879-1391</a> or <a href="#" onclick="document.getElementById('aria-launcher')&&document.getElementById('aria-launcher').click();return false;" style="color:var(--gold);text-decoration:none;">chat with Amirah →</a></div>
+
+      <!-- Inline request form -->
+      <div class="quote-request-form" id="quoteRequestForm">
+        <div class="quote-request-fields">
+          <input type="text" id="reqName"  placeholder="Your name"  autocomplete="given-name" />
+          <input type="tel"  id="reqPhone" placeholder="Your phone" autocomplete="tel" />
+        </div>
+        <button class="quote-confirm-btn" id="confirmBtn" onclick="confirmQuoteRequest()">Confirm My Request</button>
+      </div>
+      <div class="quote-success" id="quoteSuccess"></div>
     </div>
   </div>
 </div>
@@ -1269,6 +1293,9 @@ function getQuote() {
     var dateTxt  = new Date(dateVal + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'long', day:'numeric', year:'numeric' });
 
     document.getElementById('priceMain').textContent = '$' + result.price;
+    document.getElementById('requestPrice').textContent = result.price;
+    document.getElementById('quoteRequestForm').classList.remove('show');
+    document.getElementById('quoteSuccess').classList.remove('show');
     document.getElementById('priceLabel').textContent = result.label;
     document.getElementById('priceSummary').innerHTML =
       '<div class="summary-row">' + dateTxt + ' &nbsp;·&nbsp; ' + timeTxt + ' &nbsp;·&nbsp; ' + pax + ' passenger' + (pax > 1 ? 's' : '') + '</div>' +
@@ -1286,21 +1313,80 @@ function getQuote() {
   });
 }
 
-function scrollToBooking() {
-  var svcMap = {
-    airport_dfw:'Airport Transfer — DFW', airport_love:'Airport Transfer — Love Field',
-    hourly:'Hourly Charter ($165/hr)', wedding:'Wedding Package ($625)',
-    nightout:'Night Out ($475)', fifa:'FIFA Match Day ($350)', longdistance:'Long Distance ($165/hr)'
-  };
+function showRequestForm() {
+  var form = document.getElementById('quoteRequestForm');
+  document.getElementById('quoteSuccess').classList.remove('show');
+  form.classList.add('show');
+  form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('reqName').focus();
+}
+
+function confirmQuoteRequest() {
+  var name  = document.getElementById('reqName').value.trim();
+  var phone = document.getElementById('reqPhone').value.trim();
+  if (!name)  { document.getElementById('reqName').focus();  return; }
+  if (!phone) { document.getElementById('reqPhone').focus(); return; }
+
   var d = _quoteData;
-  var el = function(id){ return document.getElementById(id); };
-  if (d.svc && el('f_service'))    el('f_service').value    = svcMap[d.svc] || d.svc;
-  if (d.pickup && el('f_pickup'))  el('f_pickup').value     = d.pickup;
-  if (d.dropoff && el('f_dropoff'))el('f_dropoff').value    = d.dropoff;
-  if (d.date && el('f_date'))      el('f_date').value       = d.date;
-  if (d.time && el('f_time'))      el('f_time').value       = d.time;
-  if (d.passengers && el('f_passengers')) el('f_passengers').value = d.passengers;
-  document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+  var svcLabels = {
+    airport_dfw:'DFW Airport Transfer', airport_love:'Love Field Transfer',
+    hourly:'Hourly Charter', wedding:'Wedding Package',
+    nightout:'Night Out', fifa:'FIFA Match Day', longdistance:'Long Distance'
+  };
+  var svcLabel = svcLabels[d.svc] || d.svc || 'Limo Service';
+  var timeSel  = document.getElementById('calcTime');
+  var timeTxt  = timeSel.options[timeSel.selectedIndex] ? timeSel.options[timeSel.selectedIndex].text : (d.time || '');
+  var dateTxt  = d.date
+    ? new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'long', day:'numeric', year:'numeric' })
+    : '';
+
+  var btn = document.getElementById('confirmBtn');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+
+  fetch('https://app.synergyluxlimodfw.com/api/send-quote-confirmation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      phone: phone, name: name, service: svcLabel,
+      date: dateTxt, time: timeTxt,
+      pickup: d.pickup, dropoff: d.dropoff,
+      price: d.price, passengers: d.passengers || 1,
+    }),
+  })
+  .catch(function(e) { console.error('Quote confirmation error:', e); })
+  .finally(function() {
+    btn.textContent = 'Confirm My Request'; btn.disabled = false;
+
+    // Save lead to Supabase (fire-and-forget)
+    fetch('https://axnzxbltlwgspptqcbhy.supabase.co/rest/v1/website_quotes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': 'sb_publishable_2NZVCOzQlRFktPFxfIVX5w_ngrgvwLK',
+        'Authorization': 'Bearer sb_publishable_2NZVCOzQlRFktPFxfIVX5w_ngrgvwLK',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        name: name, phone: phone, service: svcLabel,
+        date: d.date, time: d.time,
+        pickup: d.pickup, dropoff: d.dropoff,
+        passengers: parseInt(d.passengers) || 1,
+        quoted_price: d.price, status: 'pending',
+      }),
+    }).catch(function(e) { console.error('Lead save error:', e); });
+
+    // Show success
+    document.getElementById('quoteRequestForm').classList.remove('show');
+    var suc = document.getElementById('quoteSuccess');
+    suc.innerHTML =
+      '<div class="quote-success-title">✓ Request received, ' + name + '.</div>' +
+      '<div class="quote-success-body">' +
+        'Mr. Rodriguez will confirm your $' + d.price + ' reservation<br>' +
+        'for ' + dateTxt + ' at ' + timeTxt + ' shortly.<br>' +
+        'We\'ll reach out to ' + phone + '.' +
+      '</div>';
+    suc.classList.add('show');
+  });
 }
 function toggleNav(){document.getElementById('navLinks').classList.toggle('open');}
 function toggleFaq(btn){
