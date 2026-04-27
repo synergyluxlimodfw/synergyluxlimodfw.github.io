@@ -50,16 +50,25 @@ export default function PreviewHeroPage() {
     <div className="preview-hero-root" style={{ position: 'relative', minHeight: '100vh' }}>
 
       {/*
-       * Scoped style: make OperatorPanel's root div transparent so the
-       * video behind it shows through. Only applies inside .preview-hero-root.
+       * Scoped styles:
+       * - bg-lux-black → transparent so the video shows through
+       * - PrestigeBackground sits at z-index 2 (overrides its default z-index 0)
+       * - Page content wrapper sits at z-index 10
        */}
       <style>{`
         .preview-hero-root .bg-lux-black {
           background-color: transparent !important;
         }
+        .preview-hero-root > [aria-hidden]:not(video):not(div[style*="rgba"]) {
+          z-index: 2 !important;
+        }
+        .preview-hero-root > div:last-child {
+          position: relative;
+          z-index: 10;
+        }
       `}</style>
 
-      {/* ── Full-screen video background ──────────────────────── */}
+      {/* z-index 0 — video fills the viewport behind everything */}
       <video
         autoPlay
         loop
@@ -67,37 +76,41 @@ export default function PreviewHeroPage() {
         playsInline
         aria-hidden
         style={{
-          position:   'fixed',
-          inset:       0,
-          width:      '100%',
-          height:     '100%',
-          objectFit:  'cover',
-          zIndex:     -2,
+          position:      'fixed',
+          inset:          0,
+          width:         '100%',
+          height:        '100%',
+          objectFit:     'cover',
+          zIndex:         0,
           pointerEvents: 'none',
         }}
       >
         <source src="/escalade-hero.mp4" type="video/mp4" />
       </video>
 
-      {/* ── Dark overlay (opacity 0.5) ────────────────────────── */}
+      {/* z-index 1 — dark overlay keeps text readable */}
       <div
         aria-hidden
         style={{
-          position:        'fixed',
-          inset:            0,
-          background:      'rgba(0,0,0,0.5)',
-          zIndex:          -1,
-          pointerEvents:   'none',
+          position:      'fixed',
+          inset:          0,
+          background:    'rgba(0,0,0,0.5)',
+          zIndex:         1,
+          pointerEvents: 'none',
         }}
       />
 
-      {/* ── Existing prestige ambient glows ──────────────────── */}
-      <PrestigeBackground intensity="minimal" />
+      {/* z-index 2 — PrestigeBackground ambient glows */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none' }} aria-hidden>
+        <PrestigeBackground intensity="minimal" />
+      </div>
 
-      {/* ── Operator panel (same as homepage) ────────────────── */}
-      <Suspense>
-        <TabletPageInner />
-      </Suspense>
+      {/* z-index 10 — operator panel floats above all background layers */}
+      <div style={{ position: 'relative', zIndex: 10 }}>
+        <Suspense>
+          <TabletPageInner />
+        </Suspense>
+      </div>
 
     </div>
   );
