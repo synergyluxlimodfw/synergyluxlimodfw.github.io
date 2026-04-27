@@ -478,12 +478,54 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   line-height: 1;
 }
 
-/* ── HERO ROTATOR ── */
-.hero-slide{position:absolute!important;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 40px;transition:opacity 1.2s ease;overflow:hidden;}
-.hero-slide-a{opacity:0;}
-.hero-slide-b{opacity:1;}
-.hero-slide-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
-@media(max-width:900px){.hero-slide{padding:60px 24px;}}
+/* ── UNIFIED CINEMATIC HERO V2 ── */
+/* Intro cover — full black screen that fades out on load */
+.hero-v2-cover{position:fixed;inset:0;background:#000;z-index:9998;pointer-events:none;transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1);}
+.hero-v2-cover.out{opacity:0;}
+/* Video crossfade transition */
+.hero-v2-vid{transition:opacity 3s cubic-bezier(0.4,0,0.2,1);}
+/* Ken Burns keyframes — full and mobile-reduced */
+@keyframes hero-v2-kb-b{0%{transform:scale(1.03) translate(0.5%,0.3%);}100%{transform:scale(1) translate(-0.3%,0.3%);}}
+@keyframes hero-v2-kb-a{0%{transform:scale(1) translate(0,0);}100%{transform:scale(1.06) translate(-1%,-0.5%);}}
+@keyframes hero-v2-kb-b-sm{0%{transform:scale(1.015) translate(0.2%,0.1%);}100%{transform:scale(1) translate(-0.1%,0.1%);}}
+@keyframes hero-v2-kb-a-sm{0%{transform:scale(1) translate(0,0);}100%{transform:scale(1.02) translate(-0.3%,-0.2%);}}
+/* Escalade starts visible; city starts hidden */
+.hero-v2-vid-b{opacity:1;animation:hero-v2-kb-b 25s ease-in-out infinite alternate;}
+.hero-v2-vid-a{opacity:0;animation:hero-v2-kb-a 25s ease-in-out 4s infinite alternate;}
+/* Film-cut dip overlay — sits above gradient, below text */
+.hero-v2-dip{position:absolute!important;inset:0;background:rgba(0,0,0,0.35);z-index:1!important;pointer-events:none;opacity:0;transition:opacity 1.5s cubic-bezier(0.4,0,0.2,1);}
+/* Gold divider line under eyebrow */
+.hero-v2-divider{display:block;height:1px;background:#C9A84C;width:0;margin:0 auto 24px;animation:hero-v2-divider-draw 0.8s cubic-bezier(0.16,1,0.3,1) 0.6s forwards;}
+/* Differentiator line */
+.hero-v2-diff{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#C9A84C;opacity:0;margin-bottom:44px;font-weight:400;line-height:1.9;max-width:480px;animation:hero-v2-fade-up 0.6s cubic-bezier(0.16,1,0.3,1) 2.1s both;}
+/* Headline word spans */
+.hero-v2-line1{display:block;opacity:0;animation:hero-v2-fade-up 0.6s cubic-bezier(0.16,1,0.3,1) 1.0s both;}
+.hero-v2-line2{display:block;opacity:0;animation:hero-v2-fade-up-12 0.6s cubic-bezier(0.16,1,0.3,1) 1.4s both;}
+/* Stagger keyframes */
+@keyframes hero-v2-fade-up{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes hero-v2-fade-up-12{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes hero-v2-divider-draw{from{width:0;}to{width:40px;}}
+/* Override old hero animations — higher specificity (.hero.hero-v2 prefix = 0,2,0 vs old 0,1,0) */
+.hero.hero-v2 .hero-eyebrow{animation:hero-v2-fade-up 0.6s cubic-bezier(0.16,1,0.3,1) 0.8s both;margin-bottom:12px;}
+.hero.hero-v2 h1{opacity:1;animation:none;margin-bottom:28px;}
+.hero.hero-v2 .hero-sub{animation:hero-v2-fade-up 0.6s cubic-bezier(0.16,1,0.3,1) 1.8s both;margin-bottom:16px;}
+.hero.hero-v2 .hero-btns{animation:hero-v2-fade-up 0.6s cubic-bezier(0.16,1,0.3,1) 2.4s both;}
+/* Magnetic button — add transform to existing transitions */
+.btn-gold.hero-v2-btn{transition:background 0.45s ease,box-shadow 0.45s ease,transform 0.6s cubic-bezier(0.16,1,0.3,1);}
+.btn-outline.hero-v2-btn{transition:border-color 0.45s ease,color 0.45s ease,box-shadow 0.45s ease,transform 0.6s cubic-bezier(0.16,1,0.3,1);}
+/* Mobile: subtle Ken Burns + wrap differentiator */
+@media(max-width:480px){
+  .hero-v2-diff{font-size:8px;letter-spacing:1.5px;line-height:2;}
+  .hero-v2-vid-b{animation-name:hero-v2-kb-b-sm;}
+  .hero-v2-vid-a{animation-name:hero-v2-kb-a-sm;}
+}
+/* prefers-reduced-motion: disable all kinetic effects */
+@media(prefers-reduced-motion:reduce){
+  .hero-v2-cover{transition:none!important;}
+  .hero-v2-vid,.hero-v2-vid-b,.hero-v2-vid-a{animation:none!important;}
+  .hero.hero-v2 .hero-eyebrow,.hero-v2-line1,.hero-v2-line2,.hero.hero-v2 .hero-sub,.hero-v2-diff,.hero.hero-v2 .hero-btns{animation:none!important;opacity:1!important;}
+  .hero-v2-divider{animation:none!important;width:40px;}
+}
 </style>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOWMJuY_dQuywNAjny-qNlNL3DqgwrDRc&libraries=places&callback=initQuoteCalc" async defer></script>
 </head>
@@ -523,44 +565,39 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 
 
 <!-- ══ SECTION 1 — HERO ══ -->
-<section class="hero">
+<!-- Full-screen intro cover (fades out 200ms after load) -->
+<div class="hero-v2-cover" id="hero-v2-cover"></div>
 
-  <!-- Hero A: city video -->
-  <div class="hero-slide hero-slide-a" id="hero-slide-a">
-    <video class="hero-video" autoplay muted loop playsinline poster="city-poster.jpg">
-      <source src="city-hero.mp4" type="video/mp4">
-    </video>
-    <div class="hero-overlay"></div>
-    <div class="hero-slide-content">
-      <p class="hero-eyebrow">Synergy Lux Limo DFW</p>
-      <h1>Your Chauffeur.<br><em>Not Just a Driver.</em></h1>
-      <p class="hero-sub">Private luxury transportation across Dallas–Fort Worth — driven by someone who knows your time matters.</p>
-      <p class="hero-third reveal" style="opacity:0;animation:fadeUp 1.2s ease 1.2s forwards;">
-        Elite service. Personal touch. No surge pricing. No uncertainty.
-      </p>
-      <div class="hero-btns">
-        <a href="sms:+16468791391?&body=Hi, I'm interested in becoming a private chauffeur client." class="btn-gold">Request Your Chauffeur</a>
-        <a href="#booking" class="btn-outline">Book a Single Ride &nbsp;→</a>
-      </div>
-    </div>
-  </div>
+<section class="hero hero-v2">
 
-  <!-- Hero B: Escalade video -->
-  <div class="hero-slide hero-slide-b" id="hero-slide-b">
-    <video class="hero-video" autoplay muted loop playsinline poster="city-poster.jpg">
-      <source src="escalade-hero.mp4" type="video/mp4">
-    </video>
-    <div class="hero-overlay"></div>
-    <div class="hero-slide-content">
-      <p class="hero-eyebrow">Synergy Lux Limo DFW</p>
-      <h1>Arrive in<br><em>Style.</em></h1>
-      <p class="hero-sub">Black-on-black 2024 Cadillac Escalade. Professional chauffeurs ready when you are.</p>
-      <p class="hero-third">Airport transfers. Corporate travel. FIFA 2026 ground service across DFW.</p>
-      <div class="hero-btns">
-        <a href="sms:+16468791391?&body=Hi, I'm interested in becoming a private chauffeur client." class="btn-gold">Request Your Chauffeur</a>
-        <a href="#booking" class="btn-outline">Book a Single Ride &nbsp;→</a>
-      </div>
-    </div>
+  <!-- Video B: Escalade (visible first, Ken Burns offset 0s) -->
+  <video class="hero-video hero-v2-vid hero-v2-vid-b" id="hero-v2-vid-b" autoplay muted loop playsinline poster="city-poster.jpg">
+    <source src="escalade-hero.mp4" type="video/mp4">
+  </video>
+
+  <!-- Video A: city (hidden first, Ken Burns offset 4s) -->
+  <video class="hero-video hero-v2-vid hero-v2-vid-a" id="hero-v2-vid-a" autoplay muted loop playsinline poster="city-poster.jpg">
+    <source src="city-hero.mp4" type="video/mp4">
+  </video>
+
+  <!-- Gradient overlay -->
+  <div class="hero-overlay"></div>
+
+  <!-- Film-cut dip layer (briefly darkens during crossfade, below text) -->
+  <div class="hero-v2-dip" id="hero-v2-dip"></div>
+
+  <!-- Single unified copy — stays through both videos -->
+  <p class="hero-eyebrow">Synergy Lux Limo DFW</p>
+  <span class="hero-v2-divider"></span>
+  <h1>
+    <span class="hero-v2-line1">Your Chauffeur.</span>
+    <em class="hero-v2-line2">Not Just a Driver.</em>
+  </h1>
+  <p class="hero-sub">Private luxury transportation across DFW — built on trust, driven by someone who cares.</p>
+  <p class="hero-v2-diff">Black 2024 Escalade · Personally Vetted Chauffeurs · Available 24/7 · Flat Rates</p>
+  <div class="hero-btns">
+    <a href="sms:+16468791391?&body=Hi, I'm interested in becoming a private chauffeur client." class="btn-gold hero-v2-btn" data-hero-btn>Request Your Chauffeur</a>
+    <a href="#booking" class="btn-outline hero-v2-btn" data-hero-btn>Book a Single Ride &nbsp;→</a>
   </div>
 
   <div class="hero-scroll">
@@ -1574,18 +1611,89 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-<!-- Hero rotator -->
+<!-- Unified cinematic hero v2 -->
 <script>
 (function(){
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  var a=document.getElementById('hero-slide-a');
-  var b=document.getElementById('hero-slide-b');
-  var showA=false;
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── 1. Intro cover fade — waits for first video or 4s max ────────────
+  var cover      = document.getElementById('hero-v2-cover');
+  var vidBForLoad = document.getElementById('hero-v2-vid-b');
+  if (cover) {
+    var fadeCover = function(){
+      setTimeout(function(){
+        cover.classList.add('out');
+        setTimeout(function(){ cover.style.display = 'none'; }, 900);
+      }, 200);
+    };
+    if (vidBForLoad && vidBForLoad.readyState < 3) {
+      // Not yet buffered — wait for canplay or 4s safety timeout
+      var coverTimeout = setTimeout(fadeCover, 4000);
+      vidBForLoad.addEventListener('canplay', function(){
+        clearTimeout(coverTimeout);
+        fadeCover();
+      }, { once: true });
+    } else {
+      // Already cached — original 200ms fast path
+      fadeCover();
+    }
+  }
+
+  if (reducedMotion) return;
+
+  // ── 2. Video crossfade rotator (12s display, 3s crossfade + dip) ─────
+  var vidB  = document.getElementById('hero-v2-vid-b'); // Escalade — visible first
+  var vidA  = document.getElementById('hero-v2-vid-a'); // City — hidden first
+  var dip   = document.getElementById('hero-v2-dip');
+  var showB = true;
+
   setInterval(function(){
-    showA=!showA;
-    a.style.opacity=showA?'1':'0';
-    b.style.opacity=showA?'0':'1';
-  },7000);
+    // Film-cut dip: briefly darken background then fade back
+    if (dip) {
+      dip.style.opacity = '1';
+      setTimeout(function(){ dip.style.opacity = '0'; }, 1500);
+    }
+    // Swap videos
+    showB = !showB;
+    if (vidB) vidB.style.opacity = showB ? '1' : '0';
+    if (vidA) vidA.style.opacity = showB ? '0' : '1';
+  }, 12000);
+
+  // ── 3. Magnetic CTA buttons ───────────────────────────────────────────
+  var isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+  if (!isTouchDevice) {
+    var heroSection = document.querySelector('.hero.hero-v2');
+    var btns = document.querySelectorAll('[data-hero-btn]');
+    if (heroSection && btns.length) {
+      var ticking = false;
+      heroSection.addEventListener('mousemove', function(e){
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function(){
+          btns.forEach(function(btn){
+            var r  = btn.getBoundingClientRect();
+            var cx = r.left + r.width  / 2;
+            var cy = r.top  + r.height / 2;
+            var dx = e.clientX - cx;
+            var dy = e.clientY - cy;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 0 && dist < 80) {
+              var pull = (1 - dist / 80) * 4;
+              btn.style.transform = 'translate(' +
+                (dx / dist * pull).toFixed(2) + 'px,' +
+                (dy / dist * pull).toFixed(2) + 'px)';
+            } else {
+              btn.style.transform = '';
+            }
+          });
+          ticking = false;
+        });
+      });
+      heroSection.addEventListener('mouseleave', function(){
+        btns.forEach(function(btn){ btn.style.transform = ''; });
+      });
+    }
+  }
 })();
 </script>
 </body>
