@@ -31,16 +31,6 @@ import {
 } from '@/lib/aria';
 import { handleBookingConfirmed } from '@/lib/sms';
 
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 interface ChatMessage {
   role:    'user' | 'assistant';
   content: string;
@@ -58,7 +48,8 @@ interface BookingData {
 
 // ── Shared helper: save booking to Supabase ───────────────────────────────
 
-async function saveBooking(booking: BookingData, fallbackPhone?: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function saveBooking(supabaseAdmin: any, booking: BookingData, fallbackPhone?: string) {
   const occasionValue = [
     booking.occasion?.trim(),
     booking.pickup_location?.trim()
@@ -97,6 +88,8 @@ async function saveBooking(booking: BookingData, fallbackPhone?: string) {
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const twilioClient  = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   try {
     let body: Record<string, unknown>;
 
@@ -114,7 +107,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'bookingData required' }, { status: 422 });
       }
 
-      const { data, error, occasionValue } = await saveBooking(bookingData);
+      const { data, error, occasionValue } = await saveBooking(supabaseAdmin, bookingData);
 
       // Cancel any pending follow-ups for this phone
       if (bookingData.phone) {

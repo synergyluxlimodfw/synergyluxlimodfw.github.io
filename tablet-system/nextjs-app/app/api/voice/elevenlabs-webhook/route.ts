@@ -38,16 +38,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
 
-const twilioClient = twilio(
-  process.env.TWILIO_SID,
-  process.env.TWILIO_AUTH
-);
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 // ── ElevenLabs payload types ──────────────────────────────────────────────
 
 interface CollectedField {
@@ -89,6 +79,8 @@ function field(
 // ── Route ─────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const twilioClient  = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   try {
     const body: ElevenLabsPayload = await req.json();
 

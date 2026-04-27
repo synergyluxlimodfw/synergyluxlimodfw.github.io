@@ -24,24 +24,13 @@ import { createClient } from '@supabase/supabase-js';
 import { ARIA_SYSTEM_PROMPT, extractBookingReady, stripBookingReady } from '@/lib/aria';
 import { handleBookingConfirmed } from '@/lib/sms';
 
-const twilioClient = twilio(
-  process.env.TWILIO_SID,
-  process.env.TWILIO_AUTH
-);
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 const EMPTY_TWIML =
   '<?xml version="1.0" encoding="UTF-8"?><Response></Response>';
 
 export async function POST(req: NextRequest) {
+  const twilioClient  = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
+  const anthropic     = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   try {
     // Twilio sends x-www-form-urlencoded
     const body = await req.text();

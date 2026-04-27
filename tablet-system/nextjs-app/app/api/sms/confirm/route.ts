@@ -10,12 +10,11 @@ import { handleBookingConfirmed } from '@/lib/sms';
 
 console.log('SMS confirm route loaded - version 2');
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
   try {
     const { rideId } = await req.json();
     if (!rideId) {

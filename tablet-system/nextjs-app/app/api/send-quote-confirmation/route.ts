@@ -2,17 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import Stripe from 'stripe';
 
-const twilioClient = twilio(
-  process.env.TWILIO_SID,
-  process.env.TWILIO_AUTH
-);
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia' });
-
 const OPERATOR_PHONE = '+16468791391';
-const FROM_PHONE     = process.env.TWILIO_PHONE!;
 
 export async function POST(req: NextRequest) {
+  const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
+  const stripe       = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia' });
+  const FROM_PHONE   = process.env.TWILIO_PHONE!;
   try {
     const { phone, name, service, date, time, pickup, dropoff, price, passengers,
             returnTrip, returnDate, returnTime } = await req.json();
