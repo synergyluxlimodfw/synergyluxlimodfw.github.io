@@ -477,6 +477,13 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   cursor: pointer;
   line-height: 1;
 }
+
+/* ── HERO ROTATOR ── */
+.hero-slide{position:absolute!important;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 40px;transition:opacity 1.2s ease;overflow:hidden;}
+.hero-slide-a{opacity:1;}
+.hero-slide-b{opacity:0;}
+.hero-slide-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
+@media(max-width:900px){.hero-slide{padding:60px 24px;}}
 </style>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOWMJuY_dQuywNAjny-qNlNL3DqgwrDRc&libraries=places&callback=initQuoteCalc" async defer></script>
 </head>
@@ -517,20 +524,43 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 
 <!-- ══ SECTION 1 — HERO ══ -->
 <section class="hero">
-  <video class="hero-video" autoplay muted loop playsinline poster="city-poster.jpg">
-    <source src="city-hero.mp4" type="video/mp4">
-  </video>
-  <div class="hero-overlay"></div>
 
-  <p class="hero-eyebrow">Synergy Lux Limo DFW</p>
-  <h1>Your Chauffeur.<br><em>Not Just a Driver.</em></h1>
-  <p class="hero-sub">Private luxury transportation across Dallas–Fort Worth — driven by someone who knows your time matters.</p>
-  <p class="hero-third reveal" style="opacity:0;animation:fadeUp 1.2s ease 1.2s forwards;">
-    Elite service. Personal touch. No surge pricing. No uncertainty.
-  </p>
-  <div class="hero-btns">
-    <a href="sms:+16468791391?&body=Hi, I'm interested in becoming a private chauffeur client." class="btn-gold">Request Your Chauffeur</a>
-    <a href="#booking" class="btn-outline">Book a Single Ride &nbsp;→</a>
+  <!-- Hero A: city video -->
+  <div class="hero-slide hero-slide-a" id="hero-slide-a">
+    <video class="hero-video" autoplay muted loop playsinline poster="city-poster.jpg">
+      <source src="city-hero.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-slide-content">
+      <p class="hero-eyebrow">Synergy Lux Limo DFW</p>
+      <h1>Your Chauffeur.<br><em>Not Just a Driver.</em></h1>
+      <p class="hero-sub">Private luxury transportation across Dallas–Fort Worth — driven by someone who knows your time matters.</p>
+      <p class="hero-third reveal" style="opacity:0;animation:fadeUp 1.2s ease 1.2s forwards;">
+        Elite service. Personal touch. No surge pricing. No uncertainty.
+      </p>
+      <div class="hero-btns">
+        <a href="sms:+16468791391?&body=Hi, I'm interested in becoming a private chauffeur client." class="btn-gold">Request Your Chauffeur</a>
+        <a href="#booking" class="btn-outline">Book a Single Ride &nbsp;→</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero B: Escalade video -->
+  <div class="hero-slide hero-slide-b" id="hero-slide-b">
+    <video class="hero-video" autoplay muted loop playsinline poster="city-poster.jpg">
+      <source src="escalade-hero.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-slide-content">
+      <p class="hero-eyebrow">Synergy Lux Limo DFW</p>
+      <h1>Arrive in<br><em>Style.</em></h1>
+      <p class="hero-sub">Black-on-black 2024 Cadillac Escalade. Professional chauffeurs ready when you are.</p>
+      <p class="hero-third">Airport transfers. Corporate travel. FIFA 2026 ground service across DFW.</p>
+      <div class="hero-btns">
+        <a href="sms:+16468791391?&body=Hi, I'm interested in becoming a private chauffeur client." class="btn-gold">Request Your Chauffeur</a>
+        <a href="#booking" class="btn-outline">Book a Single Ride &nbsp;→</a>
+      </div>
+    </div>
   </div>
 
   <div class="hero-scroll">
@@ -1542,6 +1572,21 @@ document.querySelectorAll('.gallery-grid img').forEach(function(img) {
 document.addEventListener('keydown', function(e) {
   if(e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
 });
+</script>
+
+<!-- Hero rotator -->
+<script>
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var a=document.getElementById('hero-slide-a');
+  var b=document.getElementById('hero-slide-b');
+  var showA=true;
+  setInterval(function(){
+    showA=!showA;
+    a.style.opacity=showA?'1':'0';
+    b.style.opacity=showA?'0':'1';
+  },7000);
+})();
 </script>
 </body>
 </html>
