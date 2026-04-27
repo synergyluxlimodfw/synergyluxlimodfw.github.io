@@ -14,7 +14,8 @@ const FROM_PHONE     = process.env.TWILIO_PHONE!;
 
 export async function POST(req: NextRequest) {
   try {
-    const { phone, name, service, date, time, pickup, dropoff, price, passengers } = await req.json();
+    const { phone, name, service, date, time, pickup, dropoff, price, passengers,
+            returnTrip, returnDate, returnTime } = await req.json();
 
     const priceNum = parseInt(price, 10);
 
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
       `Hi ${name}, this is Amirah with Synergy Lux. ` +
       `Your quote for ${service} on ${date} at ${time} ` +
       `from ${pickup} to ${dropoff} is $${price}. ` +
+      (returnTrip ? `Return trip: ${dropoff} → ${pickup} on ${returnDate} at ${returnTime}. ` : '') +
       `Mr. Rodriguez will personally confirm your reservation shortly. ` +
       `Questions? Call (646) 879-1391.`;
 
@@ -63,6 +65,7 @@ export async function POST(req: NextRequest) {
       `\nService: ${service}\nDate: ${date} at ${time}` +
       `\nPickup: ${pickup}\nDropoff: ${dropoff}` +
       `\nQuoted: $${price}\nPassengers: ${passengers || 1}` +
+      (returnTrip ? `\nReturn: ${returnDate} at ${returnTime} (${dropoff} → ${pickup})` : '') +
       forwardBlock;
 
     await Promise.allSettled([
