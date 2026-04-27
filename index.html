@@ -452,6 +452,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <span>Dallas–Fort Worth · Available 24/7</span>
   <div style="display:flex;gap:20px;flex-wrap:wrap;">
     <a href="tel:6468791391">(646) 879-1391</a>
+    <span style="color:rgba(0,0,0,0.55);font-weight:400;">Se habla español</span>
     <span>wrodriguez@synergyluxlimodfw.com</span>
   </div>
 </div>
@@ -643,7 +644,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <div class="calc-inner">
     <div class="calc-header reveal">
       <p class="eyebrow" style="justify-content:center;">Instant Pricing</p>
-      <h2>Get Your Exact Price</h2>
+      <h2>Get Your Instant Quote</h2>
       <p>No forms, no waiting. See your price instantly.</p>
     </div>
     <div class="calc-grid reveal d1">
@@ -663,6 +664,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
           <option value="hourly_5">Hourly Charter — 5+ Hours</option>
           <option value="nightout">Night Out — 3 Hours</option>
           <option value="sporting">Sporting Event (Roundtrip)</option>
+          <option value="fifa">🏆 FIFA Match Day — from $350 roundtrip</option>
           <option value="nye">New Year's Eve Special</option>
         </select>
       </div>
@@ -702,9 +704,10 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="price-breakdown" id="priceBreakdown"></div>
       <div class="price-btns">
         <button class="btn-pay-now" onclick="scrollToBooking()">Book This Ride</button>
-        <a class="btn-dep-now" id="calcDepositBtn" href="#booking">Reserve with Deposit</a>
+        <a class="btn-dep-now" href="tel:+18883306902">Call Amirah</a>
       </div>
-      <div class="calc-note">Price confirmed at booking · Zelle or card accepted</div>
+      <div class="calc-note" style="margin-bottom:8px;">Price confirmed at booking · Zelle or card accepted</div>
+      <div class="calc-note"><a href="#" onclick="document.getElementById('aria-launcher')&&document.getElementById('aria-launcher').click();return false;" style="color:var(--gold);text-decoration:none;opacity:0.8;">Or chat with Amirah for a custom quote →</a></div>
     </div>
   </div>
 </div>
@@ -1110,14 +1113,14 @@ var PRICES={
   corporate:{dallas:155,fortworth:170,plano:165,frisco:180,southlake:170,irving:155,arlington:170,addison:160},
   wedding_4:{base:625},wedding_8:{base:1100},prom:{base:575},
   hourly_2:{base:330},hourly_3:{base:495},hourly_4:{base:660},hourly_5:{base:825},
-  nightout:{base:475},sporting:{base:300},nye:{base:750}
+  nightout:{base:475},sporting:{base:300},fifa:{base:350},nye:{base:750}
 };
 var SVC_LABELS={
   airport_dfw:'Airport Transfer DFW',airport_love:'Airport Transfer Love Field',
   corporate:'Corporate',wedding_4:'Wedding 4hrs',wedding_8:'Wedding Full Day',
   prom:'Prom/Event',hourly_2:'Hourly 2hrs',hourly_3:'Hourly 3hrs',
   hourly_4:'Hourly 4hrs',hourly_5:'Hourly 5hrs+',
-  nightout:'Night Out',sporting:'Sporting Event',nye:'NYE Special'
+  nightout:'Night Out',sporting:'Sporting Event',fifa:'FIFA Match Day',nye:'NYE Special'
 };
 var STRIPE_LINKS={
   airport_dfw:'https://buy.stripe.com/00w3cp7J2b7NafF2Uf8Vi06',
@@ -1129,7 +1132,8 @@ var STRIPE_LINKS={
   hourly_2:'https://buy.stripe.com/6oU5kxe7q7VB2NdamH8Vi09',
   hourly_3:'#booking',hourly_4:'#booking',hourly_5:'#booking',
   nightout:'https://buy.stripe.com/3cI8wJ4wQ8ZF1J91Qb8Vi0h',
-  sporting:'https://buy.stripe.com/aFafZb7J2dfVevV3Yj8Vi0f',nye:'#booking'
+  sporting:'https://buy.stripe.com/aFafZb7J2dfVevV3Yj8Vi0f',
+  fifa:'/fifa-2026.html',nye:'#booking'
 };
 function calculatePrice(){
   var svc=document.getElementById('calcService').value;

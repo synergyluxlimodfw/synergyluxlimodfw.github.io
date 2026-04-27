@@ -81,7 +81,7 @@
     // Send opening message exactly once
     if (messages.length === 0) {
       pushAssistantMessage(
-        'Welcome to Prestige by Synergy Lux. What\'s the occasion for your ride?'
+        'Good day. I\'m Amirah, your Synergy Lux concierge.\nGet an instant quote — where are you heading and when?'
       );
     }
   }
