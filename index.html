@@ -786,17 +786,11 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     <div class="booking-hdr reveal">
       <p class="eyebrow" style="justify-content:center;">Smart Booking</p>
       <h2>Book Your Ride</h2>
-      <p>Submit below for an instant confirmation — we respond within minutes.</p>
-    </div>
-    <div class="notify-badges reveal d1">
-      <span class="badge">Text confirmation instantly</span>
-      <span class="badge">Email confirmation instantly</span>
-      <span class="badge">We are notified immediately</span>
+      <p>Prefer to fill a form? We'll confirm personally within minutes.</p>
     </div>
     <form class="form-grid reveal d2" id="bookingForm" onsubmit="return handleBooking(event);">
       <div class="fg"><label>Full Name *</label><input type="text" id="f_name" name="Name" placeholder="Your full name" required></div>
       <div class="fg"><label>Phone Number *</label><input type="tel" id="f_phone" name="Phone" placeholder="(000) 000-0000" required></div>
-      <div class="fg"><label>Email Address *</label><input type="email" id="f_email" name="Email" placeholder="your@email.com" required></div>
       <div class="fg"><label>Service Type *</label>
         <select id="f_service" name="Service" required>
           <option value="">Select a service</option>
@@ -815,13 +809,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="fg"><label>Drop-off Location *</label><input type="text" id="f_dropoff" name="Dropoff_Location" placeholder="Full address or location" required></div>
       <div class="fg"><label>Date *</label><input type="date" id="f_date" name="Date" required></div>
       <div class="fg"><label>Time *</label><input type="time" id="f_time" name="Time" required></div>
-      <div class="fg"><label>Passengers</label>
-        <select id="f_passengers" name="Passengers">
-          <option>1 passenger</option><option>2 passengers</option><option>3 passengers</option>
-          <option>4 passengers</option><option>5 passengers</option><option>6 passengers</option>
-        </select>
-      </div>
-      <div class="fg full"><label>Flight Number / Special Notes</label><textarea rows="3" id="f_notes" name="Notes" placeholder="Flight number, airline, special requests..."></textarea></div>
+      <div class="fg full"><label>Notes</label><textarea rows="3" id="f_notes" name="Notes" placeholder="Flight number, special requests, or anything we should know"></textarea></div>
       <div class="form-status" id="formStatus"></div>
       <div class="form-submit"><button type="submit" id="submitBtn">Send Booking Request</button></div>
     </form>
@@ -1405,20 +1393,18 @@ function handleBooking(e){
   status.style.display='block';status.style.color='var(--gold)';
   status.innerHTML='Sending your booking request...';
   var name=document.getElementById('f_name').value;
-  var email=document.getElementById('f_email').value;
   var phone=document.getElementById('f_phone').value;
   var service=document.getElementById('f_service').value;
   var pickup=document.getElementById('f_pickup').value;
   var dropoff=document.getElementById('f_dropoff').value;
   var date=document.getElementById('f_date').value;
   var time=document.getElementById('f_time').value;
-  var passengers=document.getElementById('f_passengers').value;
   var notes=(document.getElementById('f_notes').value)||'None';
   var submitted=new Date().toLocaleString('en-US',{timeZone:'America/Chicago'});
   var templateParams={
-    to_email:email,client_email:email,client_name:name,client_phone:phone,
+    client_name:name,client_phone:phone,
     service_type:service,pickup_location:pickup,dropoff_location:dropoff,
-    trip_date:date,trip_time:time,passengers:passengers,notes:notes,submitted_at:submitted
+    trip_date:date,trip_time:time,notes:notes,submitted_at:submitted
   };
   var fd=new FormData(form);
   fetch('https://formspree.io/f/xzdkjrep',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
@@ -1426,7 +1412,7 @@ function handleBooking(e){
     if(!r.ok)throw new Error('Formspree error');
     fetch('https://hooks.zapier.com/hooks/catch/27079056/u73tqjh/',{
       method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,passengers:passengers,notes:notes,submitted_at:submitted})
+      body:JSON.stringify({client_name:name,client_phone:phone,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,notes:notes,submitted_at:submitted})
     }).catch(function(e){console.log('Zapier:',e);});
     fetch('https://app.synergyluxlimodfw.com/api/booking-notify',{
       method:'POST',
@@ -1434,13 +1420,11 @@ function handleBooking(e){
       body:JSON.stringify({
         Name:document.getElementById('f_name').value,
         Phone:document.getElementById('f_phone').value,
-        Email:document.getElementById('f_email').value,
         Service:document.getElementById('f_service').value,
         Pickup_Location:document.getElementById('f_pickup').value,
         Dropoff_Location:document.getElementById('f_dropoff').value,
         Date:document.getElementById('f_date').value,
         Time:document.getElementById('f_time').value,
-        Passengers:document.getElementById('f_passengers').value,
         Notes:document.getElementById('f_notes').value,
       })
     }).catch(function(e){console.warn('SMS notify failed:',e);});
