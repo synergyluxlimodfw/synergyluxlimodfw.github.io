@@ -743,11 +743,25 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
         <label>Return Trip</label>
         <div class="calc-toggle-wrap" onclick="document.getElementById('calcReturn').click()">
           <label class="calc-toggle">
-            <input type="checkbox" id="calcReturn" onclick="event.stopPropagation()" />
+            <input type="checkbox" id="calcReturn" onclick="event.stopPropagation()" onchange="toggleReturnFields()" />
             <div class="calc-toggle-track"><div class="calc-toggle-thumb"></div></div>
           </label>
           <span class="calc-toggle-label">Include return trip</span>
         </div>
+      </div>
+    </div>
+
+    <!-- Return trip date/time (shown when toggle ON) -->
+    <div class="calc-row reveal d2" id="returnFields" style="display:none;">
+      <div class="calc-field">
+        <label>Return Date</label>
+        <input type="date" id="calcReturnDate" />
+      </div>
+      <div class="calc-field">
+        <label>Return Time</label>
+        <select id="calcReturnTime">
+          <option value="">Select time...</option>
+        </select>
       </div>
     </div>
 
@@ -1168,6 +1182,7 @@ var _quoteData = {};
 function initQuoteCalc() {
   // Build 15-min time intervals
   var sel = document.getElementById('calcTime');
+  var selR = document.getElementById('calcReturnTime');
   for (var h = 0; h < 24; h++) {
     for (var m = 0; m < 60; m += 15) {
       var h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
@@ -1177,11 +1192,18 @@ function initQuoteCalc() {
       var opt = document.createElement('option');
       opt.value = val; opt.textContent = label;
       sel.appendChild(opt);
+      var optR = document.createElement('option');
+      optR.value = val; optR.textContent = label;
+      selR.appendChild(optR);
     }
   }
   // Block past dates
   var today = new Date();
   document.getElementById('calcDate').min = today.toISOString().split('T')[0];
+  // Keep return date min in sync with pickup date
+  document.getElementById('calcDate').addEventListener('change', function() {
+    document.getElementById('calcReturnDate').min = this.value;
+  });
 
   // Google Places autocomplete
   var opts = { componentRestrictions: { country: 'us' } };
@@ -1231,6 +1253,15 @@ function calcExactPrice(svc, distMiles, durMins, isReturn) {
   return { price: base, label: label, note: note };
 }
 
+function toggleReturnFields() {
+  var on = document.getElementById('calcReturn').checked;
+  document.getElementById('returnFields').style.display = on ? '' : 'none';
+  if (!on) {
+    document.getElementById('calcReturnDate').value = '';
+    document.getElementById('calcReturnTime').value = '';
+  }
+}
+
 function getQuote() {
   var svc     = document.getElementById('calcService').value;
   var dateVal = document.getElementById('calcDate').value;
@@ -1239,12 +1270,17 @@ function getQuote() {
   var dropoff = document.getElementById('calcDropoffAddr').value.trim();
   var pax     = document.getElementById('calcPassengers').value;
   var ret     = document.getElementById('calcReturn').checked;
+  var retDate = ret ? document.getElementById('calcReturnDate').value : '';
+  var retTime = ret ? document.getElementById('calcReturnTime').value : '';
 
   if (!svc)     { alert('Please select a service type.'); return; }
   if (!dateVal) { alert('Please select a date.'); return; }
   if (!timeVal) { alert('Please select a pickup time.'); return; }
   if (!pickup)  { alert('Please enter a pickup address.'); return; }
   if (!dropoff) { alert('Please enter a drop-off address.'); return; }
+  if (ret && !retDate) { alert('Please select a return date.'); return; }
+  if (ret && !retTime) { alert('Please select a return time.'); return; }
+  if (ret && retDate < dateVal) { alert('Return date must be the same day or later than pickup date.'); return; }
 
   // 2-hour advance booking guard
   var selDT = new Date(dateVal + 'T' + timeVal + ':00');
@@ -1276,20 +1312,40 @@ function getQuote() {
     var result   = calcExactPrice(svc, distMi, durMin, ret);
     var dep      = Math.ceil(result.price * 0.5);
 
-    var timeSel  = document.getElementById('calcTime');
-    var timeTxt  = timeSel.options[timeSel.selectedIndex].text;
-    var dateTxt  = new Date(dateVal + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'long', day:'numeric', year:'numeric' });
+    var timeSel    = document.getElementById('calcTime');
+    var timeTxt    = timeSel.options[timeSel.selectedIndex].text;
+    var dateTxt    = new Date(dateVal + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'long', day:'numeric', year:'numeric' });
+    var retTimeSel = document.getElementById('calcReturnTime');
+    var retTimeTxt = ret && retTime ? retTimeSel.options[retTimeSel.selectedIndex].text : '';
+    var retDateTxt = ret && retDate ? new Date(retDate + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'long', day:'numeric', year:'numeric' }) : '';
 
     document.getElementById('priceMain').textContent = '$' + result.price;
     document.getElementById('requestPrice').textContent = result.price;
     document.getElementById('quoteRequestForm').classList.remove('show');
     document.getElementById('quoteSuccess').classList.remove('show');
     document.getElementById('priceLabel').textContent = result.label;
-    document.getElementById('priceSummary').innerHTML =
-      '<div class="summary-row">' + dateTxt + ' &nbsp;·&nbsp; ' + timeTxt + ' &nbsp;·&nbsp; ' + pax + ' passenger' + (pax > 1 ? 's' : '') + '</div>' +
-      '<div class="summary-row"><span class="summary-from">✦ ' + pickup + '</span></div>' +
-      '<div class="summary-row"><span class="summary-to">→ ' + dropoff + '</span></div>' +
-      '<div class="summary-row" style="color:rgba(239,239,239,0.4);font-size:11px;">' + distTxt + ' &nbsp;·&nbsp; ' + durTxt + ' drive</div>';
+
+    var summaryHtml;
+    if (ret) {
+      summaryHtml =
+        '<div class="summary-row" style="color:var(--gold);font-size:11px;letter-spacing:1px;">OUTBOUND</div>' +
+        '<div class="summary-row">' + dateTxt + ' &nbsp;·&nbsp; ' + timeTxt + '</div>' +
+        '<div class="summary-row"><span class="summary-from">✦ ' + pickup + '</span></div>' +
+        '<div class="summary-row"><span class="summary-to">→ ' + dropoff + '</span></div>' +
+        '<div class="summary-row" style="color:rgba(239,239,239,0.4);font-size:11px;margin-bottom:10px;">' + distTxt + ' &nbsp;·&nbsp; ' + durTxt + ' drive</div>' +
+        '<div class="summary-row" style="color:var(--gold);font-size:11px;letter-spacing:1px;">RETURN</div>' +
+        '<div class="summary-row">' + retDateTxt + ' &nbsp;·&nbsp; ' + retTimeTxt + '</div>' +
+        '<div class="summary-row"><span class="summary-from">✦ ' + dropoff + '</span></div>' +
+        '<div class="summary-row"><span class="summary-to">→ ' + pickup + '</span></div>';
+    } else {
+      summaryHtml =
+        '<div class="summary-row">' + dateTxt + ' &nbsp;·&nbsp; ' + timeTxt + ' &nbsp;·&nbsp; ' + pax + ' passenger' + (pax > 1 ? 's' : '') + '</div>' +
+        '<div class="summary-row"><span class="summary-from">✦ ' + pickup + '</span></div>' +
+        '<div class="summary-row"><span class="summary-to">→ ' + dropoff + '</span></div>' +
+        '<div class="summary-row" style="color:rgba(239,239,239,0.4);font-size:11px;">' + distTxt + ' &nbsp;·&nbsp; ' + durTxt + ' drive</div>';
+    }
+    document.getElementById('priceSummary').innerHTML = summaryHtml;
+
     document.getElementById('priceBreakdown').innerHTML =
       result.note + ' &nbsp;&nbsp;·&nbsp;&nbsp; <span>50% deposit: $' + dep + '</span>';
 
@@ -1297,7 +1353,8 @@ function getQuote() {
     resultEl.classList.add('show');
     resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-    _quoteData = { svc:svc, date:dateVal, time:timeVal, pickup:pickup, dropoff:dropoff, passengers:pax, price:result.price };
+    _quoteData = { svc:svc, date:dateVal, time:timeVal, pickup:pickup, dropoff:dropoff, passengers:pax, price:result.price,
+                   returnTrip:ret, retDate:retDate, retTime:retTime, retDateTxt:retDateTxt, retTimeTxt:retTimeTxt };
   });
 }
 
@@ -1339,6 +1396,9 @@ function confirmQuoteRequest() {
       date: dateTxt, time: timeTxt,
       pickup: d.pickup, dropoff: d.dropoff,
       price: d.price, passengers: d.passengers || 1,
+      returnTrip: d.returnTrip || false,
+      returnDate: d.retDateTxt || '',
+      returnTime: d.retTimeTxt || '',
     }),
   })
   .catch(function(e) { console.error('Quote confirmation error:', e); })
