@@ -31,6 +31,25 @@ import {
 } from '@/lib/aria';
 import { handleBookingConfirmed } from '@/lib/sms';
 
+// ── CORS — allows the marketing site to call this endpoint ────────────────
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin':  'https://synergyluxlimodfw.com',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
+/** Wraps NextResponse.json and injects CORS headers on every response. */
+function json(body: unknown, init?: ResponseInit) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: { ...CORS_HEADERS, ...(init?.headers ?? {}) },
+  });
+}
+
 interface ChatMessage {
   role:    'user' | 'assistant';
   content: string;
@@ -96,7 +115,7 @@ export async function POST(req: NextRequest) {
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+      return json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
     // ── Mode 2: explicit booking confirmation ─────────────────────────────
@@ -104,7 +123,7 @@ export async function POST(req: NextRequest) {
       const bookingData = body.bookingData as BookingData | undefined;
 
       if (!bookingData) {
-        return NextResponse.json({ error: 'bookingData required' }, { status: 422 });
+        return json({ error: 'bookingData required' }, { status: 422 });
       }
 
       const { data, error, occasionValue } = await saveBooking(supabaseAdmin, bookingData);
@@ -123,7 +142,7 @@ export async function POST(req: NextRequest) {
 
       if (error) {
         console.error('[Aria/confirm] Supabase insert error:', error);
-        return NextResponse.json({
+        return json({
           type:     'booking_confirmed',
           response: 'I had trouble saving your booking. Please call us at (646) 879-1391.',
         });
@@ -155,7 +174,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      return NextResponse.json({
+      return json({
         type:     'booking_confirmed',
         response: "You're all set. Mr. Rodriguez will take care of everything.",
       });
@@ -164,7 +183,7 @@ export async function POST(req: NextRequest) {
     // ── Mode 1: normal chat ───────────────────────────────────────────────
     const raw = body.messages;
     if (!Array.isArray(raw) || raw.length === 0) {
-      return NextResponse.json({ error: 'messages array required' }, { status: 422 });
+      return json({ error: 'messages array required' }, { status: 422 });
     }
 
     const messages: ChatMessage[] = (raw as unknown[])
@@ -179,7 +198,7 @@ export async function POST(req: NextRequest) {
       .map(m => ({ role: m.role, content: m.content.trim() }));
 
     if (messages.length === 0) {
-      return NextResponse.json({ error: 'No valid messages' }, { status: 422 });
+      return json({ error: 'No valid messages' }, { status: 422 });
     }
 
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -208,13 +227,13 @@ export async function POST(req: NextRequest) {
       clearTimeout(timeoutId);
       if (err instanceof Error && err.name === 'AbortError') {
         console.error('[Aria] Request timed out after 25s');
-        return NextResponse.json({
+        return json({
           type:     'message',
           response: "I'm sorry — it's taking a moment on our end. Please try again or call us directly at (646) 879-1391.",
         });
       }
       console.error('[Aria] Anthropic error:', err);
-      return NextResponse.json({
+      return json({
         type:     'message',
         response: 'I apologize — I am having trouble connecting right now. Please call us directly at (646) 879-1391.',
       });
@@ -284,7 +303,7 @@ export async function POST(req: NextRequest) {
         console.error('Lead save error:', leadErr);
       }
 
-      return NextResponse.json({
+      return json({
         type:                'booking_confirmation',
         booking,
         message:             availabilityWarning || cleanMessage,
@@ -332,14 +351,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    return json({
       type:     'message',
       response: stripBookingReady(rawResponse),
     });
 
   } catch (error) {
     console.error('[Aria] Unhandled error:', error);
-    return NextResponse.json({
+    return json({
       type:     'message',
       response: 'I apologize — something went wrong on our end. Please call us at (646) 879-1391.',
     });
