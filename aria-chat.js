@@ -1,3 +1,4 @@
+// trigger redeploy 2026-04-28
 /* ─────────────────────────────────────────────────────────
    Aria Chat Widget — Prestige by Synergy Lux
    Calls the Next.js API at the tablet app origin for streaming.
