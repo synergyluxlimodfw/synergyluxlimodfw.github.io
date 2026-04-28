@@ -20,7 +20,7 @@
 
 #aria-launcher {
   position:        fixed;
-  bottom:          28px;
+  bottom:          100px;  /* stacks above WhatsApp button at 28px */
   right:           28px;
   z-index:         9998;
   display:         flex;
@@ -73,7 +73,7 @@
 
 #aria-window {
   position:      fixed;
-  bottom:        28px;
+  bottom:        100px;  /* bottom edge clears WhatsApp button */
   right:         28px;
   z-index:       9999;
   width:         var(--aria-w);
@@ -357,7 +357,7 @@
   }
 
   #aria-launcher {
-    bottom: 20px;
+    bottom: 80px;  /* clears WhatsApp button on mobile */
     right:  20px;
   }
 }

@@ -7,7 +7,7 @@
   'use strict';
 
   // ── Config ───────────────────────────────────────────────
-  var API_URL      = 'https://synergy-lux-tablet.vercel.app/api/aria';
+  var API_URL      = 'https://app.synergyluxlimodfw.com/api/aria';
   var SUPABASE_URL = 'https://axnzxbltlwgspptqcbhy.supabase.co';
 
   // ── State ────────────────────────────────────────────────
@@ -190,7 +190,7 @@
     });
   }
 
-  // ── Send message + stream response ───────────────────────
+  // ── Send message ─────────────────────────────────────────
   function handleSend() {
     var text = inputEl.value.trim();
     if (!text || isStreaming) return;
@@ -199,11 +199,7 @@
     inputEl.style.height = 'auto';
     pushUserMessage(text);
     setInputLocked(true);
-
-    var typingEl = showTyping();
-    var assistantText = '';
-    var assistantEl   = null;
-    var bookingHandled = false;
+    showTyping();
 
     fetch(API_URL, {
       method:  'POST',
@@ -212,91 +208,30 @@
     })
     .then(function (res) {
       if (!res.ok) throw new Error('API error ' + res.status);
-      if (!res.body) throw new Error('No stream');
-
+      return res.json();
+    })
+    .then(function (data) {
       removeTyping();
 
-      // Create the assistant bubble for streaming text
-      assistantEl = document.createElement('div');
-      assistantEl.className = 'aria-msg aria-assistant';
-      messagesEl.appendChild(assistantEl);
-
-      var reader  = res.body.getReader();
-      var decoder = new TextDecoder();
-
-      function read() {
-        return reader.read().then(function (chunk) {
-          if (chunk.done) {
-            // Finalize: push full message to history (excluding BOOKING_READY line)
-            var displayText = assistantText
-              .replace(/\nBOOKING_READY:\{.*\}/s, '')
-              .replace(/BOOKING_READY:\{.*\}/s, '')
-              .trim();
-
-            messages.push({ role: 'assistant', content: displayText });
-            assistantEl.textContent = displayText;
-
-            // Parse BOOKING_READY if present and not already handled
-            if (!bookingHandled) {
-              var match = assistantText.match(/BOOKING_READY:(\{[\s\S]*?\})/);
-              if (match) {
-                bookingHandled = true;
-                try {
-                  var booking = JSON.parse(match[1]);
-                  saveBookingToSupabase(booking);
-                  showConfirmCard(booking);
-                } catch (e) {
-                  console.warn('[Aria] Failed to parse BOOKING_READY JSON:', e);
-                }
-              }
-            }
-
-            setInputLocked(false);
-            inputEl.focus();
-            scrollBottom();
-            return;
-          }
-
-          var raw = decoder.decode(chunk.value, { stream: true });
-
-          // SSE format: lines starting with "data: "
-          raw.split('\n').forEach(function (line) {
-            if (!line.startsWith('data: ')) return;
-            var payload = line.slice(6).trim();
-            if (payload === '[DONE]') return;
-            try {
-              var parsed = JSON.parse(payload);
-              var delta  = (parsed.delta && parsed.delta.text) ||
-                           (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) ||
-                           '';
-              if (delta) {
-                assistantText += delta;
-
-                // Stream visible text (hide BOOKING_READY tag from user)
-                var visible = assistantText
-                  .replace(/\nBOOKING_READY:\{[\s\S]*$/, '')
-                  .replace(/BOOKING_READY:\{[\s\S]*$/, '')
-                  .trim();
-
-                assistantEl.textContent = visible;
-                scrollBottom();
-              }
-            } catch (_) { /* non-JSON SSE line */ }
-          });
-
-          return read();
-        });
+      if (data.type === 'booking_confirmation') {
+        // Amirah has collected ride details — show her message + a summary card
+        var confirmText = data.message || 'Here are your ride details — shall I reserve this?';
+        pushAssistantMessage(confirmText);
+        if (data.booking) { showConfirmCard(data.booking); }
+      } else {
+        // type: 'message', 'booking_confirmed', error fallback, or validation error
+        var replyText = data.response || data.message || 'I apologize — something went wrong. Please try again.';
+        pushAssistantMessage(replyText);
       }
 
-      return read();
+      setInputLocked(false);
+      inputEl.focus();
+      scrollBottom();
     })
     .catch(function (err) {
       removeTyping();
-      console.error('[Aria] Stream error:', err);
-      var errEl = document.createElement('div');
-      errEl.className = 'aria-msg aria-assistant';
-      errEl.textContent = 'I apologize — something went wrong. Please try again.';
-      messagesEl.appendChild(errEl);
+      console.error('[Aria] Fetch error:', err);
+      pushAssistantMessage('I apologize — something went wrong. Please try again.');
       setInputLocked(false);
       scrollBottom();
     });
