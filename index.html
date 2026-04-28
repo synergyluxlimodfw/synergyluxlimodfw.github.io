@@ -526,10 +526,58 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   .hero.hero-v2 .hero-eyebrow,.hero-v2-line1,.hero-v2-line2,.hero.hero-v2 .hero-sub,.hero-v2-diff,.hero.hero-v2 .hero-btns{animation:none!important;opacity:1!important;}
   .hero-v2-divider{animation:none!important;width:40px;}
 }
+
+/* ── POLISH BATCH ── */
+/* #1 Scroll progress bar */
+.scroll-progress{position:fixed;top:0;left:0;width:0%;height:2px;background:linear-gradient(to right,#C9A84C,#DEB96A);z-index:1000;pointer-events:none;}
+
+/* #2 Gallery overflow fix */
+.gallery-grid{overflow:hidden;}
+.gallery-grid img{transition:filter 0.5s ease,transform 0.5s ease;}
+
+/* #3 Why Us cards — gold underline on hover */
+.why-card{overflow:hidden;}
+.why-card::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--gold);transition:width 0.5s ease;}
+.why-card:hover::after{width:100%;}
+
+/* #4 Fleet image hover — brightness reveal */
+.fleet-img{overflow:hidden;}
+.fleet-img img:hover{filter:brightness(1);transform:scale(1.02);}
+.fleet-img img{transition:filter 0.6s ease,transform 0.6s ease;}
+
+/* #5 Decorative quote mark behind featured review */
+.rev-featured{overflow:hidden;}
+.rev-featured::after{content:'\201C';font-family:'Cormorant Garamond',serif;font-size:200px;color:rgba(201,168,76,0.05);position:absolute;bottom:-24px;right:28px;line-height:1;pointer-events:none;font-weight:300;}
+
+/* #7 Pricing cards — lift on hover */
+.pay-card{transition:background 0.4s,transform 0.4s cubic-bezier(0.16,1,0.3,1),box-shadow 0.4s;}
+.pay-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(201,168,76,0.07);}
+
+/* #8 Who We Serve — slide right on hover */
+.serve-line{transition:color 0.4s ease,transform 0.4s cubic-bezier(0.16,1,0.3,1);}
+.serve-line:hover{transform:translateX(6px);}
+
+/* #9 About photo — brightness reveal on hover */
+.about-img-wrap img{transition:filter 0.6s ease;}
+.about-img-wrap img:hover{filter:brightness(1);}
+
+/* #10 Global CTA button lift */
+.btn-gold{transition:background 0.45s ease,box-shadow 0.45s ease,transform 0.35s cubic-bezier(0.16,1,0.3,1);}
+.btn-gold:hover{transform:translateY(-2px);}
+.btn-outline{transition:border-color 0.45s ease,color 0.45s ease,box-shadow 0.45s ease,transform 0.35s cubic-bezier(0.16,1,0.3,1);}
+.btn-outline:hover{transform:translateY(-2px);}
+
+/* Mobile — disable transforms that cause layout issues */
+@media(max-width:480px){
+  .serve-line:hover{transform:none;}
+  .pay-card:hover{transform:none;box-shadow:none;}
+  .btn-gold:hover,.btn-outline:hover{transform:none;}
+}
 </style>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOWMJuY_dQuywNAjny-qNlNL3DqgwrDRc&libraries=places&callback=initQuoteCalc" async defer></script>
 </head>
 <body>
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -617,6 +665,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <div class="trust-item">Super Cruise Equipped</div>
 </div>
 
+<div style="text-align:center;padding:0;"><span class="sec-rule"></span></div>
 
 <!-- ══ REVIEWS ══ -->
 <section class="sec sec-dark" id="reviews">
@@ -642,6 +691,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   </div>
 </section>
 
+<div style="text-align:center;padding:0;"><span class="sec-rule"></span></div>
 
 <!-- ══ SECTION 3 — SERVICES ══ -->
 <section class="sec" id="services">
@@ -721,6 +771,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   </div>
 </section>
 
+<div style="text-align:center;padding:0;"><span class="sec-rule"></span></div>
 
 <!-- ══ PRICE CALCULATOR ══ -->
 <div class="sec calc-section" id="calculator">
@@ -978,6 +1029,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   </div>
 </section>
 
+<div style="text-align:center;padding:0;"><span class="sec-rule"></span></div>
 
 <!-- ══ SECTION 6 — VEHICLE ══ -->
 <section class="sec" id="fleet">
@@ -1020,6 +1072,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   </div>
 </section>
 
+<div style="text-align:center;padding:0;"><span class="sec-rule"></span></div>
 
 <!-- ══ ABOUT ══ -->
 <section class="sec" id="about">
@@ -1034,6 +1087,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   </div>
 </section>
 
+<div style="text-align:center;padding:0;"><span class="sec-rule"></span></div>
 
 <!-- ══ WHY US ══ -->
 <section class="sec sec-alt" id="why">
@@ -1559,6 +1613,17 @@ var revealObs=new IntersectionObserver(function(entries){
   });
 },{threshold:0.08,rootMargin:'0px 0px -32px 0px'});
 document.querySelectorAll('.reveal').forEach(function(el){revealObs.observe(el);});
+
+// #1 Scroll progress bar
+var scrollBar=document.getElementById('scrollProgress');
+if(scrollBar){
+  window.addEventListener('scroll',function(){
+    var doc=document.documentElement;
+    var scrolled=doc.scrollTop||document.body.scrollTop;
+    var total=doc.scrollHeight-doc.clientHeight;
+    scrollBar.style.width=(total>0?(scrolled/total*100):0)+'%';
+  },{passive:true});
+}
 </script>
 
 <div class="lightbox-overlay" id="lightbox" onclick="if(event.target===this||event.target.classList.contains('lightbox-close'))document.getElementById('lightbox').classList.remove('active')">
