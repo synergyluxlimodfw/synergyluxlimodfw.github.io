@@ -7,13 +7,14 @@
   'use strict';
 
   // ── Config ───────────────────────────────────────────────
-  var API_URL      = 'https://app.synergyluxlimodfw.com/api/aria';
-  var SUPABASE_URL = 'https://axnzxbltlwgspptqcbhy.supabase.co';
+  var API_URL = 'https://app.synergyluxlimodfw.com/api/aria';
 
   // ── State ────────────────────────────────────────────────
-  var messages     = [];   // { role: 'user'|'assistant', content: string }[]
-  var isStreaming  = false;
-  var isOpen       = false;
+  var messages        = [];   // { role: 'user'|'assistant', content: string }[]
+  var isStreaming     = false;
+  var isOpen          = false;
+  var pendingBooking  = null;  // BookingPayload waiting for user confirmation
+  var confirmCardEl   = null;  // DOM node for the active confirm card
 
   // ── DOM refs (set after inject) ──────────────────────────
   var launcher, chatWindow, messagesEl, inputEl, sendBtn;
@@ -137,20 +138,89 @@
     sendBtn.disabled = locked;
   }
 
-  // ── Show booking confirmation card ────────────────────────
+  // ── Show booking confirmation card (with real Confirm button) ───
   function showConfirmCard(booking) {
+    // Remove any pre-existing card
+    if (confirmCardEl) { confirmCardEl.remove(); confirmCardEl = null; }
+
     var card = document.createElement('div');
     card.className = 'aria-confirm-card';
     card.innerHTML =
-      '<h4>✦ Reservation Confirmed</h4>' +
-      '<p><strong>Name:</strong> ' + esc(booking.name || '—') + '</p>' +
-      '<p><strong>Pickup:</strong> ' + esc(booking.pickup || '—') + '</p>' +
-      '<p><strong>Destination:</strong> ' + esc(booking.destination || '—') + '</p>' +
-      '<p><strong>Date:</strong> ' + esc(booking.date || '—') + '</p>' +
-      '<p><strong>Time:</strong> ' + esc(booking.time || '—') + '</p>' +
+      '<h4>✦ Your Ride Details</h4>' +
+      '<p><strong>Name:</strong> '        + esc(booking.name             || '—') + '</p>' +
+      '<p><strong>Pickup:</strong> '      + esc(booking.pickup_location  || '—') + '</p>' +
+      '<p><strong>Destination:</strong> ' + esc(booking.destination      || '—') + '</p>' +
+      '<p><strong>Date:</strong> '        + esc(booking.date             || '—') + '</p>' +
+      '<p><strong>Time:</strong> '        + esc(booking.time             || '—') + '</p>' +
       (booking.service ? '<p><strong>Service:</strong> ' + esc(booking.service) + '</p>' : '') +
-      '<p style="margin-top:10px;font-size:11px;color:rgba(201,168,76,0.6);">A payment link will be sent to confirm your reservation.</p>';
+      '<div class="aria-confirm-actions">' +
+        '<button class="aria-btn-confirm">Confirm &amp; Reserve</button>' +
+        '<button class="aria-btn-edit">Edit Details</button>' +
+      '</div>';
+
+    card.querySelector('.aria-btn-confirm').addEventListener('click', function () {
+      handleConfirmBooking(card);
+    });
+    card.querySelector('.aria-btn-edit').addEventListener('click', function () {
+      handleEditBooking(card);
+    });
+
     messagesEl.appendChild(card);
+    confirmCardEl = card;
+    scrollBottom();
+  }
+
+  // ── Confirm booking — POST confirm:true to the API ────────
+  function handleConfirmBooking(card) {
+    if (!pendingBooking) return;
+
+    var confirmBtn = card.querySelector('.aria-btn-confirm');
+    var editBtn    = card.querySelector('.aria-btn-edit');
+    confirmBtn.disabled = true;
+    editBtn.disabled    = true;
+    confirmBtn.textContent = 'Reserving…';
+
+    fetch(API_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ confirm: true, bookingData: pendingBooking }),
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      // Replace the action buttons with a success line
+      var actionsEl = card.querySelector('.aria-confirm-actions');
+      actionsEl.innerHTML =
+        '<p style="color:#4ADE80;font-size:12px;margin:8px 0 0;">✓ You\'re all set. Mr. Rodriguez will take care of everything.</p>';
+
+      pendingBooking = null;
+      confirmCardEl  = null;
+
+      // Add Amirah's confirmation message to the chat
+      var reply = (data && data.response) || "You're all set. Mr. Rodriguez will take care of everything.";
+      pushAssistantMessage(reply);
+      setInputLocked(false);
+      inputEl.focus();
+      scrollBottom();
+    })
+    .catch(function (err) {
+      console.error('[Aria] Confirm error:', err);
+      confirmBtn.disabled    = false;
+      editBtn.disabled       = false;
+      confirmBtn.textContent = 'Confirm & Reserve';
+      pushAssistantMessage('Something went wrong saving your booking. Please call us at (646) 879-1391.');
+      setInputLocked(false);
+      scrollBottom();
+    });
+  }
+
+  // ── Edit — dismiss card and let user correct details ──────
+  function handleEditBooking(card) {
+    card.remove();
+    confirmCardEl  = null;
+    pendingBooking = null;
+    pushAssistantMessage('Of course — what would you like to change?');
+    setInputLocked(false);
+    inputEl.focus();
     scrollBottom();
   }
 
@@ -158,36 +228,6 @@
     var d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
-  }
-
-  // ── Save booking to Supabase ──────────────────────────────
-  function saveBookingToSupabase(booking) {
-    // Read the anon key from the page's meta tag or fall back to env baked in at build.
-    // For GitHub Pages we embed it directly here (public anon key — safe to expose).
-    var anonKey = (window.__SUPABASE_ANON_KEY) ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bnp4Ymx0bHdnc3BwdHFjYmh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTc3ODUsImV4cCI6MjA1OTE5Mzc4NX0.6J7-HrWL4rHSVdT6kGADIUFpZ0Yw9HmFW2fmRf1Ol40';
-
-    fetch(SUPABASE_URL + '/rest/v1/bookings_calendar', {
-      method:  'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'apikey':        anonKey,
-        'Authorization': 'Bearer ' + anonKey,
-        'Prefer':        'return=minimal',
-      },
-      body: JSON.stringify({
-        guest_name:  booking.name        || null,
-        pickup:      booking.pickup      || null,
-        destination: booking.destination || null,
-        date:        booking.date        || null,
-        time:        booking.time        || null,
-        service:     booking.service     || null,
-        phone:       booking.phone       || null,
-        source:      'aria_chat',
-      }),
-    }).catch(function (err) {
-      console.warn('[Aria] Supabase save failed:', err);
-    });
   }
 
   // ── Send message ─────────────────────────────────────────
@@ -214,18 +254,25 @@
       removeTyping();
 
       if (data.type === 'booking_confirmation') {
-        // Amirah has collected ride details — show her message + a summary card
+        // Amirah has collected ride details — show her message + interactive confirm card
         var confirmText = data.message || 'Here are your ride details — shall I reserve this?';
         pushAssistantMessage(confirmText);
-        if (data.booking) { showConfirmCard(data.booking); }
+        if (data.booking) {
+          pendingBooking = data.booking;
+          showConfirmCard(data.booking);
+          // Keep input locked until user confirms or edits
+        } else {
+          setInputLocked(false);
+          inputEl.focus();
+        }
       } else {
         // type: 'message', 'booking_confirmed', error fallback, or validation error
         var replyText = data.response || data.message || 'I apologize — something went wrong. Please try again.';
         pushAssistantMessage(replyText);
+        setInputLocked(false);
+        inputEl.focus();
       }
 
-      setInputLocked(false);
-      inputEl.focus();
       scrollBottom();
     })
     .catch(function (err) {
