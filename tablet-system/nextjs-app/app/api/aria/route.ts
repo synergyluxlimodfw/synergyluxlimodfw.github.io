@@ -32,21 +32,31 @@ import {
 import { handleBookingConfirmed } from '@/lib/sms';
 
 // ── CORS — allows the marketing site to call this endpoint ────────────────
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin':  'https://synergyluxlimodfw.com',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+const ALLOWED_ORIGINS = [
+  'https://synergyluxlimodfw.com',
+  'https://www.synergyluxlimodfw.com',
+];
 
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+function corsHeaders(req: NextRequest) {
+  const origin  = req.headers.get('origin') ?? '';
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Vary': 'Origin',
+  };
+}
+
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: corsHeaders(req) });
 }
 
 /** Wraps NextResponse.json and injects CORS headers on every response. */
-function json(body: unknown, init?: ResponseInit) {
+function json(body: unknown, req: NextRequest, init?: ResponseInit) {
   return NextResponse.json(body, {
     ...init,
-    headers: { ...CORS_HEADERS, ...(init?.headers ?? {}) },
+    headers: { ...corsHeaders(req), ...(init?.headers ?? {}) },
   });
 }
 
@@ -115,7 +125,7 @@ export async function POST(req: NextRequest) {
     try {
       body = await req.json();
     } catch {
-      return json({ error: 'Invalid JSON' }, { status: 400 });
+      return json({ error: 'Invalid JSON' }, req, { status: 400 });
     }
 
     // ── Mode 2: explicit booking confirmation ─────────────────────────────
@@ -123,7 +133,7 @@ export async function POST(req: NextRequest) {
       const bookingData = body.bookingData as BookingData | undefined;
 
       if (!bookingData) {
-        return json({ error: 'bookingData required' }, { status: 422 });
+        return json({ error: 'bookingData required' }, req, { status: 422 });
       }
 
       const { data, error, occasionValue } = await saveBooking(supabaseAdmin, bookingData);
@@ -145,7 +155,7 @@ export async function POST(req: NextRequest) {
         return json({
           type:     'booking_confirmed',
           response: 'I had trouble saving your booking. Please call us at (646) 879-1391.',
-        });
+        }, req);
       }
 
       if (data && bookingData.phone?.trim()) {
@@ -177,13 +187,13 @@ export async function POST(req: NextRequest) {
       return json({
         type:     'booking_confirmed',
         response: "You're all set. Mr. Rodriguez will take care of everything.",
-      });
+      }, req);
     }
 
     // ── Mode 1: normal chat ───────────────────────────────────────────────
     const raw = body.messages;
     if (!Array.isArray(raw) || raw.length === 0) {
-      return json({ error: 'messages array required' }, { status: 422 });
+      return json({ error: 'messages array required' }, req, { status: 422 });
     }
 
     const messages: ChatMessage[] = (raw as unknown[])
@@ -198,7 +208,7 @@ export async function POST(req: NextRequest) {
       .map(m => ({ role: m.role, content: m.content.trim() }));
 
     if (messages.length === 0) {
-      return json({ error: 'No valid messages' }, { status: 422 });
+      return json({ error: 'No valid messages' }, req, { status: 422 });
     }
 
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -230,13 +240,13 @@ export async function POST(req: NextRequest) {
         return json({
           type:     'message',
           response: "I'm sorry — it's taking a moment on our end. Please try again or call us directly at (646) 879-1391.",
-        });
+        }, req);
       }
       console.error('[Aria] Anthropic error:', err);
       return json({
         type:     'message',
         response: 'I apologize — I am having trouble connecting right now. Please call us directly at (646) 879-1391.',
-      });
+      }, req);
     }
 
     // ── BOOKING_READY detected → return confirmation prompt, do NOT save ──
@@ -309,7 +319,7 @@ export async function POST(req: NextRequest) {
         message:             availabilityWarning || cleanMessage,
         tier,
         availabilityWarning: availabilityWarning || null,
-      });
+      }, req);
     }
 
     // ── Normal response ───────────────────────────────────────────────────
@@ -354,13 +364,13 @@ export async function POST(req: NextRequest) {
     return json({
       type:     'message',
       response: stripBookingReady(rawResponse),
-    });
+    }, req);
 
   } catch (error) {
     console.error('[Aria] Unhandled error:', error);
     return json({
       type:     'message',
       response: 'I apologize — something went wrong on our end. Please call us at (646) 879-1391.',
-    });
+    }, req);
   }
 }
