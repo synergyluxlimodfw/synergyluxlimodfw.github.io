@@ -905,6 +905,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     <form class="form-grid reveal d2" id="bookingForm" onsubmit="return handleBooking(event);">
       <div class="fg"><label>Full Name *</label><input type="text" id="f_name" name="Name" placeholder="Your full name" required></div>
       <div class="fg"><label>Phone Number *</label><input type="tel" id="f_phone" name="Phone" placeholder="(000) 000-0000" required></div>
+      <div class="fg"><label>Email Address *</label><input type="email" id="f_email" name="email" placeholder="your@email.com" autocomplete="email" required></div>
       <div class="fg full" style="margin-top:-8px;"><p style="font-size:10px;color:rgba(239,239,239,0.38);line-height:1.6;font-weight:300;">By providing your phone number you consent to receive SMS messages from Synergy Lux Limo DFW regarding your booking. Reply STOP to opt out.</p></div>
       <div class="fg"><label>Service Type *</label>
         <select id="f_service" name="Service" required>
@@ -1549,6 +1550,7 @@ function handleBooking(e){
   status.innerHTML='Sending your booking request...';
   var name=document.getElementById('f_name').value;
   var phone=document.getElementById('f_phone').value;
+  var email=document.getElementById('f_email').value;
   var service=document.getElementById('f_service').value;
   var pickup=document.getElementById('f_pickup').value;
   var dropoff=document.getElementById('f_dropoff').value;
@@ -1557,7 +1559,7 @@ function handleBooking(e){
   var notes=(document.getElementById('f_notes').value)||'None';
   var submitted=new Date().toLocaleString('en-US',{timeZone:'America/Chicago'});
   var templateParams={
-    client_name:name,client_phone:phone,
+    client_name:name,client_phone:phone,client_email:email,
     service_type:service,pickup_location:pickup,dropoff_location:dropoff,
     trip_date:date,trip_time:time,notes:notes,submitted_at:submitted
   };
@@ -1567,7 +1569,7 @@ function handleBooking(e){
     if(!r.ok)throw new Error('Formspree error');
     fetch('https://hooks.zapier.com/hooks/catch/27079056/u73tqjh/',{
       method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({client_name:name,client_phone:phone,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,notes:notes,submitted_at:submitted})
+      body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,notes:notes,submitted_at:submitted})
     }).catch(function(e){console.log('Zapier:',e);});
     fetch('https://app.synergyluxlimodfw.com/api/booking-notify',{
       method:'POST',
@@ -1575,6 +1577,7 @@ function handleBooking(e){
       body:JSON.stringify({
         Name:document.getElementById('f_name').value,
         Phone:document.getElementById('f_phone').value,
+        Email:document.getElementById('f_email').value,
         Service:document.getElementById('f_service').value,
         Pickup_Location:document.getElementById('f_pickup').value,
         Dropoff_Location:document.getElementById('f_dropoff').value,
