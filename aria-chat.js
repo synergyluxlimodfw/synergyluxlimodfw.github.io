@@ -23,22 +23,22 @@
     // Launcher
     launcher = document.createElement('button');
     launcher.id = 'aria-launcher';
-    launcher.setAttribute('aria-label', 'Open Aria concierge chat');
+    launcher.setAttribute('aria-label', 'Open Amirah concierge chat');
     launcher.innerHTML =
       '<span class="aria-launcher-dot"></span>' +
-      '<span class="aria-launcher-label">Ask Aria</span>';
+      '<span class="aria-launcher-label">Ask Amirah</span>';
 
     // Window
     chatWindow = document.createElement('div');
     chatWindow.id = 'aria-window';
     chatWindow.setAttribute('role', 'dialog');
-    chatWindow.setAttribute('aria-label', 'Aria concierge chat');
+    chatWindow.setAttribute('aria-label', 'Amirah concierge chat');
     chatWindow.innerHTML =
       '<div id="aria-header">' +
         '<div class="aria-header-left">' +
           '<div class="aria-avatar">✦</div>' +
           '<div>' +
-            '<div class="aria-header-name">Aria</div>' +
+            '<div class="aria-header-name">Amirah</div>' +
             '<div class="aria-header-sub">Prestige Concierge</div>' +
           '</div>' +
         '</div>' +
@@ -46,7 +46,7 @@
       '</div>' +
       '<div id="aria-messages"></div>' +
       '<div id="aria-input-area">' +
-        '<textarea id="aria-input" rows="1" placeholder="Message Aria…" aria-label="Message"></textarea>' +
+        '<textarea id="aria-input" rows="1" placeholder="Message Amirah…" aria-label="Message"></textarea>' +
         '<button id="aria-send" aria-label="Send">↑</button>' +
       '</div>';
 
