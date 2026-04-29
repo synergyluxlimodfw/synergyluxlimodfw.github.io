@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import TipQRCode from '@/components/TipQRCode';
 import { TIP_LINKS } from '@/lib/tipLinks';
-import { supabase } from '@/lib/supabase';
 import { experienceStore } from '@/lib/experienceStore';
 import type { TipKey } from '@/lib/tipLinks';
 
@@ -37,12 +36,16 @@ export default function TipSelector({ onTip }: TipSelectorProps) {
   function handleSelect(key: PresetKey, percent: number) {
     setSelected(key);
     const { rideId, guestName } = experienceStore.getState();
-    supabase.from('tips').insert({
-      ride_id:    rideId,
-      guest_name: guestName || null,
-      percent,
-      stripe_key: key,
-    }).then(() => {});
+    fetch('/api/tips/insert', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ride_id:    rideId,
+        guest_name: guestName || null,
+        percent,
+        stripe_key: key,
+      }),
+    }).catch(err => console.error('[TipSelector] tips/insert error:', err));
   }
 
   return (

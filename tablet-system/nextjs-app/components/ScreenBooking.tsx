@@ -6,7 +6,6 @@ import { QRCodeSVG } from 'qrcode.react';
 import { SERVICES } from '@/lib/services';
 import { ProgressDots } from './ScreenWhy';
 import { track } from '@/lib/events';
-import { supabase } from '@/lib/supabase';
 import { experienceStore } from '@/lib/experienceStore';
 import type { Service } from '@/lib/types';
 
@@ -24,14 +23,18 @@ function openStripe(svc: Service, type: 'deposit' | 'full') {
   const url = type === 'deposit' ? (svc.depositLink || svc.fullLink) : svc.fullLink;
   if (!url) return;
   const { rideId } = experienceStore.getState();
-  supabase.from('bookings').insert({
-    ride_id:      rideId,
-    service:      svc.name,
-    amount:       parseDollar(svc.price),
-    deposit:      parseDollar(svc.deposit),
-    stripe_link:  url,
-    payment_type: type,
-  }).then(() => {});
+  fetch('/api/bookings/insert', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ride_id:      rideId,
+      service:      svc.name,
+      amount:       parseDollar(svc.price),
+      deposit:      parseDollar(svc.deposit),
+      stripe_link:  url,
+      payment_type: type,
+    }),
+  }).catch(err => console.error('[ScreenBooking] bookings/insert error:', err));
   window.open(url, '_blank');
 }
 

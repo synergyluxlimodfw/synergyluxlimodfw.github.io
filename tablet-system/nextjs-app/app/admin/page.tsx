@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { getMetrics, getEvents, clearEvents } from '@/lib/events';
 import type { ConversionMetrics, TrackEvent } from '@/lib/events';
-import { supabase } from '@/lib/supabase';
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -123,60 +122,40 @@ export default function AdminPage() {
       .then(d => setFunnelStats(d.stats ?? null))
       .catch(() => setApiError(true));
 
-    // ── Today's rides ──
-    const today = new Date().toISOString().split('T')[0];
-    const { data: todayRides } = await supabase
-      .from('rides')
-      .select('*')
-      .gte('created_at', today)
-      .order('created_at', { ascending: false });
-    if (todayRides) setLiveRides(todayRides);
-
-    // ── Rebook requests ──
-    const { data: rebooks } = await supabase
-      .from('rebook_requests')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20);
-    if (rebooks) setRebookRequests(rebooks);
-
-    // ── Today stats ──
-    setTodayStats({
-      rides:   todayRides?.length || 0,
-      revenue: (todayRides?.length || 0) * 165,
-      pending: rebooks?.filter((r: any) => r.status === 'pending').length || 0,
-    });
+    // ── Dashboard top-line data (today rides + rebooks + quotes) ──
+    try {
+      const dashRes = await fetch('/api/admin/dashboard-data');
+      if (dashRes.ok) {
+        const dash = await dashRes.json();
+        setLiveRides(dash.todayRides ?? []);
+        setRebookRequests(dash.rebookRequests ?? []);
+        setTodayStats(dash.todayStats ?? { rides: 0, revenue: 0, pending: 0 });
+        setQuotes(dash.quotes ?? []);
+        setQuotesLoading(false);
+      } else {
+        console.error('[AdminPage] dashboard-data error:', dashRes.status);
+      }
+    } catch (err) {
+      console.error('[AdminPage] dashboard-data fetch error:', err);
+    }
 
     // ── Unified Leads Dashboard ──
     setLeadsLoading(true);
-
-    // 1. All rides (paid bookings)
-    const { data: allRides } = await supabase
-      .from('rides')
-      .select('id, created_at, guest_name, phone, client_phone, destination, occasion, status, source')
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    // 2. Bookings with amounts
-    const { data: bookings } = await supabase
-      .from('bookings')
-      .select('ride_id, amount, payment_type')
-      .limit(100);
-
-    // 3. All rebook requests
-    const { data: allRebooks } = await supabase
-      .from('rebook_requests')
-      .select('id, created_at, passenger_name, phone, destination, occasion, status, source, preferred_date')
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    // 4. Unique phones from SMS conversations (inquiries)
-    const { data: smsData } = await supabase
-      .from('sms_conversations')
-      .select('phone, content, created_at')
-      .eq('role', 'user')
-      .order('created_at', { ascending: false })
-      .limit(200);
+    let allRides: any[] = [], bookings: any[] = [], allRebooks: any[] = [], smsData: any[] = [];
+    try {
+      const leadsRes = await fetch('/api/leads/list');
+      if (leadsRes.ok) {
+        const leadsData = await leadsRes.json();
+        allRides   = leadsData.rides   ?? [];
+        bookings   = leadsData.bookings ?? [];
+        allRebooks = leadsData.rebooks  ?? [];
+        smsData    = leadsData.sms      ?? [];
+      } else {
+        console.error('[AdminPage] leads/list error:', leadsRes.status);
+      }
+    } catch (err) {
+      console.error('[AdminPage] leads/list fetch error:', err);
+    }
 
     const bookingMap = new Map((bookings ?? []).map((b: any) => [b.ride_id, b]));
 
@@ -237,15 +216,6 @@ export default function AdminPage() {
       .then(d => { setOutreachLeads(d.leads || []); setOutreachLoading(false); })
       .catch(() => setOutreachLoading(false));
 
-    // ── Website quote requests ──
-    setQuotesLoading(true);
-    const { data: quotesData } = await supabase
-      .from('website_quotes')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (quotesData) setQuotes(quotesData as WebsiteQuote[]);
-    setQuotesLoading(false);
-
     // Conversion metrics
     fetch('/api/admin/metrics')
       .then(r => r.json())
@@ -274,7 +244,17 @@ export default function AdminPage() {
   }
 
   async function confirmQuote(id: string) {
-    await supabase.from('website_quotes').update({ status: 'confirmed' }).eq('id', id);
+    try {
+      const res = await fetch('/api/website-quotes/update', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: 'confirmed' }),
+      });
+      if (!res.ok) { console.error('[AdminPage] website-quotes/update error:', res.status); return; }
+    } catch (err) {
+      console.error('[AdminPage] website-quotes/update fetch error:', err);
+      return;
+    }
     setQuotes(prev => prev.map(q => q.id === id ? { ...q, status: 'confirmed' } : q));
   }
 

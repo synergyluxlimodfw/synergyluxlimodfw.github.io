@@ -4,7 +4,6 @@ import { useState, useEffect, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { experienceStore }    from '@/lib/experienceStore';
-import { supabase }           from '@/lib/supabase';
 import PrestigeBackground     from '@/components/PrestigeBackground';
 
 // ─────────────────────────────────────────────────────────
@@ -130,18 +129,27 @@ export default function OperatorPage() {
     experienceStore.launchExperience();
 
     // Await insert so we get the ride ID for the tablet URL
-    const { data: ride } = await supabase.from('rides').insert({
-      guest_name:  name.trim(),
-      destination: destination.trim(),
-      occasion:    occasion || null,
-      chauffeur:   chauffeurName,
-      eta_minutes: eta,
-      status:      'preparing',
-      vip_note:    notes.trim() || null,
-      phone:       phone.trim() || null,
-    }).select('id').single();
-
-    const rideId = ride?.id ?? null;
+    let rideId: string | null = null;
+    try {
+      const res  = await fetch('/api/rides/insert', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guest_name:  name.trim(),
+          destination: destination.trim(),
+          occasion:    occasion || null,
+          chauffeur:   chauffeurName,
+          eta_minutes: eta,
+          status:      'preparing',
+          vip_note:    notes.trim() || null,
+          phone:       phone.trim() || null,
+        }),
+      });
+      const ride = await res.json();
+      rideId = ride?.id ?? null;
+    } catch (err) {
+      console.error('[OperatorPage] rides/insert error:', err);
+    }
     if (rideId) experienceStore.setRideId(rideId);
 
     setLaunchedRideId(rideId);
@@ -809,11 +817,19 @@ function SuccessState({
     if (!rideId) return;
     setPhase(newPhase);
 
-    const update: Record<string, unknown> = { status: newPhase };
+    const update: Record<string, unknown> = { id: rideId, status: newPhase };
     if (newPhase === 'active')   update.start_time = new Date().toISOString();
     if (newPhase === 'complete') update.end_time   = new Date().toISOString();
 
-    await supabase.from('rides').update(update).eq('id', rideId);
+    try {
+      await fetch('/api/rides/update', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(update),
+      });
+    } catch (err) {
+      console.error('[OperatorPage] rides/update (phase) error:', err);
+    }
 
     // When ride ends, fire post-ride SMS
     if (newPhase === 'complete') {
@@ -837,7 +853,15 @@ function SuccessState({
 
   async function showBooking() {
     if (!rideId || bookingSent) return;
-    await supabase.from('rides').update({ show_booking: true }).eq('id', rideId);
+    try {
+      await fetch('/api/rides/update', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: rideId, show_booking: true }),
+      });
+    } catch (err) {
+      console.error('[OperatorPage] rides/update (show_booking) error:', err);
+    }
     setBookingSent(true);
   }
 

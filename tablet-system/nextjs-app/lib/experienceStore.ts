@@ -10,7 +10,6 @@
  */
 
 import { useSyncExternalStore } from 'react';
-import { supabase } from '@/lib/supabase';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -153,7 +152,11 @@ export const experienceStore = {
   setActive(): void {
     commit({ status: 'active' });
     if (_state.rideId) {
-      supabase.from('rides').update({ status: 'active' }).eq('id', _state.rideId).then(() => {});
+      fetch('/api/rides/update', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: _state.rideId, status: 'active' }),
+      }).catch(err => console.error('[experienceStore] rides/update (active) error:', err));
     }
   },
 
@@ -161,7 +164,11 @@ export const experienceStore = {
   completeRide(): void {
     commit({ status: 'complete' });
     if (_state.rideId) {
-      supabase.from('rides').update({ status: 'complete' }).eq('id', _state.rideId).then(() => {});
+      fetch('/api/rides/update', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: _state.rideId, status: 'complete' }),
+      }).catch(err => console.error('[experienceStore] rides/update (complete) error:', err));
     }
   },
 

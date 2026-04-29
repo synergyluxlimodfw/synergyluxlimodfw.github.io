@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useExperienceStore, experienceStore } from '@/lib/experienceStore';
 import type { ExperienceStatus } from '@/lib/experienceStore';
-import { supabase } from '@/lib/supabase';
+// TODO Phase 4: re-enable supabase realtime after server-side polling replaces channel subscription
+// import { supabase } from '@/lib/supabase';
 import { playExitTone } from '@/lib/audio';
 import MapEmbed            from '@/components/MapEmbed';
 import ThankYouScreen      from '@/components/ThankYouScreen';
@@ -54,23 +55,22 @@ function ExperienceInner() {
   const searchParams = useSearchParams();
   const rideParam    = searchParams.get('ride');
 
-  // ── Supabase Realtime subscription ───────────────────────
+  // ── Initial ride load via server-side API routes ─────────
+  // TODO Phase 4: restore realtime channel subscription once anon grants
+  // have been replaced with a server-sent-events or polling approach.
   useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-
     async function init() {
       let targetId = rideParam;
 
       // No URL param — find the latest in-progress ride
       if (!targetId) {
-        const { data } = await supabase
-          .from('rides')
-          .select('id')
-          .in('status', ['preparing', 'ready', 'active'])
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-        targetId = data?.id ?? null;
+        try {
+          const res  = await fetch('/api/rides/list?status=preparing,ready,active&limit=1&select=id');
+          const rows = await res.json();
+          targetId   = rows[0]?.id ?? null;
+        } catch (err) {
+          console.error('[ExperiencePage] rides/list error:', err);
+        }
       }
 
       // No active ride anywhere — fall back to sessionStorage
@@ -80,57 +80,27 @@ function ExperienceInner() {
       }
 
       // Fetch the full ride row
-      const { data: ride } = await supabase
-        .from('rides')
-        .select('*')
-        .eq('id', targetId)
-        .single();
+      try {
+        const res  = await fetch(`/api/rides/get/${targetId}`);
+        if (!res.ok) { experienceStore.hydrate(); return; }
+        const ride = await res.json() as RideRow;
+        experienceStore.loadFromRide(ride);
+        setPrestigeRideId(ride.id || '');
+        setPrestigeEta(ride.eta_minutes || 0);
+        setPrestigePhone((ride as unknown as Record<string, string>).phone || '');
+        setPrestigePickup((ride as unknown as Record<string, string>).pickup || '');
+      } catch (err) {
+        console.error('[ExperiencePage] rides/get error:', err);
+        experienceStore.hydrate();
+      }
 
-      if (ride) experienceStore.loadFromRide(ride as RideRow);
-      setPrestigeRideId(ride?.id || '');
-      setPrestigeEta(ride?.eta_minutes || 0);
-      setPrestigePhone((ride as any)?.phone || '');
-      setPrestigePickup((ride as any)?.pickup || '');
-
-      // Subscribe to realtime UPDATEs for this specific ride
-      channel = supabase
-        .channel(`ride-${targetId}`)
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'rides', filter: `id=eq.${targetId}` },
-          (payload) => {
-            const row = payload.new as RideRow;
-            setPrestigePhone((row as any)?.phone || '');
-            setPrestigePickup((row as any)?.pickup || '');
-            setPrestigeEta((row as any)?.eta_minutes || 0);
-
-            // Operator triggered booking screen — show pre-dropoff conversion screen
-            if (row.show_booking === true) {
-              setPreDropoffDest(row.destination || '');
-              setPreDropoffOcc(row.occasion || null);
-              setShowPreDropoff(true);
-              return;
-            }
-
-            if (row.status === 'complete') {
-              // Call completeRide() only if not already complete — prevents
-              // an update loop since completeRide() also writes back to Supabase
-              if (experienceStore.getState().status !== 'complete') {
-                experienceStore.completeRide();
-              }
-            } else {
-              experienceStore.loadFromRide(row);
-            }
-          }
-        )
-        .subscribe();
+      // TODO Phase 4: subscribe to realtime updates for this ride.
+      // Blocked by RLS lockdown — anon channel grants revoked in Phase 1.
+      // Operator status changes (complete, show_booking) currently require
+      // a manual page refresh until Phase 4 polling is implemented.
     }
 
     init();
-
-    return () => {
-      if (channel) supabase.removeChannel(channel);
-    };
   }, [rideParam]);
 
   const [showGratuity,        setShowGratuity]        = useState(false);
