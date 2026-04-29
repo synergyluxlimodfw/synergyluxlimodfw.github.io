@@ -114,6 +114,79 @@ async function saveBooking(supabaseAdmin: any, booking: BookingData, fallbackPho
   return { data, error, occasionValue };
 }
 
+// ── SMS consent enforcement ───────────────────────────────────────────────
+//
+// Scans conversation history to determine whether explicit SMS consent
+// has been obtained. Returns 'granted', 'declined', or 'pending'.
+//
+// Logic:
+//   1. Walk backwards through messages to find the LAST assistant message
+//      that contains an SMS consent question (detected by keyword set).
+//   2. If found, inspect the NEXT user message after it:
+//      - Affirmative word  → 'granted'
+//      - Negative word     → 'declined'
+//      - Anything else     → 'pending' (question asked, answer unclear)
+//   3. If no consent question found in history → 'pending'
+//
+// This is intentionally conservative: ambiguous answers always → 'pending'
+// so Amirah re-asks rather than silently skipping consent.
+
+function hasExplicitSmsConsent(
+  messages: ChatMessage[]
+): 'granted' | 'declined' | 'pending' {
+  // Keywords that indicate an assistant message was asking for SMS consent.
+  // At least one from each group must be present.
+  const consentTopicWords  = ['text', 'sms', 'message you', 'send you', 'notification'];
+  const consentContextWords = ['stop', 'opt out', 'confirmation', 'updates', 'reservation'];
+
+  let consentQuestionIndex = -1;
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    if (msg.role !== 'assistant') continue;
+    const lower = msg.content.toLowerCase();
+    const hasTopic   = consentTopicWords.some(w  => lower.includes(w));
+    const hasContext = consentContextWords.some(w => lower.includes(w));
+    if (hasTopic && hasContext) {
+      consentQuestionIndex = i;
+      break;
+    }
+  }
+
+  // No consent question found in history — must ask
+  if (consentQuestionIndex === -1) return 'pending';
+
+  // Look for the first user reply after the consent question
+  for (let i = consentQuestionIndex + 1; i < messages.length; i++) {
+    const msg = messages[i];
+    if (msg.role !== 'user') continue;
+
+    const lower = msg.content.toLowerCase().trim();
+
+    // Explicit decline
+    const declinePatterns = [
+      /^no\b/, /^nope\b/, /^nah\b/, /^no thanks\b/, /^no thank you\b/,
+      /don't text/, /do not text/, /no texts/, /no sms/, /no messages/,
+    ];
+    if (declinePatterns.some(p => p.test(lower))) return 'declined';
+
+    // Affirmative consent
+    const affirmPatterns = [
+      /^yes\b/, /^yeah\b/, /^yep\b/, /^yup\b/, /^sure\b/, /^ok\b/, /^okay\b/,
+      /^of course\b/, /^absolutely\b/, /^definitely\b/, /^please\b/, /^go ahead\b/,
+      /^sounds good\b/, /^that('s| is) fine\b/, /^that works\b/, /^confirmed\b/,
+    ];
+    if (affirmPatterns.some(p => p.test(lower))) return 'granted';
+
+    // User replied but with something ambiguous (e.g. a question, unrelated text)
+    // Treat as pending so we re-ask
+    return 'pending';
+  }
+
+  // Consent question was the last assistant message — user hasn't replied yet
+  return 'pending';
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
@@ -249,10 +322,30 @@ export async function POST(req: NextRequest) {
       }, req);
     }
 
-    // ── BOOKING_READY detected → return confirmation prompt, do NOT save ──
+    // ── BOOKING_READY detected → enforce SMS consent before confirmation ──
     const booking = extractBookingReady(rawResponse);
 
     if (booking) {
+      // Hard code-level consent gate — independent of system prompt compliance.
+      const consentStatus = hasExplicitSmsConsent(messages);
+
+      if (consentStatus === 'pending') {
+        // Consent not yet asked or answer was ambiguous — ask now, block confirmation.
+        return json({
+          type:     'message',
+          response: 'Almost done — one quick thing. May I text you the confirmation details and any updates for this reservation? You can reply STOP at any time to opt out.',
+        }, req);
+      }
+
+      if (consentStatus === 'declined') {
+        // User explicitly declined SMS — route to phone booking, no card.
+        return json({
+          type:     'message',
+          response: 'No problem — we can finalize your booking by phone. Please call (646)\u00a0879-1391 and we\'ll take care of everything directly.',
+        }, req);
+      }
+
+      // consentStatus === 'granted' — fall through to normal confirmation logic
       const cleanMessage = stripBookingReady(rawResponse).trim() ||
         'Here are your ride details. Shall I reserve this for you?';
 
