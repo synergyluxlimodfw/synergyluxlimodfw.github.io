@@ -1593,14 +1593,19 @@ function handleBooking(e){
     if(!r.ok)throw new Error('Formspree error');
     var bookingConsent=document.getElementById('bookingSmsConsent').checked;
     var bookingDatetime=(date&&time)?new Date(date+'T'+time).toISOString():null;
+    console.log('[leads insert] firing for',name);
     fetch('https://app.synergyluxlimodfw.com/api/leads/insert',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name:name,email:email,phone:phone,pickup:pickup,destination:dropoff,datetime:bookingDatetime,occasion:service,notes:notes==='None'?null:notes,source:'website-booking',lead_type:'booking',sms_consent:bookingConsent,sms_consent_timestamp:bookingConsent?new Date().toISOString():null})
-    }).catch(function(e){console.warn('[leads/insert] booking:',e);});
+      body:JSON.stringify({name:name,email:email,phone:phone,pickup:pickup,destination:dropoff,datetime:bookingDatetime,occasion:service,notes:notes==='None'?null:notes,source:'website-booking',lead_type:'booking',sms_consent:bookingConsent,sms_consent_timestamp:bookingConsent?new Date().toISOString():null}),
+      keepalive:true
+    }).then(function(r){console.log('[leads insert] response:',r.status);}).catch(function(e){console.warn('[leads insert] failed:',e);});
+    console.log('[zapier] firing for',name);
     fetch('https://hooks.zapier.com/hooks/catch/27079056/u73tqjh/',{
       method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,notes:notes,submitted_at:submitted,sms_consent:bookingConsent,sms_consent_timestamp:bookingConsent?new Date().toISOString():null})
-    }).catch(function(e){console.log('Zapier:',e);});
+      body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,notes:notes,submitted_at:submitted,sms_consent:bookingConsent,sms_consent_timestamp:bookingConsent?new Date().toISOString():null}),
+      keepalive:true
+    }).then(function(r){console.log('[zapier] response:',r.status);}).catch(function(e){console.warn('[zapier] failed:',e);});
+    console.log('[booking-notify] firing for',name);
     fetch('https://app.synergyluxlimodfw.com/api/booking-notify',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -1616,8 +1621,9 @@ function handleBooking(e){
         Notes:document.getElementById('f_notes').value,
         sms_consent:bookingConsent,
         sms_consent_timestamp:bookingConsent?new Date().toISOString():null,
-      })
-    }).catch(function(e){console.warn('SMS notify failed:',e);});
+      }),
+      keepalive:true
+    }).then(function(r){console.log('[booking-notify] response:',r.status);}).catch(function(e){console.warn('[booking-notify] failed:',e);});
     return emailjs.send('service_tnx9bxv','template_i4rw16m',templateParams);
   })
   .then(function(){
