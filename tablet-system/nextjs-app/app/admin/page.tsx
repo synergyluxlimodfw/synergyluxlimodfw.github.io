@@ -48,6 +48,24 @@ type WebsiteQuote = {
   created_at: string;
 };
 
+type InboundLead = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  pickup: string | null;
+  destination: string | null;
+  datetime: string | null;
+  occasion: string | null;
+  notes: string | null;
+  source: string;
+  lead_type: string | null;
+  status: string | null;
+  sms_consent: boolean;
+  sms_consent_timestamp: string | null;
+  created_at: string;
+};
+
 // ── Mock data ──────────────────────────────────────────────
 
 const MOCK_RIDES: MockRide[] = [
@@ -66,6 +84,21 @@ const EVENT_COLORS: Record<string, string> = {
   'viewed_offer': '#38BDF8', 'clicked_book': '#A78BFA', 'completed_payment': '#4ADE80',
 };
 
+const INBOUND_TYPE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  booking:   { label: 'Booking',   color: '#4ADE80', bg: 'rgba(74,222,128,0.10)'  },
+  fifa:      { label: 'FIFA',      color: '#818CF8', bg: 'rgba(129,140,248,0.10)' },
+  affiliate: { label: 'Affiliate', color: '#C9A84C', bg: 'rgba(201,168,76,0.10)'  },
+  amirah:    { label: 'Amirah',    color: '#38BDF8', bg: 'rgba(56,189,248,0.10)'  },
+};
+
+const INBOUND_STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
+  new:       { color: '#FCD34D', bg: 'rgba(252,211,77,0.10)'  },
+  contacted: { color: '#818CF8', bg: 'rgba(129,140,248,0.10)' },
+  confirmed: { color: '#4ADE80', bg: 'rgba(74,222,128,0.10)'  },
+  booked:    { color: '#4ADE80', bg: 'rgba(74,222,128,0.10)'  },
+  spam:      { color: '#F87171', bg: 'rgba(248,113,113,0.10)' },
+};
+
 const TYPE_CONFIG = {
   booking:  { label: 'Booking',  color: '#4ADE80', bg: 'rgba(74,222,128,0.10)',  border: 'rgba(74,222,128,0.25)' },
   rebook:   { label: 'Rebook',   color: '#818CF8', bg: 'rgba(129,140,248,0.10)', border: 'rgba(129,140,248,0.25)' },
@@ -80,6 +113,19 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
   complete:  { color: '#818CF8', bg: 'rgba(129,140,248,0.10)' },
   inquiry:   { color: '#C9A84C', bg: 'rgba(201,168,76,0.10)' },
 };
+
+// ── Helpers ────────────────────────────────────────────────
+
+function timeAgo(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60)  return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60)  return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24)    return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 
 // ── Component ──────────────────────────────────────────────
 
@@ -104,6 +150,9 @@ export default function AdminPage() {
   const [quotes,           setQuotes]           = useState<WebsiteQuote[]>([]);
   const [quotesLoading,    setQuotesLoading]    = useState(true);
   const [sendingPaymentId, setSendingPaymentId] = useState<string | null>(null);
+  const [inboundLeads,     setInboundLeads]     = useState<InboundLead[]>([]);
+  const [inboundLoading,   setInboundLoading]   = useState(true);
+  const [expandedInbound,  setExpandedInbound]  = useState<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
     // ── localStorage metrics ──
@@ -221,6 +270,13 @@ export default function AdminPage() {
       .then(r => r.json())
       .then(d => setConvMetrics(d))
       .catch(err => console.error('Metrics fetch error:', err));
+
+    // Inbound leads (website forms + Amirah)
+    setInboundLoading(true);
+    fetch('/api/leads/inbound')
+      .then(r => r.json())
+      .then(d => { setInboundLeads(d.leads ?? []); setInboundLoading(false); })
+      .catch(() => setInboundLoading(false));
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
@@ -341,6 +397,175 @@ export default function AdminPage() {
             <StatCard label="Est. Revenue"    value={`$${todayStats.revenue}`}   delay={0.06} color="#4ADE80" />
             <StatCard label="Pending Rebooks" value={String(todayStats.pending)} delay={0.12} color="#FCD34D" />
           </div>
+        </section>
+
+        {/* ── INBOUND LEADS ───────────────────────────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-[10px] tracking-[3.5px] uppercase text-lux-muted">Inbound Leads</p>
+              <p className="text-[11px] text-lux-muted/50 mt-1">Customer-initiated — booking, FIFA, affiliate, and Amirah captures</p>
+            </div>
+            <p className="text-[10px] tracking-[2px] uppercase" style={{ color: 'rgba(201,168,76,0.5)' }}>
+              {inboundLeads.length} total
+            </p>
+          </div>
+
+          {inboundLoading ? (
+            <div className="rounded-2xl p-8 text-center" style={{ background: '#0F0F14', border: '1px solid rgba(201,168,76,0.08)' }}>
+              <p className="text-[12px] text-lux-muted tracking-wide">Loading inbound leads…</p>
+            </div>
+          ) : inboundLeads.length === 0 ? (
+            <EmptyCard text="No inbound leads yet — website form submissions and Amirah captures will appear here." />
+          ) : (
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(201,168,76,0.10)', overflowX: 'auto' }}>
+              {/* Header */}
+              <div
+                className="px-5 py-3 text-[10px] tracking-[2px] uppercase"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '80px 160px 120px 150px 170px 110px 50px 90px',
+                  color: '#666672',
+                  borderBottom: '1px solid rgba(201,168,76,0.08)',
+                  background: '#0F0F14',
+                  minWidth: 960,
+                }}
+              >
+                <span>When</span>
+                <span>Name / Type</span>
+                <span>Phone</span>
+                <span>Email</span>
+                <span>Route</span>
+                <span>Trip Date</span>
+                <span>SMS</span>
+                <span>Status</span>
+              </div>
+
+              <div style={{ minWidth: 960 }}>
+                {inboundLeads.map((lead, i) => {
+                  const typeKey  = lead.lead_type ?? (lead.source === 'amirah' ? 'amirah' : 'booking');
+                  const typeConf = INBOUND_TYPE_CONFIG[typeKey] ?? INBOUND_TYPE_CONFIG.booking;
+                  const statConf = INBOUND_STATUS_CONFIG[lead.status ?? 'new'] ?? INBOUND_STATUS_CONFIG.new;
+                  const expanded = expandedInbound.has(lead.id);
+
+                  const tripDate = lead.datetime
+                    ? new Date(lead.datetime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
+                    : '—';
+
+                  return (
+                    <div key={lead.id}>
+                      <motion.div
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.025 }}
+                        className="px-5 py-3 items-center cursor-pointer hover:bg-white/[0.02] transition-colors"
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '80px 160px 120px 150px 170px 110px 50px 90px',
+                          borderBottom: '1px solid rgba(201,168,76,0.06)',
+                          background: i % 2 === 0 ? '#09090E' : '#0F0F14',
+                        }}
+                        onClick={() => setExpandedInbound(prev => {
+                          const next = new Set(prev);
+                          next.has(lead.id) ? next.delete(lead.id) : next.add(lead.id);
+                          return next;
+                        })}
+                      >
+                        {/* When */}
+                        <p className="text-[10px] text-lux-muted/60 tabular-nums">{timeAgo(lead.created_at)}</p>
+
+                        {/* Name + type badge */}
+                        <div className="flex items-center gap-2 pr-2">
+                          <p className="text-[13px] font-medium text-lux-white truncate">{lead.name || '—'}</p>
+                          <span
+                            className="flex-shrink-0 text-[8px] font-bold tracking-[1px] uppercase rounded-full px-2 py-0.5"
+                            style={{ color: typeConf.color, background: typeConf.bg, border: `1px solid ${typeConf.color}33` }}
+                          >
+                            {typeConf.label}
+                          </span>
+                        </div>
+
+                        {/* Phone */}
+                        {lead.phone ? (
+                          <a
+                            href={`tel:${lead.phone}`}
+                            onClick={e => e.stopPropagation()}
+                            className="text-[11px] tabular-nums hover:text-gold transition-colors truncate"
+                            style={{ color: 'rgba(201,168,76,0.7)' }}
+                          >
+                            {lead.phone}
+                          </a>
+                        ) : (
+                          <p className="text-[11px] text-lux-muted/30">—</p>
+                        )}
+
+                        {/* Email */}
+                        {lead.email ? (
+                          <a
+                            href={`mailto:${lead.email}`}
+                            onClick={e => e.stopPropagation()}
+                            className="text-[11px] hover:text-gold transition-colors truncate pr-2"
+                            style={{ color: 'rgba(201,168,76,0.5)' }}
+                          >
+                            {lead.email}
+                          </a>
+                        ) : (
+                          <p className="text-[11px] text-lux-muted/30">—</p>
+                        )}
+
+                        {/* Route */}
+                        <p className="text-[11px] text-lux-muted/70 truncate pr-2">
+                          {lead.pickup && lead.destination
+                            ? `${lead.pickup} → ${lead.destination}`
+                            : lead.pickup ?? lead.destination ?? '—'}
+                        </p>
+
+                        {/* Trip date */}
+                        <p className="text-[11px] text-lux-muted/60 tabular-nums">{tripDate}</p>
+
+                        {/* SMS consent */}
+                        <span
+                          className="text-[11px] font-medium"
+                          style={{ color: lead.sms_consent ? '#4ADE80' : 'rgba(102,102,114,0.5)' }}
+                        >
+                          {lead.sms_consent ? '✓' : '—'}
+                        </span>
+
+                        {/* Status */}
+                        <span
+                          className="inline-flex items-center gap-1 text-[9px] font-bold tracking-[1px] uppercase rounded-full px-2.5 py-1 w-fit"
+                          style={{ color: statConf.color, background: statConf.bg, border: `1px solid ${statConf.color}33` }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: statConf.color }} />
+                          {lead.status ?? 'new'}
+                        </span>
+                      </motion.div>
+
+                      {/* Expanded details */}
+                      {expanded && (
+                        <div
+                          className="px-5 py-4 text-[11px] space-y-1.5"
+                          style={{ background: 'rgba(201,168,76,0.03)', borderBottom: '1px solid rgba(201,168,76,0.08)' }}
+                        >
+                          {lead.occasion && (
+                            <p><span className="text-lux-muted/50 uppercase tracking-wider text-[9px]">Service / Occasion: </span><span className="text-lux-white">{lead.occasion}</span></p>
+                          )}
+                          {lead.notes && (
+                            <p><span className="text-lux-muted/50 uppercase tracking-wider text-[9px]">Notes: </span><span className="text-lux-muted">{lead.notes}</span></p>
+                          )}
+                          <p><span className="text-lux-muted/50 uppercase tracking-wider text-[9px]">Source: </span><span className="text-lux-muted">{lead.source}</span></p>
+                          <p><span className="text-lux-muted/50 uppercase tracking-wider text-[9px]">Submitted: </span><span className="text-lux-muted">{new Date(lead.created_at).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span></p>
+                          {lead.sms_consent && lead.sms_consent_timestamp && (
+                            <p><span className="text-lux-muted/50 uppercase tracking-wider text-[9px]">SMS Consent: </span><span style={{ color: '#4ADE80' }}>Granted {new Date(lead.sms_consent_timestamp).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</span></p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* ── QUOTE REQUESTS ──────────────────────────────── */}
