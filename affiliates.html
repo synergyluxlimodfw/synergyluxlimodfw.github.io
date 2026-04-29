@@ -447,7 +447,8 @@ function handleAffiliate(e){
   var btn = e.target.querySelector('button');
   btn.disabled = true;
   btn.textContent = 'Sending...';
-  var fd = new FormData(e.target);
+  var form = e.target;
+  var fd = new FormData(form);
   fd.append('_subject', 'New Affiliate Application — Synergy Lux Limo DFW');
   fetch('https://formspree.io/f/xzdkjrep', {
     method: 'POST',
@@ -456,7 +457,29 @@ function handleAffiliate(e){
   }).then(function(){
     btn.textContent = '✅ Application Received! We\'ll contact you within 24 hours.';
     btn.style.background = '#5cb85c';
-    e.target.reset();
+    // Write lead to database (fire-and-forget)
+    var affConsent  = form.querySelector('#affiliateSmsConsent').checked;
+    var business    = fd.get('Business') || '';
+    var volume      = fd.get('Volume')   || '';
+    var notesBase   = fd.get('Notes')    || '';
+    var city        = fd.get('City')     || '';
+    var extraNotes  = [city?'City: '+city:'', business?'Business: '+business:'', volume?'Volume: '+volume:'', notesBase].filter(Boolean).join(' | ');
+    fetch('https://app.synergyluxlimodfw.com/api/leads/insert', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name:        fd.get('Name')  || null,
+        email:       fd.get('Email') || null,
+        phone:       fd.get('Phone') || null,
+        destination: null,
+        occasion:    fd.get('Type')  || null,
+        notes:       extraNotes      || null,
+        source:      'website-affiliate',
+        lead_type:   'affiliate',
+        sms_consent: affConsent,
+        sms_consent_timestamp: affConsent ? new Date().toISOString() : null,
+      }),
+    }).catch(function(e){console.warn('[leads/insert] affiliate:',e);});
+    form.reset();
   }).catch(function(){
     btn.textContent = '✅ Application Received!';
     btn.style.background = '#5cb85c';

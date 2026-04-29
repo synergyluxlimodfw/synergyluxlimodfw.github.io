@@ -582,7 +582,8 @@ function handleFifaBooking(e){
   var btn = e.target.querySelector('button');
   btn.textContent = 'Sending...';
   btn.disabled = true;
-  var fd = new FormData(e.target);
+  var form = e.target;
+  var fd = new FormData(form);
   fetch('https://formspree.io/f/xzdkjrep', {
     method: 'POST',
     body: fd,
@@ -590,7 +591,30 @@ function handleFifaBooking(e){
   }).then(function(r){
     btn.textContent = '✅ Request Sent! We\'ll confirm shortly.';
     btn.style.background = '#5cb85c';
-    e.target.reset();
+    // Write lead to database (fire-and-forget)
+    var fifaConsent = form.querySelector('#fifaSmsConsent').checked;
+    var passengers  = fd.get('Passengers') || '';
+    var country     = fd.get('Country')    || '';
+    var notesBase   = fd.get('Notes')      || '';
+    var dates       = fd.get('Dates') || '';
+    var extraNotes  = [dates?'Dates: '+dates:'', country?'Country: '+country:'', passengers?'Passengers: '+passengers:'', notesBase].filter(Boolean).join(' | ');
+    fetch('https://app.synergyluxlimodfw.com/api/leads/insert', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name:        fd.get('Name')    || null,
+        email:       fd.get('Email')   || null,
+        phone:       fd.get('Phone')   || null,
+        pickup:      fd.get('Pickup')  || null,
+        datetime:    null,
+        occasion:    fd.get('Package') || null,
+        notes:       extraNotes        || null,
+        source:      'website-fifa',
+        lead_type:   'fifa',
+        sms_consent: fifaConsent,
+        sms_consent_timestamp: fifaConsent ? new Date().toISOString() : null,
+      }),
+    }).catch(function(e){console.warn('[leads/insert] fifa:',e);});
+    form.reset();
   }).catch(function(){
     btn.textContent = '✅ Request Sent!';
     btn.style.background = '#5cb85c';

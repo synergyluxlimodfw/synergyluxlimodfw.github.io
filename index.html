@@ -1592,6 +1592,11 @@ function handleBooking(e){
   .then(function(r){
     if(!r.ok)throw new Error('Formspree error');
     var bookingConsent=document.getElementById('bookingSmsConsent').checked;
+    var bookingDatetime=(date&&time)?new Date(date+'T'+time).toISOString():null;
+    fetch('https://app.synergyluxlimodfw.com/api/leads/insert',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:name,email:email,phone:phone,pickup:pickup,destination:dropoff,datetime:bookingDatetime,occasion:service,notes:notes==='None'?null:notes,source:'website-booking',lead_type:'booking',sms_consent:bookingConsent,sms_consent_timestamp:bookingConsent?new Date().toISOString():null})
+    }).catch(function(e){console.warn('[leads/insert] booking:',e);});
     fetch('https://hooks.zapier.com/hooks/catch/27079056/u73tqjh/',{
       method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,notes:notes,submitted_at:submitted,sms_consent:bookingConsent,sms_consent_timestamp:bookingConsent?new Date().toISOString():null})
