@@ -116,6 +116,13 @@ nav{background:rgba(10,10,10,0.98);padding:0 40px;display:flex;justify-content:s
 .form-submit{grid-column:1/-1;text-align:center;margin-top:8px;}
 .form-submit button{background:var(--gold);color:#000;border:none;padding:18px 64px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;width:100%;}
 .form-submit button:hover{background:var(--gold2);}
+.sms-consent-label{display:flex;align-items:flex-start;gap:12px;margin:20px 0 16px;padding:14px 16px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:6px;cursor:pointer;grid-column:1/-1;}
+.sms-consent-label input[type="checkbox"]{margin-top:3px;accent-color:var(--gold);width:16px;height:16px;flex-shrink:0;cursor:pointer;}
+.sms-consent-label span{font-size:13px;line-height:1.5;color:#a8a098;}
+.sms-consent-label a{color:var(--gold);text-decoration:underline;}
+.sms-consent-label a:hover{color:var(--gold2);}
+.sms-consent-error{font-size:12px;color:#d9534f;margin:-8px 0 12px;display:none;grid-column:1/-1;}
+.sms-consent-error.show{display:block;}
 
 /* FAQ */
 .faq-inner{max-width:780px;margin:48px auto 0;}
@@ -375,6 +382,10 @@ footer{background:#0d0d0d;border-top:1px solid rgba(201,168,76,0.12);padding:40p
       <div class="fg full"><label>Tell Us About Your Business / Clients</label>
         <textarea rows="3" name="Notes" placeholder="Brief description of your business and the type of clients you work with..."></textarea>
       </div>
+      <label class="sms-consent-label" for="affiliateSmsConsent">
+        <input type="checkbox" id="affiliateSmsConsent" name="sms_consent" required>
+        <span>I agree to receive SMS text messages from Synergy Lux Limo DFW LLC at the number provided regarding partnership communications, commission payments via Zelle, and account updates. Message &amp; data rates may apply. Reply STOP to opt out at any time. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>.</span>
+      </label>
       <div class="form-submit">
         <button type="submit">💰 Apply to Become a Partner</button>
       </div>

@@ -275,6 +275,18 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .form-status{grid-column:1/-1;text-align:center;padding:18px;font-size:13px;display:none;}
 .form-status.success{display:block;color:#5cb85c;background:rgba(92,184,92,0.06);border:1px solid rgba(92,184,92,0.2);}
 .form-status.error{display:block;color:#d9534f;background:rgba(217,83,79,0.06);border:1px solid rgba(217,83,79,0.2);}
+.sms-consent-label{display:flex;align-items:flex-start;gap:12px;margin:20px 0 16px;padding:14px 16px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:6px;cursor:pointer;}
+.sms-consent-label input[type="checkbox"]{margin-top:3px;accent-color:var(--gold);width:16px;height:16px;flex-shrink:0;cursor:pointer;}
+.sms-consent-label span{font-size:13px;line-height:1.5;color:#a8a098;}
+.sms-consent-label a{color:var(--gold);text-decoration:underline;}
+.sms-consent-label a:hover{color:var(--gold2);}
+.sms-consent-error{font-size:12px;color:#d9534f;margin:-8px 0 12px;display:none;}
+.sms-consent-error.show{display:block;}
+.quote-request-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.quote-request-fields input{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--white);padding:13px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;width:100%;box-sizing:border-box;}
+.quote-request-fields input:focus{border-color:rgba(201,168,76,0.5);}
+.quote-request-fields input::placeholder{color:rgba(239,239,239,0.25);}
+@media(max-width:480px){.sms-consent-label{padding:12px 14px;}.sms-consent-label span{font-size:12.5px;}.quote-request-fields{grid-template-columns:1fr;}}
 
 /* ── STRIPE PAYMENT CARDS ── */
 .pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:64px;}
@@ -884,8 +896,13 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
         <div class="quote-request-fields">
           <input type="text" id="reqName"  placeholder="Your name"  autocomplete="given-name" />
           <input type="tel"  id="reqPhone" placeholder="Your phone" autocomplete="tel" />
+          <input type="email" id="reqEmail" name="email" placeholder="Your email" autocomplete="email" />
         </div>
-        <p style="font-size:10px;color:rgba(239,239,239,0.38);line-height:1.6;margin:10px 0 14px;font-weight:300;">By providing your phone number you consent to receive SMS messages from Synergy Lux Limo DFW regarding your booking. Reply STOP to opt out.</p>
+        <label class="sms-consent-label" for="quoteSmsConsent" style="margin-top:14px;">
+          <input type="checkbox" id="quoteSmsConsent" name="sms_consent" required>
+          <span>I agree to receive SMS text messages from Synergy Lux Limo DFW LLC at the number provided regarding my reservation and booking updates. Message &amp; data rates may apply. Reply STOP to opt out at any time. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>.</span>
+        </label>
+        <p class="sms-consent-error" id="quoteConsentError">Please agree to receive SMS messages to continue.</p>
         <button class="quote-confirm-btn" id="confirmBtn" onclick="confirmQuoteRequest()">Confirm My Request</button>
       </div>
       <div class="quote-success" id="quoteSuccess"></div>
@@ -906,7 +923,12 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="fg"><label>Full Name *</label><input type="text" id="f_name" name="Name" placeholder="Your full name" required></div>
       <div class="fg"><label>Phone Number *</label><input type="tel" id="f_phone" name="Phone" placeholder="(000) 000-0000" required></div>
       <div class="fg"><label>Email Address *</label><input type="email" id="f_email" name="email" placeholder="your@email.com" autocomplete="email" required></div>
-      <div class="fg full" style="margin-top:-8px;"><p style="font-size:10px;color:rgba(239,239,239,0.38);line-height:1.6;font-weight:300;">By providing your phone number you consent to receive SMS messages from Synergy Lux Limo DFW regarding your booking. Reply STOP to opt out.</p></div>
+      <div class="fg full" style="margin-top:-8px;">
+        <label class="sms-consent-label" for="bookingSmsConsent">
+          <input type="checkbox" id="bookingSmsConsent" name="sms_consent" required>
+          <span>I agree to receive SMS text messages from Synergy Lux Limo DFW LLC at the number provided regarding my reservation and booking updates. Message &amp; data rates may apply. Reply STOP to opt out at any time. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>.</span>
+        </label>
+      </div>
       <div class="fg"><label>Service Type *</label>
         <select id="f_service" name="Service" required>
           <option value="">Select a service</option>
@@ -1263,7 +1285,6 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <a href="https://facebook.com/synergyluxlimodfw" target="_blank">Facebook</a>
       <a href="https://linkedin.com" target="_blank">LinkedIn</a>
       <a href="/privacy.html">Privacy Policy</a>
-      <!-- TODO: /terms.html does not exist yet -->
       <a href="/terms.html">Terms of Service</a>
     </div>
   </div>
@@ -1468,8 +1489,12 @@ function showRequestForm() {
 function confirmQuoteRequest() {
   var name  = document.getElementById('reqName').value.trim();
   var phone = document.getElementById('reqPhone').value.trim();
+  var consentEl = document.getElementById('quoteSmsConsent');
+  var consentErrEl = document.getElementById('quoteConsentError');
   if (!name)  { document.getElementById('reqName').focus();  return; }
   if (!phone) { document.getElementById('reqPhone').focus(); return; }
+  if (!consentEl.checked) { consentErrEl.classList.add('show'); consentEl.focus(); return; }
+  consentErrEl.classList.remove('show');
 
   var d = _quoteData;
   var svcLabels = {
