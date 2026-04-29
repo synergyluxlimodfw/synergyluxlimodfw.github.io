@@ -1,6 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 
+// ── CORS — allows the marketing site to call this endpoint ────────────────
+const ALLOWED_ORIGINS = [
+  'https://synergyluxlimodfw.com',
+  'https://www.synergyluxlimodfw.com',
+];
+
+function corsHeaders(req: NextRequest) {
+  const origin  = req.headers.get('origin') ?? '';
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Vary': 'Origin',
+  };
+}
+
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: corsHeaders(req) });
+}
+
+function json(body: unknown, req: NextRequest, init?: ResponseInit) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: { ...corsHeaders(req), ...(init?.headers ?? {}) },
+  });
+}
+
 export async function POST(req: NextRequest) {
   const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   try {
@@ -19,10 +47,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!Phone && !Email) {
-      return NextResponse.json(
-        { error: 'Missing contact info' },
-        { status: 400 }
-      );
+      return json({ error: 'Missing contact info' }, req, { status: 400 });
     }
 
     // Format phone to E.164 if provided
@@ -58,12 +83,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true });
+    return json({ success: true }, req);
   } catch (err: any) {
     console.error('Booking notify error:', err);
-    return NextResponse.json(
-      { error: err.message },
-      { status: 500 }
-    );
+    return json({ error: err.message }, req, { status: 500 });
   }
 }
