@@ -899,10 +899,9 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
           <input type="email" id="reqEmail" name="email" placeholder="Your email" autocomplete="email" />
         </div>
         <label class="sms-consent-label" for="quoteSmsConsent" style="margin-top:14px;">
-          <input type="checkbox" id="quoteSmsConsent" name="sms_consent" required>
-          <span>I agree to receive SMS text messages from Synergy Lux Limo DFW LLC at the number provided regarding my reservation and booking updates. Message &amp; data rates may apply. Reply STOP to opt out at any time. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>.</span>
+          <input type="checkbox" id="quoteSmsConsent" name="sms_consent">
+          <span>By checking this box, I agree to receive SMS messages from Synergy Lux Limo DFW LLC about my reservation. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help. Frequency varies. View <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms</a>. (Optional — leave unchecked to receive contact via phone or email only.)</span>
         </label>
-        <p class="sms-consent-error" id="quoteConsentError">Please agree to receive SMS messages to continue.</p>
         <button class="quote-confirm-btn" id="confirmBtn" onclick="confirmQuoteRequest()">Confirm My Request</button>
       </div>
       <div class="quote-success" id="quoteSuccess"></div>
@@ -925,8 +924,8 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="fg"><label>Email Address *</label><input type="email" id="f_email" name="email" placeholder="your@email.com" autocomplete="email" required></div>
       <div class="fg full" style="margin-top:-8px;">
         <label class="sms-consent-label" for="bookingSmsConsent">
-          <input type="checkbox" id="bookingSmsConsent" name="sms_consent" required>
-          <span>I agree to receive SMS text messages from Synergy Lux Limo DFW LLC at the number provided regarding my reservation and booking updates. Message &amp; data rates may apply. Reply STOP to opt out at any time. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>.</span>
+          <input type="checkbox" id="bookingSmsConsent" name="sms_consent">
+          <span>By checking this box, I agree to receive SMS messages from Synergy Lux Limo DFW LLC about my reservation. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help. Frequency varies. View <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms</a>. (Optional — leave unchecked to receive contact via phone or email only.)</span>
         </label>
       </div>
       <div class="fg"><label>Service Type *</label>
@@ -1493,8 +1492,7 @@ function confirmQuoteRequest() {
   var consentErrEl = document.getElementById('quoteConsentError');
   if (!name)  { document.getElementById('reqName').focus();  return; }
   if (!phone) { document.getElementById('reqPhone').focus(); return; }
-  if (!consentEl.checked) { consentErrEl.classList.add('show'); consentEl.focus(); return; }
-  consentErrEl.classList.remove('show');
+  if (consentErrEl) consentErrEl.classList.remove('show');
 
   var d = _quoteData;
   var svcLabels = {
@@ -1529,21 +1527,19 @@ function confirmQuoteRequest() {
   .finally(function() {
     btn.textContent = 'Confirm My Request'; btn.disabled = false;
 
-    // Save lead to Supabase (fire-and-forget)
-    fetch('https://axnzxbltlwgspptqcbhy.supabase.co/rest/v1/website_quotes', {
+    // Save lead via server-side API (fire-and-forget)
+    var consentChecked = consentEl.checked;
+    fetch('https://app.synergyluxlimodfw.com/api/website-quotes/insert', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': 'sb_publishable_2NZVCOzQlRFktPFxfIVX5w_ngrgvwLK',
-        'Authorization': 'Bearer sb_publishable_2NZVCOzQlRFktPFxfIVX5w_ngrgvwLK',
-        'Prefer': 'return=minimal',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: name, phone: phone, service: svcLabel,
         date: d.date, time: d.time,
         pickup: d.pickup, dropoff: d.dropoff,
         passengers: parseInt(d.passengers) || 1,
         quoted_price: d.price, status: 'pending',
+        sms_consent: consentChecked,
+        sms_consent_timestamp: consentChecked ? new Date().toISOString() : null,
       }),
     }).catch(function(e) { console.error('Lead save error:', e); });
 
@@ -1595,9 +1591,10 @@ function handleBooking(e){
   fetch('https://formspree.io/f/xzdkjrep',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
   .then(function(r){
     if(!r.ok)throw new Error('Formspree error');
+    var bookingConsent=document.getElementById('bookingSmsConsent').checked;
     fetch('https://hooks.zapier.com/hooks/catch/27079056/u73tqjh/',{
       method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,notes:notes,submitted_at:submitted})
+      body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,service_type:service,pickup_location:pickup,dropoff_location:dropoff,trip_date:date,trip_time:time,notes:notes,submitted_at:submitted,sms_consent:bookingConsent,sms_consent_timestamp:bookingConsent?new Date().toISOString():null})
     }).catch(function(e){console.log('Zapier:',e);});
     fetch('https://app.synergyluxlimodfw.com/api/booking-notify',{
       method:'POST',
@@ -1612,6 +1609,8 @@ function handleBooking(e){
         Date:document.getElementById('f_date').value,
         Time:document.getElementById('f_time').value,
         Notes:document.getElementById('f_notes').value,
+        sms_consent:bookingConsent,
+        sms_consent_timestamp:bookingConsent?new Date().toISOString():null,
       })
     }).catch(function(e){console.warn('SMS notify failed:',e);});
     return emailjs.send('service_tnx9bxv','template_i4rw16m',templateParams);
