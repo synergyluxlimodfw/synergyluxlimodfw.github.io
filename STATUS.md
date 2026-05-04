@@ -13,10 +13,13 @@ Updated as milestones close. Check this file before making changes that touch Tw
 - **Until approved:** SMS sending from this number may be filtered by carriers
 
 ### DFW Local Number +18178092801 (A2P 10DLC)
-- **Status:** Campaign v2 re-submitted April 29, 2026
+- **Status:** ✅ APPROVED — May 4, 2026
+- **Campaign ID:** CM33337f95800bb553d849772409b064de
+- **External Campaign ID (TCR):** C5ZO28T
+- **Reviewed by:** Satyaki Ghosh (Twilio)
 - **Brand:** Approved (Low Volume Mixed)
-- **Expected:** 1–7 business days
-- **Until approved:** SMS sending from this number may be filtered by carriers
+- **Verified:** Yes — end-to-end SMS pipeline confirmed with successful test send
+- SMS sending from this number is fully operational
 
 ---
 
