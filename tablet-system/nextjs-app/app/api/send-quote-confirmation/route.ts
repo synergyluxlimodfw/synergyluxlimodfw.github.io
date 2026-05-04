@@ -1,3 +1,4 @@
+import { SENDER_ID, CTIA_FOOTER } from '@/lib/sms';
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import Stripe from 'stripe';
@@ -18,13 +19,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'phone and name required' }, { status: 422 });
     }
 
+    const returnTripText = returnTrip ? ` Return trip: ${dropoff} → ${pickup} on ${returnDate} at ${returnTime}.` : '';
     const customerMsg =
-      `Hi ${name}, this is Amirah with Synergy Lux. ` +
+      `${SENDER_ID}: Hi ${name}, this is Amirah. ` +
       `Your quote for ${service} on ${date} at ${time} ` +
-      `from ${pickup} to ${dropoff} is $${price}. ` +
-      (returnTrip ? `Return trip: ${dropoff} → ${pickup} on ${returnDate} at ${returnTime}. ` : '') +
-      `Mr. Rodriguez will personally confirm your reservation shortly. ` +
-      `Questions? Call (646) 879-1391.`;
+      `from ${pickup} to ${dropoff} is $${price}.${returnTripText} ` +
+      `Mr. Rodriguez will personally confirm shortly. ` +
+      `Questions? Call (646) 879-1391. ${CTIA_FOOTER}`;
 
     // ── Stripe checkout (best-effort) ────────────────────────────────────────
     let stripeUrl: string | null = null;

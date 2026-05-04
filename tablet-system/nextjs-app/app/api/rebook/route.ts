@@ -1,3 +1,4 @@
+import { SENDER_ID, CTIA_FOOTER } from '@/lib/sms';
 import crypto from 'crypto';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
       await twilioClient.messages.create({
         to:   phone,
         from,
-        body: `Synergy Lux: Your ride request has been received. Our team will confirm your booking shortly. — Synergy Lux Limo DFW`,
+        body: `${SENDER_ID}: Your ride request has been received. Our team will confirm your booking shortly. ${CTIA_FOOTER}`,
       });
     }
   } catch (smsError) {

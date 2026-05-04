@@ -17,6 +17,7 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 
+import { SENDER_ID, CTIA_FOOTER_SHORT } from '@/lib/sms';
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import Anthropic from '@anthropic-ai/sdk';
@@ -180,12 +181,13 @@ export async function POST(req: NextRequest) {
 
     // ── 7. Send Aria response via SMS ─────────────────────────────────────
     const cleanResponse = stripBookingReady(rawResponse);
+    const finalResponse = `${SENDER_ID}: ${cleanResponse} ${CTIA_FOOTER_SHORT}`;
 
     try {
       await twilioClient.messages.create({
         from: process.env.TWILIO_PHONE,
         to:   from,
-        body: cleanResponse,
+        body: finalResponse,
       });
     } catch (err) {
       console.error('[SMS/incoming] Twilio send error:', err);

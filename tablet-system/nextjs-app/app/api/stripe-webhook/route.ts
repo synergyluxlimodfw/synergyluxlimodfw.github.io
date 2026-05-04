@@ -1,3 +1,4 @@
+import { SENDER_ID, CTIA_FOOTER } from '@/lib/sms';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
       if (phone) {
         try {
           await twilioClient.messages.create({
-            body: `Synergy Lux — Payment confirmed. Your ride is booked. Mr. Rodriguez will be in touch to confirm details. Questions? Call (646) 879-1391.`,
+            body: `${SENDER_ID}: Payment confirmed. Your ride is booked. Mr. Rodriguez will be in touch to confirm details. Questions? Call (646) 879-1391. ${CTIA_FOOTER}`,
             from: process.env.TWILIO_PHONE_NUMBER,
             to: phone,
           });

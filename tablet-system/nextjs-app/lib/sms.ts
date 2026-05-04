@@ -21,6 +21,13 @@ import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
 import { addMinutes, addHours, subHours } from 'date-fns';
 
+// CTIA compliance constants — used across all customer-facing SMS templates
+// per A2P 10DLC campaign approval (Campaign SID: CM33337f95800bb553d849772409b064de)
+
+export const SENDER_ID = 'Synergy Lux Limo DFW LLC';
+export const CTIA_FOOTER = 'Reply STOP to opt out, HELP for help. Msg & data rates may apply.';
+export const CTIA_FOOTER_SHORT = 'Reply STOP to opt out.';
+
 // ── Clients ───────────────────────────────────────────────────────────────
 
 const twilioClient = twilio(
@@ -62,67 +69,60 @@ function bookingConfirmed(ride: Ride): string {
   const dateStr = ride.date ?? 'your scheduled date';
   const timeStr = ride.time ?? 'your scheduled time';
   return [
-    `Synergy Lux: Your ride is confirmed for ${dateStr} at ${timeStr}.`,
+    `${SENDER_ID}: Your ride is confirmed for ${dateStr} at ${timeStr}.`,
     '',
     `Chauffeur: ${ride.chauffeur}`,
     'Vehicle: Cadillac Escalade',
     '',
-    'Reply here if you need anything.',
-    'Reply STOP to opt out.',
+    `Reply here if you need anything. ${CTIA_FOOTER}`,
   ].join('\n');
 }
 
 function preRideReminder(): string {
   return [
-    "Synergy Lux: We'll be arriving shortly for your ride today.",
+    `${SENDER_ID}: We'll be arriving shortly for your ride today.`,
     '',
-    'Your chauffeur will be ready and on time.',
-    'Reply here if anything changes.',
+    `Your chauffeur will be ready and on time. Reply here if anything changes.`,
     '',
-    'See you soon.',
-    'Reply STOP to opt out.',
+    `See you soon. ${CTIA_FOOTER_SHORT}`,
   ].join('\n');
 }
 
-function postRide(): string {
+function postRide(bookingUrl: string): string {
   return [
-    'Thank you for riding with Synergy Lux today.',
+    `${SENDER_ID}: Thank you for riding with us today.`,
     '',
-    `Reserve your next ride here:\n${process.env.BOOKING_URL}`,
+    `Reserve your next ride: ${bookingUrl}`,
     '',
-    'Reply STOP to opt out.',
+    CTIA_FOOTER_SHORT,
   ].join('\n');
 }
 
-function reviewRequest(): string {
+function reviewRequest(googleReviewUrl: string): string {
   return [
-    "If you had a great experience, we'd truly appreciate a quick review:",
-    process.env.GOOGLE_REVIEW_URL,
+    `${SENDER_ID}: If you had a great experience, we'd truly appreciate a quick review: ${googleReviewUrl}`,
     '',
-    'Thank you — it means a lot.',
-    'Reply STOP to opt out.',
+    `Thank you — it means a lot. ${CTIA_FOOTER_SHORT}`,
   ].join('\n');
 }
 
-function rebookNudge(name: string): string {
-  const firstName = name ? name.split(' ')[0] : 'there';
+function rebookNudge(firstName: string, bookingUrl: string): string {
   return [
-    `Hi ${firstName}, if you need another ride this week, I'd be happy to take care of it.`,
+    `${SENDER_ID}: Hi ${firstName}, if you need another ride this week, I'd be happy to take care of it.`,
     '',
-    `Reserve anytime:\n${process.env.BOOKING_URL}`,
+    `Reserve anytime: ${bookingUrl}`,
     '',
-    'Reply STOP to opt out.',
+    CTIA_FOOTER_SHORT,
   ].join('\n');
 }
 
-function airportReturn(name: string): string {
-  const firstName = name ? name.split(' ')[0] : 'there';
+function airportReturn(firstName: string, bookingUrl: string): string {
   return [
-    `Hi ${firstName}, if you'll need a return ride from the airport, I can have that ready for you.`,
+    `${SENDER_ID}: Hi ${firstName}, if you'll need a return ride from the airport, I can have that ready for you.`,
     '',
-    `Schedule here:\n${process.env.BOOKING_URL}`,
+    `Schedule: ${bookingUrl}`,
     '',
-    'Reply STOP to opt out.',
+    CTIA_FOOTER_SHORT,
   ].join('\n');
 }
 
@@ -211,7 +211,7 @@ export async function handlePostRide(rideId: string): Promise<void> {
   if (!ride.client_phone) return;
 
   try {
-    await sendSMS(ride.client_phone, postRide());
+    await sendSMS(ride.client_phone, postRide(process.env.BOOKING_URL ?? ''));
     console.log('[SMS] postRide sent to', ride.client_phone);
   } catch (err) {
     console.error('[SMS] postRide error:', err);
@@ -233,7 +233,7 @@ export async function sendAirportReturn(rideId: string): Promise<void> {
   if (!ride.client_phone) return;
 
   try {
-    await sendSMS(ride.client_phone, airportReturn(ride.guest_name ?? ''));
+    await sendSMS(ride.client_phone, airportReturn((ride.guest_name ?? '').split(' ')[0] || 'there', process.env.BOOKING_URL ?? ''));
     console.log('[SMS] airportReturn sent to', ride.client_phone);
   } catch (err) {
     console.error('[SMS] airportReturn error:', err);
@@ -278,13 +278,13 @@ export async function processScheduledMessages(): Promise<number> {
           body = preRideReminder();
           break;
         case 'POST_RIDE':
-          body = postRide();
+          body = postRide(process.env.BOOKING_URL ?? '');
           break;
         case 'REVIEW_REQUEST':
-          body = reviewRequest();
+          body = reviewRequest(process.env.GOOGLE_REVIEW_URL ?? '');
           break;
         case 'REBOOK_NUDGE':
-          body = rebookNudge(ride.guest_name ?? '');
+          body = rebookNudge((ride.guest_name ?? '').split(' ')[0] || 'there', process.env.BOOKING_URL ?? '');
           break;
         default:
           console.warn('[SMS] Unknown message type:', msg.type);

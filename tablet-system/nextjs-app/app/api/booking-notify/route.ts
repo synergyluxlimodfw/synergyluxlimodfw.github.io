@@ -1,3 +1,4 @@
+import { SENDER_ID, CTIA_FOOTER } from '@/lib/sms';
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
     if (passengerPhone.length >= 12) {
       try {
         await twilioClient.messages.create({
-          body: `Synergy Lux — We received your booking request for ${Service}. Mr. Rodriguez will confirm shortly. Questions? Call (646) 879-1391 or visit synergyluxlimodfw.com`,
+          body: `${SENDER_ID}: We received your booking request for ${Service}. Mr. Rodriguez will confirm shortly. Questions? Call (646) 879-1391. ${CTIA_FOOTER}`,
           from: process.env.TWILIO_PHONE_NUMBER,
           to: passengerPhone,
         });

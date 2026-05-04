@@ -1,3 +1,4 @@
+import { SENDER_ID, CTIA_FOOTER } from '@/lib/sms';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import twilio from 'twilio';
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
     if (phone) {
       try {
         await twilioClient.messages.create({
-          body: `Synergy Lux — Your $${amount} booking is ready: ${session.url}\n\nReply with any questions or call (646) 879-1391.`,
+          body: `${SENDER_ID}: Your $${amount} booking is ready: ${session.url}\n\nReply with any questions or call (646) 879-1391. ${CTIA_FOOTER}`,
           from: process.env.TWILIO_PHONE_NUMBER,
           to: phone,
         });

@@ -18,6 +18,7 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 
+import { SENDER_ID, CTIA_FOOTER, CTIA_FOOTER_SHORT } from '@/lib/sms';
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
@@ -440,14 +441,14 @@ export async function POST(req: NextRequest) {
             phone:    formattedPhone,
             send_at:  oneHour.toISOString(),
             sent:     false,
-            message:  `Hi, this is Amirah with Synergy Lux. I wanted to make sure your transportation is taken care of. Still need a ride? I can have everything arranged in minutes. synergyluxlimodfw.com`,
+            message:  `${SENDER_ID}: Hi, this is Amirah following up. I wanted to make sure your transportation is taken care of. Still need a ride? I can have everything arranged in minutes. ${CTIA_FOOTER}`,
           },
           {
             type:     'followup_24h',
             phone:    formattedPhone,
             send_at:  twentyFourHrs.toISOString(),
             sent:     false,
-            message:  `Hi, Amirah from Synergy Lux checking in. Your ride details are saved — just say the word and Mr. Rodriguez will take care of everything. (646) 879-1391`,
+            message:  `${SENDER_ID}: Hi, this is Amirah checking in. Your ride details are saved — just say the word and Mr. Rodriguez will take care of everything. Call (646) 879-1391. ${CTIA_FOOTER_SHORT}`,
           },
         ]);
         if (scheduleErr) console.error('Follow-up schedule error:', scheduleErr);

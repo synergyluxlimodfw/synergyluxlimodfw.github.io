@@ -17,14 +17,15 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 
+import { SENDER_ID, CTIA_FOOTER } from '@/lib/sms';
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
 
 const OPENING_MESSAGE =
-  "Good day — this is Amirah with Synergy Lux. " +
-  "Mr. Rodriguez is with a client right now, but I can take care of your transportation. " +
-  "Where will we be picking you up and your destination? (Reply STOP to opt out.)";
+  `${SENDER_ID}: Good day — this is Amirah. ` +
+  `Mr. Rodriguez is with a client right now, but I can take care of your transportation. ` +
+  `Where will we be picking you up and your destination? ${CTIA_FOOTER}`;
 
 export async function POST(req: NextRequest) {
   const twilioClient  = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);

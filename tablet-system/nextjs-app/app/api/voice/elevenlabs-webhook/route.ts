@@ -34,6 +34,7 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 
+import { SENDER_ID, CTIA_FOOTER } from '@/lib/sms';
 import { NextRequest, NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { createClient } from '@supabase/supabase-js';
@@ -151,24 +152,17 @@ export async function POST(req: NextRequest) {
 
       if (missingFields.length === 0) {
         // Everything collected — move to confirmation
-        smsBody = `Hi${firstName ? ` ${firstName}` : ''}, this is Amirah with Synergy Lux. Your ${occasion} to ${destination}${date ? ` on ${date}` : ''}${time ? ` at ${time}` : ''}${price ? ` for $${price}` : ''} is being reviewed by your chauffeur. He'll confirm shortly.\n\nTo secure your ride now: reply YES and we'll send your payment link immediately.\n\nReply STOP to opt out.`;
+        smsBody = `${SENDER_ID}: Hi${firstName ? ` ${firstName}` : ''}, this is Amirah. Your ${occasion} to ${destination}${date ? ` on ${date}` : ''}${time ? ` at ${time}` : ''}${price ? ` for $${price}` : ''} is being reviewed by your chauffeur. He'll confirm shortly.\n\nTo secure your ride now: reply YES and we'll send your payment link immediately. ${CTIA_FOOTER}`;
       } else {
         smsBody = [
-          `Hi${firstName ? ` ${firstName}` : ''}, this is Amirah with Synergy Lux — following up from your call.`,
+          `${SENDER_ID}: Hi${firstName ? ` ${firstName}` : ''}, this is Amirah — following up from your call.`,
           `I have your ${occasion} to ${destination}.`,
-          `Just need your ${missingFields.join(' and ')} to confirm the booking.`,
-          '',
-          'Reply STOP to opt out.',
+          `Just need your ${missingFields.join(' and ')} to confirm the booking. ${CTIA_FOOTER}`,
         ].join('\n');
       }
     } else {
       // Minimal data collected — restart gracefully
-      smsBody = [
-        `Hi${firstName ? ` ${firstName}` : ''}, this is Amirah with Synergy Lux — following up from your call.`,
-        "I'd love to get your ride sorted. What's the occasion?",
-        '',
-        'Reply STOP to opt out.',
-      ].join('\n');
+      smsBody = `${SENDER_ID}: Hi${firstName ? ` ${firstName}` : ''}, this is Amirah — following up from your call. I'd love to get your ride sorted. What's the occasion? ${CTIA_FOOTER}`;
     }
 
     // ── 3. Send the SMS ───────────────────────────────────────────────────
