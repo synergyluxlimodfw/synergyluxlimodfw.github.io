@@ -1785,7 +1785,8 @@ function sendTextQuote() {
   var lastScrollTime = Date.now();
 
   function checkArm() {
-    if (window._quoteData && window._quoteData.price > 0) {
+    if (typeof _quoteData !== 'undefined' && _quoteData && _quoteData.price > 0) {
+      if (!armed) console.log('[ExitIntent] armed = true (quote exists)');
       armed = true;
     }
   }
@@ -1800,6 +1801,7 @@ function sendTextQuote() {
   }
 
   function showModal() {
+    console.log('[ExitIntent] showModal triggered. armed=', armed, 'shouldFire=', shouldFire());
     if (!shouldFire()) return;
     sessionStorage.setItem('sl_exit_intent_shown', '1');
     var overlay = document.getElementById('exitIntentOverlay');
@@ -1811,7 +1813,10 @@ function sendTextQuote() {
   }
 
   document.addEventListener('mouseleave', function(e) {
-    if (e.clientY < 10) showModal();
+    if (e.clientY < 10) {
+      console.log('[ExitIntent] mouseleave at y=' + e.clientY);
+      showModal();
+    }
   });
 
   window.addEventListener('scroll', function() {
@@ -1822,6 +1827,11 @@ function sendTextQuote() {
     lastScrollY = window.scrollY;
     lastScrollTime = now;
   }, { passive: true });
+
+  window.slClearExitIntent = function() {
+    sessionStorage.removeItem('sl_exit_intent_shown');
+    console.log('[ExitIntent] session flag cleared, modal can fire again');
+  };
 })();
 
 function dismissExitIntent() {
@@ -1835,7 +1845,7 @@ function submitExitIntent() {
     return;
   }
 
-  var d = window._quoteData || {};
+  var d = (typeof _quoteData !== 'undefined' && _quoteData) || {};
   if (!d.price) {
     document.getElementById('exitIntentError').style.display = 'block';
     return;
