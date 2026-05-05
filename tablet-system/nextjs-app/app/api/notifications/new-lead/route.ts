@@ -6,6 +6,7 @@ const INBOUND_SOURCES = new Set([
   'website-fifa',
   'website-affiliate',
   'amirah',
+  'website-quote',
 ]);
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -13,6 +14,7 @@ const SOURCE_LABEL: Record<string, string> = {
   'website-fifa':      'FIFA 2026',
   'website-affiliate': 'AFFILIATE',
   'amirah':            'AMIRAH CHAT',
+  'website-quote':     'QUOTE — TEXT ME',
 };
 
 function fmt(val: unknown, fallback = '—'): string {

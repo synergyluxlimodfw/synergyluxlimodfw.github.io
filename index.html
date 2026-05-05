@@ -251,6 +251,21 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .quote-success.show{display:block;}
 .quote-success-title{font-size:13px;color:#4ADE80;font-weight:500;margin-bottom:8px;}
 .quote-success-body{font-size:12px;color:rgba(239,239,239,0.6);line-height:1.9;}
+.btn-text-quote{background:transparent;border:1px solid rgba(201,168,76,0.45);color:var(--gold);padding:13px 20px;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;white-space:nowrap;}
+.btn-text-quote:hover{border-color:var(--gold);background:rgba(201,168,76,0.07);}
+.text-quote-form{margin-top:22px;border-top:1px solid rgba(201,168,76,0.14);padding-top:20px;display:none;}
+.text-quote-form.show{display:block;}
+.text-quote-form-label{font-size:12px;color:rgba(239,239,239,0.5);margin-bottom:14px;letter-spacing:0.5px;}
+.text-quote-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.text-quote-fields input{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--white);padding:13px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;width:100%;box-sizing:border-box;}
+.text-quote-fields input:focus{border-color:rgba(201,168,76,0.5);}
+.text-quote-fields input::placeholder{color:rgba(239,239,239,0.25);}
+.text-quote-submit{width:100%;background:var(--gold);color:#000;border:none;padding:14px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.3s;}
+.text-quote-submit:hover{background:var(--gold2);}
+.text-quote-submit:disabled{opacity:0.6;cursor:not-allowed;}
+.text-quote-error{display:none;margin-top:12px;font-size:12px;color:rgba(239,100,100,0.9);}
+.text-quote-ok{display:none;margin-top:12px;font-size:13px;color:#4ADE80;font-weight:500;}
+@media(max-width:600px){.text-quote-fields{grid-template-columns:1fr;}}
 @media(max-width:600px){.quote-request-fields{grid-template-columns:1fr;}}
 
 /* ── BOOKING FORM ── */
@@ -887,6 +902,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="price-btns">
         <button class="btn-pay-now" id="requestRideBtn" onclick="showRequestForm()">Request This Ride — $<span id="requestPrice">0</span></button>
         <a class="btn-dep-now" href="tel:+18883306902">Call Amirah</a>
+        <button class="btn-text-quote" id="textQuoteBtn" onclick="showTextQuoteForm()">📱 Text This Quote To My Phone</button>
       </div>
       <div class="calc-note" style="margin-bottom:6px;">Price confirmed at booking · Zelle or card accepted</div>
       <div class="calc-note">Prefer to talk first? <a href="tel:6468791391" style="color:var(--gold);text-decoration:none;">Call (646) 879-1391</a> or <a href="https://app.synergyluxlimodfw.com/aria" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;">chat with Amirah →</a></div>
@@ -905,6 +921,18 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
         <button class="quote-confirm-btn" id="confirmBtn" onclick="confirmQuoteRequest()">Confirm My Request</button>
       </div>
       <div class="quote-success" id="quoteSuccess"></div>
+
+      <!-- Text-me quote form -->
+      <div class="text-quote-form" id="textQuoteForm">
+        <div class="text-quote-form-label">We'll text your quote to your phone — no app needed.</div>
+        <div class="text-quote-fields">
+          <input type="text" id="tqName"  placeholder="Your name"         autocomplete="given-name" />
+          <input type="tel"  id="tqPhone" placeholder="(555) 123-4567"    autocomplete="tel" />
+        </div>
+        <button class="text-quote-submit" id="tqSubmitBtn" onclick="sendTextQuote()">Send Quote to My Phone</button>
+        <div class="text-quote-error" id="tqError">Couldn't send — please call <a href="tel:+18178092801" style="color:var(--gold);">(817) 809-2801</a></div>
+        <div class="text-quote-ok" id="tqSuccess">✓ Quote sent! Check your phone.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -1556,6 +1584,78 @@ function confirmQuoteRequest() {
     suc.classList.add('show');
   });
 }
+function showTextQuoteForm() {
+  var form = document.getElementById('textQuoteForm');
+  var isShowing = form.classList.contains('show');
+  // Close the request form if open
+  document.getElementById('quoteRequestForm').classList.remove('show');
+  if (isShowing) {
+    form.classList.remove('show');
+  } else {
+    document.getElementById('tqError').style.display = 'none';
+    document.getElementById('tqSuccess').style.display = 'none';
+    form.classList.add('show');
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('tqName').focus();
+  }
+}
+
+function sendTextQuote() {
+  var name  = document.getElementById('tqName').value.trim();
+  var phone = document.getElementById('tqPhone').value.trim();
+  if (!name)  { document.getElementById('tqName').focus();  return; }
+  if (!phone) { document.getElementById('tqPhone').focus(); return; }
+
+  var d = _quoteData;
+  var svcLabels = {
+    airport_dfw:'DFW Airport Transfer', airport_love:'Love Field Transfer',
+    hourly:'Hourly Charter', wedding:'Wedding Package',
+    nightout:'Night Out', fifa:'FIFA Match Day', longdistance:'Long Distance'
+  };
+  var svcLabel = svcLabels[d.svc] || d.svc || 'Limo Service';
+  var timeSel  = document.getElementById('calcTime');
+  var timeTxt  = timeSel && timeSel.options[timeSel.selectedIndex] ? timeSel.options[timeSel.selectedIndex].text : (d.time || '');
+  var dateTxt  = d.date ? new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'long', day:'numeric', year:'numeric' }) : '';
+  var dtStr    = dateTxt && timeTxt ? dateTxt + ' at ' + timeTxt : (dateTxt || '');
+
+  var btn = document.getElementById('tqSubmitBtn');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  document.getElementById('tqError').style.display   = 'none';
+  document.getElementById('tqSuccess').style.display = 'none';
+
+  fetch('https://app.synergyluxlimodfw.com/api/quote/text-me', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
+    body: JSON.stringify({
+      name:         name,
+      phone:        phone,
+      pickup:       d.pickup      || '',
+      destination:  d.dropoff     || '',
+      datetime:     dtStr,
+      passengers:   d.passengers  || 1,
+      return_trip:  d.returnTrip  || false,
+      quote_amount: d.price       || 0,
+      service:      svcLabel,
+    }),
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    btn.textContent = 'Send Quote to My Phone'; btn.disabled = false;
+    if (data.success) {
+      document.getElementById('textQuoteForm').classList.remove('show');
+      document.getElementById('tqSuccess').style.display = 'block';
+      document.getElementById('tqSuccess').scrollIntoView({ behavior:'smooth', block:'nearest' });
+    } else {
+      document.getElementById('tqError').style.display = 'block';
+    }
+  })
+  .catch(function() {
+    btn.textContent = 'Send Quote to My Phone'; btn.disabled = false;
+    document.getElementById('tqError').style.display = 'block';
+  });
+}
+
 function toggleNav(){document.getElementById('navLinks').classList.toggle('open');}
 function toggleFaq(btn){
   var a=btn.nextElementSibling,open=a.classList.contains('open');
