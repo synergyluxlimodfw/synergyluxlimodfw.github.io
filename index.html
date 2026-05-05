@@ -604,6 +604,79 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   .pay-card:hover{transform:none;box-shadow:none;}
   .btn-gold:hover,.btn-outline:hover{transform:none;}
 }
+
+/* ── Exit-intent modal ─────────────────────────────── */
+.exit-intent-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.78);
+  backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+  z-index:9999;
+  opacity:0;transition:opacity 0.35s ease;
+  padding:20px;
+}
+.exit-intent-overlay.show{display:flex;opacity:1;}
+.exit-intent-card{
+  background:#0a0a0a;
+  border:1px solid rgba(201,168,76,0.22);
+  border-radius:4px;
+  max-width:420px;width:100%;
+  padding:44px 36px 32px;
+  text-align:center;
+  transform:translateY(20px);
+  transition:transform 0.4s ease;
+}
+.exit-intent-overlay.show .exit-intent-card{transform:translateY(0);}
+.exit-intent-eyebrow{
+  font-size:10px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:16px;
+}
+.exit-intent-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px;font-weight:400;color:var(--white);
+  margin:0 0 14px;line-height:1.25;
+}
+.exit-intent-sub{
+  font-size:13px;color:rgba(239,239,239,0.55);
+  margin:0 0 24px;line-height:1.6;
+}
+#exitIntentPhone{
+  width:100%;box-sizing:border-box;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  color:var(--white);
+  padding:14px 16px;
+  font-family:'Inter',sans-serif;font-size:14px;
+  outline:none;margin-bottom:14px;
+}
+#exitIntentPhone:focus{border-color:rgba(201,168,76,0.5);}
+.exit-intent-submit{
+  width:100%;background:var(--gold);color:#000;
+  border:none;padding:14px;
+  font-family:'Inter',sans-serif;font-size:11px;
+  font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;
+  cursor:pointer;transition:background 0.3s;
+  margin-bottom:12px;
+}
+.exit-intent-submit:hover{background:var(--gold2);}
+.exit-intent-submit:disabled{opacity:0.6;cursor:not-allowed;}
+.exit-intent-dismiss{
+  background:transparent;border:none;
+  color:rgba(239,239,239,0.4);
+  font-size:12px;cursor:pointer;
+  padding:6px;
+}
+.exit-intent-dismiss:hover{color:rgba(239,239,239,0.7);}
+.exit-intent-error{
+  display:none;margin-top:14px;
+  font-size:12px;color:rgba(239,100,100,0.9);
+}
+.exit-intent-success{
+  display:none;margin-top:14px;
+  font-size:14px;color:#4ADE80;font-weight:500;
+}
 </style>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOWMJuY_dQuywNAjny-qNlNL3DqgwrDRc&libraries=places&callback=initQuoteCalc" async defer></script>
 </head>
@@ -942,6 +1015,41 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
           <div class="tq-success-sub">Or we'll text you a confirmation in a moment.</div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Exit-intent modal -->
+<div class="exit-intent-overlay" id="exitIntentOverlay">
+  <div class="exit-intent-card">
+    <div class="exit-intent-eyebrow">Before you go —</div>
+    <h3 class="exit-intent-title">
+      Want us to hold this rate for you?
+    </h3>
+    <p class="exit-intent-sub">
+      We'll text you the details and keep this quote available
+      for your selected time.
+    </p>
+    <input type="tel" id="exitIntentPhone"
+           placeholder="(555) 123-4567"
+           autocomplete="tel" />
+    <button class="exit-intent-submit"
+            id="exitIntentSubmitBtn"
+            onclick="submitExitIntent()">
+      Reserve My Rate
+    </button>
+    <button class="exit-intent-dismiss"
+            onclick="dismissExitIntent()">
+      No thanks
+    </button>
+    <div class="exit-intent-error" id="exitIntentError">
+      Couldn't save — please call
+      <a href="tel:+18178092801" style="color:var(--gold);">
+        (817) 809-2801
+      </a>
+    </div>
+    <div class="exit-intent-success" id="exitIntentSuccess">
+      ✓ You're all set — we've reserved your quote.
     </div>
   </div>
 </div>
@@ -1668,6 +1776,129 @@ function sendTextQuote() {
   .catch(function() {
     btn.textContent = 'Reserve My Rate'; btn.disabled = false;
     document.getElementById('tqError').style.display = 'block';
+  });
+}
+
+(function setupExitIntent() {
+  var armed = false;
+  var lastScrollY = 0;
+  var lastScrollTime = Date.now();
+
+  function checkArm() {
+    if (window._quoteData && window._quoteData.price > 0) {
+      armed = true;
+    }
+  }
+  setInterval(checkArm, 1000);
+
+  function shouldFire() {
+    if (!armed) return false;
+    if (sessionStorage.getItem('sl_exit_intent_shown')) return false;
+    var tqSuccess = document.getElementById('tqSuccess');
+    if (tqSuccess && tqSuccess.style.display === 'block') return false;
+    return true;
+  }
+
+  function showModal() {
+    if (!shouldFire()) return;
+    sessionStorage.setItem('sl_exit_intent_shown', '1');
+    var overlay = document.getElementById('exitIntentOverlay');
+    overlay.classList.add('show');
+    setTimeout(function() {
+      var phoneInput = document.getElementById('exitIntentPhone');
+      if (phoneInput) phoneInput.focus();
+    }, 400);
+  }
+
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10) showModal();
+  });
+
+  window.addEventListener('scroll', function() {
+    var now = Date.now();
+    var dy = window.scrollY - lastScrollY;
+    var dt = now - lastScrollTime;
+    if (dy < -300 && dt < 250) showModal();
+    lastScrollY = window.scrollY;
+    lastScrollTime = now;
+  }, { passive: true });
+})();
+
+function dismissExitIntent() {
+  document.getElementById('exitIntentOverlay').classList.remove('show');
+}
+
+function submitExitIntent() {
+  var phone = document.getElementById('exitIntentPhone').value.trim();
+  if (!phone) {
+    document.getElementById('exitIntentPhone').focus();
+    return;
+  }
+
+  var d = window._quoteData || {};
+  if (!d.price) {
+    document.getElementById('exitIntentError').style.display = 'block';
+    return;
+  }
+
+  var svcLabels = {
+    airport_dfw: 'DFW Airport Transfer',
+    airport_love: 'Love Field Transfer',
+    hourly: 'Hourly Charter',
+    wedding: 'Wedding Package',
+    nightout: 'Night Out',
+    fifa: 'FIFA Match Day',
+    longdistance: 'Long Distance'
+  };
+  var svcLabel = svcLabels[d.svc] || d.svc || 'Limo Service';
+  var timeSel = document.getElementById('calcTime');
+  var timeTxt = timeSel && timeSel.options[timeSel.selectedIndex]
+    ? timeSel.options[timeSel.selectedIndex].text : (d.time || '');
+  var dateTxt = d.date
+    ? new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', {
+        weekday: 'short', month: 'long', day: 'numeric', year: 'numeric'
+      }) : '';
+  var dtStr = dateTxt && timeTxt ? dateTxt + ' at ' + timeTxt : (dateTxt || '');
+
+  var btn = document.getElementById('exitIntentSubmitBtn');
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+  document.getElementById('exitIntentError').style.display = 'none';
+
+  fetch('https://app.synergyluxlimodfw.com/api/quote/text-me', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
+    body: JSON.stringify({
+      name: 'Guest',
+      phone: phone,
+      pickup: d.pickup || '',
+      destination: d.dropoff || '',
+      datetime: dtStr,
+      passengers: d.passengers || 1,
+      return_trip: d.returnTrip || false,
+      quote_amount: d.price || 0,
+      service: svcLabel,
+      capture_source: 'exit_intent'
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.textContent = 'Reserve My Rate';
+    btn.disabled = false;
+    if (data.success) {
+      document.getElementById('exitIntentSuccess').style.display = 'block';
+      setTimeout(function() {
+        document.getElementById('exitIntentOverlay').classList.remove('show');
+      }, 2500);
+    } else {
+      document.getElementById('exitIntentError').style.display = 'block';
+    }
+  })
+  .catch(function() {
+    btn.textContent = 'Reserve My Rate';
+    btn.disabled = false;
+    document.getElementById('exitIntentError').style.display = 'block';
   });
 }
 
