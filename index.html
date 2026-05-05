@@ -1812,33 +1812,46 @@ function sendTextQuote() {
     }, 400);
   }
 
-  // Strategy 1: mouseout with null relatedTarget (most reliable
-  // cross-browser exit-intent detection — fires when mouse exits
-  // the document entirely)
+  // ─── Multi-strategy exit-intent detection ───────────────────
+
+  // Strategy 1: mouseout with null relatedTarget — most reliable
+  // cross-browser pattern. Fires when mouse exits document entirely.
   document.addEventListener('mouseout', function(e) {
     if (!e.relatedTarget && !e.toElement) {
-      if (e.clientY <= 5) {
-        console.log('[ExitIntent] mouseout (top) y=' + e.clientY);
+      if (e.clientY <= 10) {
+        console.log('[ExitIntent] mouseout y=' + e.clientY);
         showModal();
       }
     }
   });
 
-  // Strategy 2: mouseleave on documentElement as backup
+  // Strategy 2: mouseleave on documentElement — Safari-friendly fallback
   document.documentElement.addEventListener('mouseleave', function(e) {
-    if (e.clientY <= 5) {
+    if (e.clientY <= 10) {
       console.log('[ExitIntent] documentElement.mouseleave y=' + e.clientY);
       showModal();
     }
   });
 
-  // Strategy 3: mouseleave on body as final backup
-  document.body.addEventListener('mouseleave', function(e) {
-    if (e.clientY <= 5) {
-      console.log('[ExitIntent] body.mouseleave y=' + e.clientY);
+  // Strategy 3: pointermove velocity — detects fast upward motion
+  // toward URL bar even before mouse exits viewport. Catches Safari
+  // edge cases where mouseleave events don't fire reliably.
+  var lastPointerY = 0;
+  var lastPointerT = Date.now();
+  document.addEventListener('pointermove', function(e) {
+    var now = Date.now();
+    var dt = now - lastPointerT;
+    var dy = e.clientY - lastPointerY;
+    // Fast upward motion (>200px in <150ms) reaching top 60px of viewport
+    if (e.clientY < 60 && dy < -200 && dt < 150 && dt > 0) {
+      console.log('[ExitIntent] fast upward motion y=' + e.clientY);
       showModal();
     }
-  });
+    lastPointerY = e.clientY;
+    lastPointerT = now;
+  }, { passive: true });
+
+  // ─── End multi-strategy ──────────────────────────────────────
 
   window.addEventListener('scroll', function() {
     var now = Date.now();
