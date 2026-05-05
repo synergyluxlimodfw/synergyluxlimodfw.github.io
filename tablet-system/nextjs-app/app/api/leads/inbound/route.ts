@@ -9,6 +9,7 @@
  *   website-fifa     — FIFA 2026 form
  *   website-affiliate — affiliate/partner form
  *   amirah           — Amirah AI concierge captures
+ *   website-quote    — "Save My Quote" text-me button on calculator
  * ─────────────────────────────────────────────────────────────────────────
  */
 
@@ -26,7 +27,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from('leads')
     .select('id, name, email, phone, pickup, destination, datetime, occasion, notes, source, lead_type, status, sms_consent, sms_consent_timestamp, created_at')
-    .in('source', ['website-booking', 'website-fifa', 'website-affiliate', 'amirah'])
+    .in('source', ['website-booking', 'website-fifa', 'website-affiliate', 'amirah', 'website-quote'])
     .order('created_at', { ascending: false })
     .limit(50);
 

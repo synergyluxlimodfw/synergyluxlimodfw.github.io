@@ -85,10 +85,11 @@ const EVENT_COLORS: Record<string, string> = {
 };
 
 const INBOUND_TYPE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  booking:   { label: 'Booking',   color: '#4ADE80', bg: 'rgba(74,222,128,0.10)'  },
-  fifa:      { label: 'FIFA',      color: '#818CF8', bg: 'rgba(129,140,248,0.10)' },
-  affiliate: { label: 'Affiliate', color: '#C9A84C', bg: 'rgba(201,168,76,0.10)'  },
-  amirah:    { label: 'Amirah',    color: '#38BDF8', bg: 'rgba(56,189,248,0.10)'  },
+  booking:   { label: 'Booking',    color: '#4ADE80', bg: 'rgba(74,222,128,0.10)'  },
+  fifa:      { label: 'FIFA',       color: '#818CF8', bg: 'rgba(129,140,248,0.10)' },
+  affiliate: { label: 'Affiliate',  color: '#C9A84C', bg: 'rgba(201,168,76,0.10)'  },
+  amirah:    { label: 'Amirah',     color: '#38BDF8', bg: 'rgba(56,189,248,0.10)'  },
+  quote:     { label: 'Quote — Text Me', color: '#F59E0B', bg: 'rgba(245,158,11,0.10)' },
 };
 
 const INBOUND_STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
@@ -443,7 +444,9 @@ export default function AdminPage() {
 
               <div style={{ minWidth: 960 }}>
                 {inboundLeads.map((lead, i) => {
-                  const typeKey  = lead.lead_type ?? (lead.source === 'amirah' ? 'amirah' : 'booking');
+                  const typeKey  = lead.source === 'website-quote' ? 'quote'
+                    : lead.source === 'amirah' ? 'amirah'
+                    : lead.lead_type ?? 'booking';
                   const typeConf = INBOUND_TYPE_CONFIG[typeKey] ?? INBOUND_TYPE_CONFIG.booking;
                   const statConf = INBOUND_STATUS_CONFIG[lead.status ?? 'new'] ?? INBOUND_STATUS_CONFIG.new;
                   const expanded = expandedInbound.has(lead.id);
