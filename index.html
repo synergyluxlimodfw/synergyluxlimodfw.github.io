@@ -251,6 +251,7 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .quote-success.show{display:block;}
 .quote-success-title{font-size:13px;color:#4ADE80;font-weight:500;margin-bottom:8px;}
 .quote-success-body{font-size:12px;color:rgba(239,239,239,0.6);line-height:1.9;}
+.quote-hold-line{width:100%;text-align:center;font-size:11px;font-style:italic;color:rgba(201,168,76,0.7);letter-spacing:0.5px;margin-top:8px;}
 .btn-text-quote{background:transparent;border:1px solid rgba(201,168,76,0.45);color:var(--gold);padding:13px 20px;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;white-space:nowrap;}
 .btn-text-quote:hover{border-color:var(--gold);background:rgba(201,168,76,0.07);}
 .text-quote-form{margin-top:22px;border-top:1px solid rgba(201,168,76,0.14);padding-top:20px;display:none;}
@@ -264,7 +265,10 @@ nav{background:rgba(8,8,8,0.97);padding:0 48px;display:flex;justify-content:spac
 .text-quote-submit:hover{background:var(--gold2);}
 .text-quote-submit:disabled{opacity:0.6;cursor:not-allowed;}
 .text-quote-error{display:none;margin-top:12px;font-size:12px;color:rgba(239,100,100,0.9);}
-.text-quote-ok{display:none;margin-top:12px;font-size:13px;color:#4ADE80;font-weight:500;}
+.text-quote-ok{display:none;margin-top:20px;padding-top:20px;border-top:1px solid rgba(201,168,76,0.14);}
+.tq-success-title{font-size:13px;color:#4ADE80;font-weight:500;margin-bottom:16px;}
+.tq-book-btn{display:block;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;margin-bottom:12px;}
+.tq-success-sub{font-size:11px;color:rgba(239,239,239,0.4);text-align:center;letter-spacing:0.5px;}
 @media(max-width:600px){.text-quote-fields{grid-template-columns:1fr;}}
 @media(max-width:600px){.quote-request-fields{grid-template-columns:1fr;}}
 
@@ -902,7 +906,8 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="price-btns">
         <button class="btn-pay-now" id="requestRideBtn" onclick="showRequestForm()">Request This Ride — $<span id="requestPrice">0</span></button>
         <a class="btn-dep-now" href="tel:+18883306902">Call Amirah</a>
-        <button class="btn-text-quote" id="textQuoteBtn" onclick="showTextQuoteForm()">📱 Text This Quote To My Phone</button>
+        <div class="quote-hold-line">This rate is currently available for your selected time.</div>
+        <button class="btn-text-quote" id="textQuoteBtn" onclick="showTextQuoteForm()">💎 Save My Quote — We'll Hold It For You</button>
       </div>
       <div class="calc-note" style="margin-bottom:6px;">Price confirmed at booking · Zelle or card accepted</div>
       <div class="calc-note">Prefer to talk first? <a href="tel:6468791391" style="color:var(--gold);text-decoration:none;">Call (646) 879-1391</a> or <a href="https://app.synergyluxlimodfw.com/aria" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;">chat with Amirah →</a></div>
@@ -924,14 +929,18 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 
       <!-- Text-me quote form -->
       <div class="text-quote-form" id="textQuoteForm">
-        <div class="text-quote-form-label">We'll text your quote to your phone — no app needed.</div>
+        <div class="text-quote-form-label">Reserve this rate — we'll text you a confirmation.</div>
         <div class="text-quote-fields">
           <input type="text" id="tqName"  placeholder="Your name"         autocomplete="given-name" />
           <input type="tel"  id="tqPhone" placeholder="(555) 123-4567"    autocomplete="tel" />
         </div>
-        <button class="text-quote-submit" id="tqSubmitBtn" onclick="sendTextQuote()">Send Quote to My Phone</button>
+        <button class="text-quote-submit" id="tqSubmitBtn" onclick="sendTextQuote()">Reserve My Rate</button>
         <div class="text-quote-error" id="tqError">Couldn't send — please call <a href="tel:+18178092801" style="color:var(--gold);">(817) 809-2801</a></div>
-        <div class="text-quote-ok" id="tqSuccess">✓ Quote sent! Check your phone.</div>
+        <div class="text-quote-ok" id="tqSuccess">
+          <div class="tq-success-title">✓ You're all set — we've reserved your quote.</div>
+          <a class="btn-pay-now tq-book-btn" id="tqBookBtn" href="https://app.synergyluxlimodfw.com/?lead_id=" target="_blank" rel="noopener">Book This Ride</a>
+          <div class="tq-success-sub">Or we'll text you a confirmation in a moment.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1641,17 +1650,23 @@ function sendTextQuote() {
   })
   .then(function(res) { return res.json(); })
   .then(function(data) {
-    btn.textContent = 'Send Quote to My Phone'; btn.disabled = false;
+    btn.textContent = 'Reserve My Rate'; btn.disabled = false;
     if (data.success) {
       document.getElementById('textQuoteForm').classList.remove('show');
-      document.getElementById('tqSuccess').style.display = 'block';
-      document.getElementById('tqSuccess').scrollIntoView({ behavior:'smooth', block:'nearest' });
+      // TODO: update tqBookBtn href to /book?lead_id= once /book page is built
+      var bookBtn = document.getElementById('tqBookBtn');
+      if (bookBtn && data.lead_id) {
+        bookBtn.href = 'https://app.synergyluxlimodfw.com/?lead_id=' + data.lead_id;
+      }
+      var suc = document.getElementById('tqSuccess');
+      suc.style.display = 'block';
+      suc.scrollIntoView({ behavior:'smooth', block:'nearest' });
     } else {
       document.getElementById('tqError').style.display = 'block';
     }
   })
   .catch(function() {
-    btn.textContent = 'Send Quote to My Phone'; btn.disabled = false;
+    btn.textContent = 'Reserve My Rate'; btn.disabled = false;
     document.getElementById('tqError').style.display = 'block';
   });
 }

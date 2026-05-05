@@ -107,11 +107,11 @@ export async function POST(req: NextRequest) {
     : pickupStr || destStr || 'your route';
 
   const smsLines = [
-    `Hi ${firstName} — Synergy Lux Limo DFW.`,
+    `Hi ${firstName}, this is Amirah from Synergy Lux Limo DFW.`,
     '',
-    `Your quote: $${amount} for ${routeLine}${dtStr ? ` on ${dtStr}` : ''}.`,
+    `I've saved your quote of $${amount} for ${routeLine}${dtStr ? ` on ${dtStr}` : ''}.`,
     '',
-    `Reply BOOK to lock this in, or call (817) 809-2801.`,
+    `Want me to reserve your chauffeur? Reply YES or call (817) 809-2801.`,
     '',
     `Reply STOP to opt out. Msg & data rates may apply.`,
   ];
