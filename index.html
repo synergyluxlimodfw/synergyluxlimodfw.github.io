@@ -2165,12 +2165,15 @@ document.addEventListener('keydown', function(e) {
   var isMobile = window.matchMedia('(max-width: 768px)').matches;
   var heroVideos = document.querySelectorAll('video[data-desktop-src]');
   heroVideos.forEach(function(video) {
-    // Mobile portrait crop disabled — iOS Safari object-fit:cover bug
-    // couldn't be resolved with available workarounds (min-height,
-    // explicit dimensions, reflow trigger all attempted).
-    // Revisit when filming portrait-native footage.
-    var src = video.dataset.desktopSrc;
-    var poster = '';
+    // Mobile portrait video: AI-generated 784×1168 hero. Desktop:
+    // existing real-footage landscape video. JS source switching
+    // delivers correct asset per viewport.
+    var src = isMobile
+      ? video.dataset.mobileSrc
+      : video.dataset.desktopSrc;
+    var poster = isMobile && video.dataset.mobilePoster
+      ? video.dataset.mobilePoster
+      : '';
     if (src) {
       video.src = src;
       if (poster) video.poster = poster;
