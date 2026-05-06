@@ -748,8 +748,8 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <p class="hero-sub">Private luxury transportation across DFW — built on trust, driven by someone who cares.</p>
   <p class="hero-v2-diff">Black 2024 Escalade · Personally Vetted Chauffeurs · Available 24/7 · Flat Rates</p>
   <div class="hero-btns">
-    <a href="#booking" class="btn-gold hero-v2-btn" data-hero-btn>Request Your Chauffeur</a>
-    <a href="#booking" class="btn-outline hero-v2-btn" data-hero-btn>Book a Single Ride &nbsp;→</a>
+    <a href="#calculator" class="btn-gold hero-v2-btn" data-hero-btn>Get My Instant Quote</a>
+    <a href="tel:6468791391" class="btn-outline hero-v2-btn" data-hero-btn>Speak with Mr. Rodriguez</a>
   </div>
 
   <div class="hero-scroll">
@@ -810,7 +810,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="svc-num">01</div>
       <h3>Airport Transfers</h3>
       <p>Timed precisely. Executed without friction.</p>
-      <span class="svc-price">From $155 one-way</span>
+      <span class="svc-price">Flat rate from $165</span>
       <div class="svc-btns">
         <a href="https://buy.stripe.com/fZubIV1kE7VBafFeCX8Vi05" target="_blank" class="btn-svc-pay">Pay Full — $165</a>
         <a href="https://buy.stripe.com/00w3cp7J2b7NafF2Uf8Vi06" target="_blank" class="btn-svc-dep">Deposit — $83</a>
@@ -833,7 +833,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
   <!-- All services grid -->
   <div class="services-grid-full reveal d2">
     <div class="svc-card">
-      <span class="svc-icon">💍</span>
+      <span class="svc-icon">03</span>
       <h3>Weddings</h3>
       <p>Red carpet arrival for your most important day. Complimentary vehicle décor and full coordination.</p>
       <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $625 · 4 hrs</span>
@@ -843,7 +843,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">🎓</span>
+      <span class="svc-icon">04</span>
       <h3>Prom &amp; Events</h3>
       <p>Professional, safe, and on time for concerts, proms, and special occasions across DFW.</p>
       <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $575</span>
@@ -853,7 +853,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">🌙</span>
+      <span class="svc-icon">05</span>
       <h3>Night Out</h3>
       <p>Evenings out, dinner reservations, and personal travel. Professional and discreet.</p>
       <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $475 · 3 hrs</span>
@@ -863,7 +863,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       </div>
     </div>
     <div class="svc-card">
-      <span class="svc-icon">🏟</span>
+      <span class="svc-icon">06</span>
       <h3>Sporting Events</h3>
       <p>Cowboys, Mavericks, Stars, Rangers — skip the parking, arrive in comfort.</p>
       <span class="svc-price" style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:16px;">From $300 roundtrip</span>
@@ -872,6 +872,15 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
         <a href="https://buy.stripe.com/aFafZb7J2dfVevV3Yj8Vi0f" target="_blank" class="btn-svc-dep">Deposit — $150</a>
       </div>
     </div>
+  </div>
+  <div class="services-cross-link" style="text-align:center; margin: 36px auto 0; max-width: 600px;">
+    <p style="font-size:14px; color:rgba(239,239,239,0.55); font-style:italic; margin:0;">
+      Not ready to book?
+      <a href="#calculator" style="color:var(--gold); text-decoration:none; border-bottom:1px solid rgba(201,168,76,0.4); padding-bottom:1px;">
+        Get an instant quote
+      </a>
+      — we'll hold your rate.
+    </p>
   </div>
 </section>
 
@@ -992,10 +1001,17 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
           <input type="tel"  id="reqPhone" placeholder="Your phone" autocomplete="tel" />
           <input type="email" id="reqEmail" name="email" placeholder="Your email" autocomplete="email" />
         </div>
-        <label class="sms-consent-label" for="quoteSmsConsent" style="margin-top:14px;">
-          <input type="checkbox" id="quoteSmsConsent" name="sms_consent">
-          <span>By checking this box and submitting this form, you consent to receive transactional text messages from Synergy Lux Limo DFW LLC, including booking confirmations, ride status updates, and reservation reminders. Reply STOP to opt out. Reply HELP for help. Standard message and data rates may apply. Message frequency varies. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>. <strong>(Optional — you can complete your booking without consenting to SMS.)</strong></span>
-        </label>
+        <div class="sms-consent-block" style="margin-top:14px;">
+          <label class="sms-consent-label" for="quoteSmsConsent">
+            <input type="checkbox" id="quoteSmsConsent" name="sms_consent">
+            <span>I agree to receive booking-related texts.
+              <a href="#" class="sms-consent-toggle" onclick="toggleSmsConsent(event, this)">View full terms</a>
+            </span>
+          </label>
+          <div class="sms-consent-full" style="display:none; font-size:11px; color:rgba(239,239,239,0.45); margin-top:8px; line-height:1.6;">
+            By checking this box and submitting this form, you consent to receive transactional text messages from Synergy Lux Limo DFW LLC, including booking confirmations, ride status updates, and reservation reminders. Reply STOP to opt out. Reply HELP for help. Standard message and data rates may apply. Message frequency varies. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>. <strong>(Optional — you can complete your booking without consenting to SMS.)</strong>
+          </div>
+        </div>
         <button class="quote-confirm-btn" id="confirmBtn" onclick="confirmQuoteRequest()">Confirm My Request</button>
       </div>
       <div class="quote-success" id="quoteSuccess"></div>
@@ -1068,10 +1084,17 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="fg"><label>Phone Number *</label><input type="tel" id="f_phone" name="Phone" placeholder="(000) 000-0000" required></div>
       <div class="fg"><label>Email Address *</label><input type="email" id="f_email" name="email" placeholder="your@email.com" autocomplete="email" required></div>
       <div class="fg full" style="margin-top:-8px;">
-        <label class="sms-consent-label" for="bookingSmsConsent">
-          <input type="checkbox" id="bookingSmsConsent" name="sms_consent">
-          <span>By checking this box and submitting this form, you consent to receive transactional text messages from Synergy Lux Limo DFW LLC, including booking confirmations, ride status updates, and reservation reminders. Reply STOP to opt out. Reply HELP for help. Standard message and data rates may apply. Message frequency varies. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>. <strong>(Optional — you can complete your booking without consenting to SMS.)</strong></span>
-        </label>
+        <div class="sms-consent-block">
+          <label class="sms-consent-label" for="bookingSmsConsent">
+            <input type="checkbox" id="bookingSmsConsent" name="sms_consent">
+            <span>I agree to receive booking-related texts.
+              <a href="#" class="sms-consent-toggle" onclick="toggleSmsConsent(event, this)">View full terms</a>
+            </span>
+          </label>
+          <div class="sms-consent-full" style="display:none; font-size:11px; color:rgba(239,239,239,0.45); margin-top:8px; line-height:1.6;">
+            By checking this box and submitting this form, you consent to receive transactional text messages from Synergy Lux Limo DFW LLC, including booking confirmations, ride status updates, and reservation reminders. Reply STOP to opt out. Reply HELP for help. Standard message and data rates may apply. Message frequency varies. View our <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/terms.html" target="_blank">Terms of Service</a>. <strong>(Optional — you can complete your booking without consenting to SMS.)</strong>
+          </div>
+        </div>
       </div>
       <div class="fg"><label>Service Type *</label>
         <select id="f_service" name="Service" required>
@@ -1316,7 +1339,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="skip-cell good">✓ Flat rate always</div>
     </div>
     <div class="skip-row">
-      <div class="skip-cell bad">✗ Random drivers</div>
+      <div class="skip-cell bad">✗ Rotating drivers</div>
       <div class="skip-cell good">✓ Same pro every time</div>
     </div>
     <div class="skip-row">
@@ -1349,7 +1372,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
       <div class="serve-line">Same vehicle and chauffeur every time</div>
       <div class="serve-line">Flexible monthly scheduling</div>
     </div>
-    <a href="#booking" class="btn-gold reveal d4">Request Private Chauffeur Access</a>
+    <a href="#booking" class="btn-gold reveal d4">Apply for Private Client Status</a>
   </div>
 </section>
 
@@ -1427,7 +1450,7 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
     <div class="f-socials">
       <a href="https://instagram.com/synergyluxlimodfw" target="_blank">Instagram</a>
       <a href="https://facebook.com/synergyluxlimodfw" target="_blank">Facebook</a>
-      <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+      <a href="https://www.linkedin.com/in/wilmerluxdfw" target="_blank">LinkedIn</a>
       <a href="/privacy.html">Privacy Policy</a>
       <a href="/terms.html">Terms of Service</a>
     </div>
@@ -1987,6 +2010,12 @@ function submitExitIntent() {
   });
 }
 
+function toggleSmsConsent(e, link) {
+  e.preventDefault();
+  var full = link.closest('.sms-consent-block').querySelector('.sms-consent-full');
+  full.style.display = full.style.display === 'none' ? 'block' : 'none';
+  link.textContent = full.style.display === 'none' ? 'View full terms' : 'Hide full terms';
+}
 function toggleNav(){document.getElementById('navLinks').classList.toggle('open');}
 function toggleFaq(btn){
   var a=btn.nextElementSibling,open=a.classList.contains('open');
