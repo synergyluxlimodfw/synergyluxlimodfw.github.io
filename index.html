@@ -1786,10 +1786,51 @@ function sendTextQuote() {
 
   function checkArm() {
     if (typeof _quoteData !== 'undefined' && _quoteData && _quoteData.price > 0) {
-      if (!armed) console.log('[ExitIntent] armed = true (quote exists)');
-      armed = true;
+      if (!armed) {
+        armed = true;
+        console.log('[ExitIntent] armed = true (quote exists)');
+        startInactivityTimer();
+      }
     }
   }
+
+  // ─── Inactivity timer (30-second deliberation trigger) ────────
+
+  var inactivityTimer = null;
+  var INACTIVITY_DELAY = 30000;
+
+  function startInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    if (sessionStorage.getItem('sl_exit_intent_shown')) return;
+    inactivityTimer = setTimeout(function() {
+      if (document.visibilityState !== 'visible') return;
+      console.log('[ExitIntent] inactivity timer fired (30s)');
+      showModal();
+    }, INACTIVITY_DELAY);
+  }
+
+  function resetInactivityTimer() {
+    if (!armed) return;
+    startInactivityTimer();
+  }
+
+  var interactionEvents = ['scroll', 'mousemove', 'click', 'touchstart', 'keydown'];
+  interactionEvents.forEach(function(evt) {
+    document.addEventListener(evt, resetInactivityTimer, { passive: true });
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') {
+      clearTimeout(inactivityTimer);
+      console.log('[ExitIntent] timer paused (tab hidden)');
+    } else if (armed) {
+      startInactivityTimer();
+      console.log('[ExitIntent] timer resumed (tab visible)');
+    }
+  });
+
+  // ─── End inactivity timer ─────────────────────────────────────
+
   setInterval(checkArm, 1000);
 
   function shouldFire() {
