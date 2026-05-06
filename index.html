@@ -723,15 +723,19 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 <section class="hero hero-v2">
 
   <!-- Video B: Escalade (visible first, Ken Burns offset 0s) -->
-  <video class="hero-video hero-v2-vid hero-v2-vid-b" id="hero-v2-vid-b" autoplay muted loop playsinline preload="metadata" poster="escalade-hero-mobile-poster.jpg">
-    <source src="escalade-hero-mobile.mp4" media="(max-width: 768px)" type="video/mp4">
-    <source src="escalade-hero.mp4" type="video/mp4">
+  <video class="hero-video hero-v2-vid hero-v2-vid-b" id="hero-v2-vid-b"
+         autoplay muted loop playsinline preload="metadata"
+         data-desktop-src="escalade-hero.mp4"
+         data-mobile-src="escalade-hero-mobile.mp4"
+         data-mobile-poster="escalade-hero-mobile-poster.jpg">
   </video>
 
   <!-- Video A: city (hidden first, Ken Burns offset 4s) -->
-  <video class="hero-video hero-v2-vid hero-v2-vid-a" id="hero-v2-vid-a" autoplay muted loop playsinline preload="metadata" poster="city-hero-mobile-poster.jpg">
-    <source src="city-hero-mobile.mp4" media="(max-width: 768px)" type="video/mp4">
-    <source src="city-hero.mp4" type="video/mp4">
+  <video class="hero-video hero-v2-vid hero-v2-vid-a" id="hero-v2-vid-a"
+         autoplay muted loop playsinline preload="metadata"
+         data-desktop-src="city-hero.mp4"
+         data-mobile-src="city-hero-mobile.mp4"
+         data-mobile-poster="city-hero-mobile-poster.jpg">
   </video>
 
   <!-- Gradient overlay -->
@@ -2151,6 +2155,27 @@ document.querySelectorAll('.gallery-grid img').forEach(function(img) {
 document.addEventListener('keydown', function(e) {
   if(e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
 });
+</script>
+
+<!-- Hero video source selection — runs before any other hero logic -->
+<script>
+(function setHeroVideoSources() {
+  var isMobile = window.matchMedia('(max-width: 768px)').matches;
+  var heroVideos = document.querySelectorAll('video[data-desktop-src]');
+  heroVideos.forEach(function(video) {
+    var src = isMobile ? video.dataset.mobileSrc : video.dataset.desktopSrc;
+    var poster = isMobile && video.dataset.mobilePoster ? video.dataset.mobilePoster : '';
+    if (src) {
+      video.src = src;
+      if (poster) video.poster = poster;
+      video.load();
+      var playPromise = video.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch(function() { /* autoplay blocked — poster shows */ });
+      }
+    }
+  });
+})();
 </script>
 
 <!-- Unified cinematic hero v2 -->
