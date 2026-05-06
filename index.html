@@ -723,12 +723,14 @@ footer{background:#0A0A0A;border-top:1px solid var(--border);padding:80px 80px 4
 <section class="hero hero-v2">
 
   <!-- Video B: Escalade (visible first, Ken Burns offset 0s) -->
-  <video class="hero-video hero-v2-vid hero-v2-vid-b" id="hero-v2-vid-b" autoplay muted loop playsinline poster="city-poster.jpg">
+  <video class="hero-video hero-v2-vid hero-v2-vid-b" id="hero-v2-vid-b" autoplay muted loop playsinline preload="metadata" poster="escalade-hero-mobile-poster.jpg">
+    <source src="escalade-hero-mobile.mp4" media="(max-width: 768px)" type="video/mp4">
     <source src="escalade-hero.mp4" type="video/mp4">
   </video>
 
   <!-- Video A: city (hidden first, Ken Burns offset 4s) -->
-  <video class="hero-video hero-v2-vid hero-v2-vid-a" id="hero-v2-vid-a" autoplay muted loop playsinline poster="city-poster.jpg">
+  <video class="hero-video hero-v2-vid hero-v2-vid-a" id="hero-v2-vid-a" autoplay muted loop playsinline preload="metadata" poster="city-hero-mobile-poster.jpg">
+    <source src="city-hero-mobile.mp4" media="(max-width: 768px)" type="video/mp4">
     <source src="city-hero.mp4" type="video/mp4">
   </video>
 
